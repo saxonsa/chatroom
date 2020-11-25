@@ -4,18 +4,26 @@
 #include <stdio.h>
 #include <string.h>
 #include <process.h>
+#pragma comment(lib,"ws2_32.lib")
 
 #define DEFAULT_PORT	5019
 
+// global msg_sock
+SOCKET msg_sock;
+
+// function to accept a connection
+void accept_conn(void *dummy) {
+	// doing something here
+}
 
 int main(int argc, char **argv){
 
-	char szBuff[10];
+	char szBuff[1000];
 	int msg_len;
 	int addr_len;
 	struct sockaddr_in local, client_addr;
 
-	SOCKET sock, msg_sock;
+	SOCKET sock;
 	WSADATA wsaData;
 
 	if (WSAStartup(0x202, &wsaData) == SOCKET_ERROR){
@@ -84,7 +92,7 @@ int main(int argc, char **argv){
 
 		printf("Bytes Received: %d, message: %s from %s\n", msg_len, szBuff, inet_ntoa(client_addr.sin_addr));
 		
-		// change szBuff (msg to Client)
+		// change szBuff (test passing msg to Client)
 		memset(szBuff, 0, sizeof(szBuff));
 
 		msg_len = send(msg_sock, szBuff, sizeof(szBuff), 0);
@@ -94,8 +102,6 @@ int main(int argc, char **argv){
 			closesocket(msg_sock);
 			return -1;
 		}
-
-		
 
 		closesocket(msg_sock);
 	}
