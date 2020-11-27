@@ -3,35 +3,26 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "client.h"
 #pragma comment(lib,"ws2_32.lib")
 
-
-#define DEFAULT_PORT	5019
-
-
 int main(int argc, char **argv){
-	
-	char szBuff[1000];
-	int msg_len;
-	//int addr_len;
-	struct sockaddr_in server_addr;
-	struct hostent *hp;
-	SOCKET connect_sock;
-	WSADATA wsaData;
 
-	char			*server_name = "localhost";
-	unsigned short	port = DEFAULT_PORT;
-	unsigned int	addr;
+	/* Read the server's IP address and port number which client wants to establish connection */
+	printf("Please input the server's IP: ");
+	gets_s(serverIP);
+	printf("Please input the server's port: ");
+	gets_s(server_port);
 
-	if (argc != 3){
-		printf("echoscln [server name] [port number]\n");
-		return -1;
-	}
-	else{
-		server_name = argv[1];
-		port = atoi(argv[2]);
-	}
+	server_name = serverIP;
+	port = atoi(server_port);
 
+	/*  Initilize Socket
+
+		WSAStartup: 
+			@param1: request Socket version
+			@param2: variable to save version information
+	*/
 	if (WSAStartup(0x202, &wsaData) == SOCKET_ERROR){
 		// stderr: standard error are printed to the screen.
 		fprintf(stderr, "WSAStartup failed with error %d\n", WSAGetLastError());
@@ -79,9 +70,11 @@ int main(int argc, char **argv){
 		return -1;
 	}
 
+	// print connected server information
+	printf("Successful connect to server IP: %s; Port: %d\n", inet_ntoa(server_addr.sin_addr), htons(server_addr.sin_port));
 
 	printf("input character string:\n");
-	gets(szBuff);
+	gets_s(szBuff);
 	
 	msg_len = send(connect_sock, szBuff, sizeof(szBuff), 0);
 	
@@ -119,3 +112,9 @@ int main(int argc, char **argv){
 	closesocket(connect_sock);
 	WSACleanup();
 }
+
+/*
+void *THRE_RECV(SOCKET ClientSocket) {
+	return;
+}
+*/

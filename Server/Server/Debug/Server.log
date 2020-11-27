@@ -1,4 +1,4 @@
-﻿Build started 2020-11-26 0:12:15.
+﻿Build started 2020-11-27 22:45:24.
      1>Project "C:\Users\n8300\Desktop\Networking_ass2\Server\Server\Server.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Server.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -25,4 +25,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.24
+Time Elapsed 00:00:01.53

@@ -1,4 +1,4 @@
-﻿Build started 2020-11-26 0:13:15.
+﻿Build started 2020-11-28 0:52:04.
      1>Project "C:\Users\n8300\Desktop\Networking_ass2\Client\Client\Client.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Client.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -6,8 +6,6 @@
          All outputs are up-to-date.
          C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Debug\Client.pch" /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Client.cpp
          Client.cpp
-     1>c:\users\n8300\desktop\networking_ass2\client\client\client.cpp(84): warning C4996: 'gets': This function or variable may be unsafe. Consider using gets_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 10.0\vc\include\stdio.h(277) : see declaration of 'gets'
        ManifestResourceCompile:
          All outputs are up-to-date.
        Link:
@@ -27,4 +25,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.04
+Time Elapsed 00:00:00.89
