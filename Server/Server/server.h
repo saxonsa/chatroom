@@ -1,5 +1,5 @@
 
-#define		DEFAULT_PORT		5019	// Server Listening Port
+#define		DEFAULT_PORT		5019	// server Listening Port
 
 
 /*************************************************************/
@@ -20,8 +20,8 @@ char szBuff[1000];
 int msg_len;
 int addr_len;
 
-int connecting = 0; // cuurently number of clients connected with server
-int max_allowed = 5; // The max number of clients supported by server 
+int connecting = 0; // cuurent number of clients connected with server
+int MAX_ALLOWED = 5; // the max number of clients supported by server 
 
 
 // client structure
@@ -30,4 +30,7 @@ typedef struct _Client {
 	char client_name[32];
 	struct sockaddr_in client_addr;
 }Client;
+
+// an array to store all the clients connecting with server
+static Client *clients = NULL;
 

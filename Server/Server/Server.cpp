@@ -4,8 +4,22 @@
 #include <stdio.h>
 #include <string.h>
 #include <process.h>
+#include <signal.h> // for signal() function
 #include "server.h"
 #pragma comment(lib,"ws2_32.lib")
+
+/*
+	exit_clean: (safe exit function)
+		description: Signal callback function, when unknown exit Ctrl-c, will clear the process
+
+	1. clean up WSA
+	2. free all the allocated memory
+*/
+void exit_clean(int arg) {
+	WSACleanup();
+	free(clients);
+	exit(0);
+}
 
 // function to accept a connection
 void accept_conn(void *dummy) {
@@ -20,6 +34,11 @@ int main(int argc, char **argv){
 			@param1: request Socket version
 			@param2: variable to save version information
 	*/
+
+	// Register signal handlers to prevent accidental exits and release ports
+    signal(SIGTERM, exit_clean);
+    signal(SIGINT, exit_clean);
+
 	if (WSAStartup(0x202, &wsaData) == SOCKET_ERROR){
 		// stderr: standard error are printed to the screen.
 		fprintf(stderr, "WSAStartup failed with error %d\n", WSAGetLastError());
@@ -51,15 +70,15 @@ int main(int argc, char **argv){
 
 	/*
 		waiting for the connections from Client
-		max number of clients waiting to connect: max_allowed
+		max number of clients waiting to connect: MAX_ALLOWED
 	*/
-	if (listen(sock, max_allowed) == SOCKET_ERROR){
+	if (listen(sock, MAX_ALLOWED) == SOCKET_ERROR){
 		fprintf(stderr, "listen() failed with error %d\n", WSAGetLastError());
 		WSACleanup();
 		return -1;
 	}
 	
-	while (connecting < max_allowed) {
+	while (connecting < MAX_ALLOWED) {
 
 		printf("Waiting for the connections ........\n");
 
@@ -107,5 +126,8 @@ int main(int argc, char **argv){
 
 		closesocket(msg_sock);
 	}
-	WSACleanup();
+
+
+	exit_clean(0);
+	return 0;
 }

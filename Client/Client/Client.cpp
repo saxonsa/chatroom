@@ -113,6 +113,8 @@ int main(int argc, char **argv){
 
 	closesocket(connect_sock);
 	WSACleanup();
+
+	return 0;
 }
 
 void THRE_RECV(SOCKET ClientSocket) {
