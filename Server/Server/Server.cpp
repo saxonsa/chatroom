@@ -14,7 +14,7 @@ void accept_conn(void *dummy) {
 
 int main(int argc, char **argv){
 
-	/*  Initilize Socket
+	/*  Initilize WSA
 
 		WSAStartup: 
 			@param1: request Socket version
@@ -49,14 +49,17 @@ int main(int argc, char **argv){
 		return -1;
 	}
 
-	/* waiting for the connections from Client */
-	if (listen(sock, 5) == SOCKET_ERROR){
+	/*
+		waiting for the connections from Client
+		max number of clients waiting to connect: max_allowed
+	*/
+	if (listen(sock, max_allowed) == SOCKET_ERROR){
 		fprintf(stderr, "listen() failed with error %d\n", WSAGetLastError());
 		WSACleanup();
 		return -1;
 	}
 	
-	while (1) {
+	while (connecting < max_allowed) {
 
 		printf("Waiting for the connections ........\n");
 

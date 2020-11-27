@@ -8,6 +8,7 @@
 
 int main(int argc, char **argv){
 
+	// *************************************************************************************** //
 	/* Read the server's IP address and port number which client wants to establish connection */
 	printf("Please input the server's IP: ");
 	gets_s(serverIP);
@@ -16,8 +17,9 @@ int main(int argc, char **argv){
 
 	server_name = serverIP;
 	port = atoi(server_port);
+	// *************************************************************************************** //
 
-	/*  Initilize Socket
+	/*  Initilize WSA
 
 		WSAStartup: 
 			@param1: request Socket version
@@ -113,8 +115,6 @@ int main(int argc, char **argv){
 	WSACleanup();
 }
 
-/*
-void *THRE_RECV(SOCKET ClientSocket) {
+void THRE_RECV(SOCKET ClientSocket) {
 	return;
 }
-*/

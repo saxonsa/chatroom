@@ -19,5 +19,5 @@ struct hostent *hp;
 
 
 // call a thread to receive message from server
-// void *THRE_RECV(SOCKET ClientSocket);
+// void THRE_RECV(SOCKET ClientSocket);
 

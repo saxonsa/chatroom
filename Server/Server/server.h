@@ -20,3 +20,14 @@ char szBuff[1000];
 int msg_len;
 int addr_len;
 
+int connecting = 0; // cuurently number of clients connected with server
+int max_allowed = 5; // The max number of clients supported by server 
+
+
+// client structure
+typedef struct _Client {
+	int client_fd;
+	char client_name[32];
+	struct sockaddr_in client_addr;
+}Client;
+
