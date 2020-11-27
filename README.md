@@ -1,39 +1,45 @@
 # networking_chatroom
 
-#### 介绍
-{**以下是 Gitee 平台说明，您可以替换此简介**
-Gitee 是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用 Gitee 实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
+**实现思路**
 
-#### 软件架构
-软件架构说明
+Server： 绑定socket对象->设置监听数->等待连接->有客户端连接就新建一个线程，这个线程中，一旦就收到这个客户发送的消息，就广播的向其他客户端发送同样的消息。
+
+Client：向客户端连接->新建线程用来接收服务器端发送的消息，同时主进程用来发送消息
 
 
-#### 安装教程
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+#### **当前实现功能**：
 
-#### 使用说明
+Server：
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+​		可接收一个客户端的信息，并把信息传递回去，然后没啥用了
 
-#### 参与贡献
+Client：
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+​		可以向服务器端发送一条信息，然后中断
 
 
-#### 特技
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+**剩余任务待处理**
+
+Server：
+
+1. 处理当多个client进行连接的请求，并接收信息广播给所有人 （多线程，封装accept，receive）
+2. 用数据库来存储client发送的信息
+3. search method
+
+Client：
+
+1. 单用户可多次发送，可多次接收
+2. search历史记录 method
+
+Additional：
+
+1. GUI
+2. 管理员禁言等功能
+3. 用户可以传文件，图片等支持多种格式
+
+
+
+
+
