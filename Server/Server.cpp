@@ -23,7 +23,37 @@ void exit_clean(int arg) {
 
 // function to accept a connection
 void accept_conn(void *dummy) {
-	// doing something here
+		SOCKET sub_sock = (SOCKET) dummy;
+	
+		msg_len = recv(sub_sock, szBuff, sizeof(szBuff), 0);
+
+		if (msg_len == SOCKET_ERROR){
+			fprintf(stderr, "recv() failed with error %d\n", WSAGetLastError());
+			WSACleanup();
+			//return -1;
+		}
+
+
+
+
+		if (msg_len == 0){
+			printf("Client closed connection\n");
+			closesocket(sub_sock);
+			//return -1;
+		}
+
+		printf("Bytes Received: %d, message: %s from %s\n", msg_len, szBuff, inet_ntoa(client_addr.sin_addr));
+
+		/* Send message back to Client */
+		msg_len = send(sub_sock, szBuff, sizeof(szBuff), 0);
+		if (msg_len == 0){
+			printf("Client closed connection\n");
+			closesocket(sub_sock);
+			//return -1;
+		}
+
+		closesocket(sub_sock);
+		_endthread();
 }
 
 int main(int argc, char **argv){
@@ -84,47 +114,19 @@ int main(int argc, char **argv){
 
 		addr_len = sizeof(client_addr);
 
+		while(1){
+			msg_sock = accept(sock, (struct sockaddr*)&client_addr, &addr_len);
+			if (msg_sock == INVALID_SOCKET){
+				fprintf(stderr, "accept() failed with error %d\n", WSAGetLastError());
+				WSACleanup();
+				return -1;
+			}
+			printf("accepted connection from %s, port %d\n",
+				inet_ntoa(client_addr.sin_addr),
+				htons(client_addr.sin_port));
 
-
-		msg_sock = accept(sock, (struct sockaddr*)&client_addr, &addr_len);
-		if (msg_sock == INVALID_SOCKET){
-			fprintf(stderr, "accept() failed with error %d\n", WSAGetLastError());
-			WSACleanup();
-			return -1;
+			_beginthread(accept_conn,0,(void*)msg_sock);
 		}
-
-		printf("accepted connection from %s, port %d\n",
-			inet_ntoa(client_addr.sin_addr),
-			htons(client_addr.sin_port));
-
-		msg_len = recv(msg_sock, szBuff, sizeof(szBuff), 0);
-
-		if (msg_len == SOCKET_ERROR){
-			fprintf(stderr, "recv() failed with error %d\n", WSAGetLastError());
-			WSACleanup();
-			return -1;
-		}
-
-
-
-
-		if (msg_len == 0){
-			printf("Client closed connection\n");
-			closesocket(msg_sock);
-			return -1;
-		}
-
-		printf("Bytes Received: %d, message: %s from %s\n", msg_len, szBuff, inet_ntoa(client_addr.sin_addr));
-
-		/* Send message back to Client */
-		msg_len = send(msg_sock, szBuff, sizeof(szBuff), 0);
-		if (msg_len == 0){
-			printf("Client closed connection\n");
-			closesocket(msg_sock);
-			return -1;
-		}
-
-		closesocket(msg_sock);
 	}
 
 
