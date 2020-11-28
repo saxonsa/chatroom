@@ -24,21 +24,28 @@ void exit_clean(int arg) {
 // function to accept a connection
 void accept_conn(void *dummy) {
 		SOCKET sub_sock = (SOCKET) dummy;
-	
+
+		connecting++;
+		printf("current number of clients: %d\n", connecting);
+
 		msg_len = recv(sub_sock, szBuff, sizeof(szBuff), 0);
+
+		printf("msg_len: %d\n", msg_len);
 
 		if (msg_len == SOCKET_ERROR){
 			fprintf(stderr, "recv() failed with error %d\n", WSAGetLastError());
+			connecting--;
 			WSACleanup();
+			_endthread();
 			//return -1;
 		}
-
-
-
 
 		if (msg_len == 0){
 			printf("Client closed connection\n");
 			closesocket(sub_sock);
+			connecting--;
+			printf("current number of clients: %d\n", connecting);
+			_endthread();
 			//return -1;
 		}
 
@@ -46,17 +53,21 @@ void accept_conn(void *dummy) {
 
 		/* Send message back to Client */
 		msg_len = send(sub_sock, szBuff, sizeof(szBuff), 0);
-		if (msg_len == 0){
-			printf("Client closed connection\n");
+		if (msg_len <= 0){
+			printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
 			closesocket(sub_sock);
+			connecting--;
+			printf("current number of clients: %d\n", connecting);
+			_endthread();
 			//return -1;
 		}
-
-		closesocket(sub_sock);
-		_endthread();
 }
 
 int main(int argc, char **argv){
+
+	// Register signal handlers to prevent accidental exits and release ports
+    signal(SIGTERM, exit_clean);
+    signal(SIGINT, exit_clean);
 
 	/*  Initilize WSA
 
@@ -64,10 +75,6 @@ int main(int argc, char **argv){
 			@param1: request Socket version
 			@param2: variable to save version information
 	*/
-
-	// Register signal handlers to prevent accidental exits and release ports
-    signal(SIGTERM, exit_clean);
-    signal(SIGINT, exit_clean);
 
 	if (WSAStartup(0x202, &wsaData) == SOCKET_ERROR){
 		// stderr: standard error are printed to the screen.
@@ -107,26 +114,30 @@ int main(int argc, char **argv){
 		WSACleanup();
 		return -1;
 	}
-	
-	while (connecting < MAX_ALLOWED) {
 
-		printf("Waiting for the connections ........\n");
+	printf("Waiting for the connections ........\n");
 
+
+	while(1){
 		addr_len = sizeof(client_addr);
-
-		while(1){
-			msg_sock = accept(sock, (struct sockaddr*)&client_addr, &addr_len);
-			if (msg_sock == INVALID_SOCKET){
-				fprintf(stderr, "accept() failed with error %d\n", WSAGetLastError());
-				WSACleanup();
-				return -1;
-			}
-			printf("accepted connection from %s, port %d\n",
-				inet_ntoa(client_addr.sin_addr),
-				htons(client_addr.sin_port));
-
-			_beginthread(accept_conn,0,(void*)msg_sock);
+		msg_sock = accept(sock, (struct sockaddr*)&client_addr, &addr_len);
+		if (msg_sock == INVALID_SOCKET){
+			fprintf(stderr, "accept() failed with error %d\n", WSAGetLastError());
+			WSACleanup();
+			return -1;
 		}
+
+		if (connecting >= MAX_ALLOWED) {
+			closesocket(msg_sock);
+			printf("max client number reached!\n");
+			continue;
+		}
+
+		printf("accepted connection from %s, port %d\n",
+			inet_ntoa(client_addr.sin_addr),
+			htons(client_addr.sin_port));
+
+		_beginthread(accept_conn,0,(void*)msg_sock);
 	}
 
 
