@@ -30,7 +30,7 @@ Server：
 
 Client：
 
-1. 单用户可多次发送，可多次接收
+1. 单用户可多次接收其他用户信息
 2. search历史记录 method
 
 Additional：

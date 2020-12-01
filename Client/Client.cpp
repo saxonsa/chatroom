@@ -82,7 +82,7 @@ int main(int argc, char **argv){
 
 		// when user type end in, the client will close the socket
 		if (strcmp(szBuff, "end") == 0) {
-			printf("client exit\n");
+			printf("exit chatroom\n");
 			break;
 		}
 	
