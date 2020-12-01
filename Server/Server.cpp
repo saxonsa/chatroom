@@ -28,39 +28,39 @@ void accept_conn(void *dummy) {
 		connecting++;
 		printf("current number of clients: %d\n", connecting);
 
-		msg_len = recv(sub_sock, szBuff, sizeof(szBuff), 0);
+		while (1) {
 
-		printf("msg_len: %d\n", msg_len);
+			msg_len = recv(sub_sock, szBuff, sizeof(szBuff), 0);
 
-		if (msg_len == SOCKET_ERROR){
-			fprintf(stderr, "recv() failed with error %d\n", WSAGetLastError());
-			connecting--;
-			WSACleanup();
-			_endthread();
-			//return -1;
+			printf("msg_len: %d\n", msg_len);
+
+			if (msg_len == SOCKET_ERROR){
+				fprintf(stderr, "recv() failed with error %d\n", WSAGetLastError());
+				break;
+				//return -1;
+			}
+
+			if (msg_len == 0){
+				printf("Client closed connection\n");
+				closesocket(sub_sock);
+				break;
+				//return -1;
+			}
+
+			printf("Bytes Received: %d, message: %s from %s\n", msg_len, szBuff, inet_ntoa(client_addr.sin_addr));
+
+			/* Send message back to Client */
+			msg_len = send(sub_sock, szBuff, sizeof(szBuff), 0);
+			if (msg_len <= 0){
+				printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+				closesocket(sub_sock);
+				break;
+				//return -1;
+			}
 		}
-
-		if (msg_len == 0){
-			printf("Client closed connection\n");
-			closesocket(sub_sock);
-			connecting--;
-			printf("current number of clients: %d\n", connecting);
-			_endthread();
-			//return -1;
-		}
-
-		printf("Bytes Received: %d, message: %s from %s\n", msg_len, szBuff, inet_ntoa(client_addr.sin_addr));
-
-		/* Send message back to Client */
-		msg_len = send(sub_sock, szBuff, sizeof(szBuff), 0);
-		if (msg_len <= 0){
-			printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
-			closesocket(sub_sock);
-			connecting--;
-			printf("current number of clients: %d\n", connecting);
-			_endthread();
-			//return -1;
-		}
+		connecting--;
+		printf("current number of clients: %d\n", connecting);
+		_endthread();
 }
 
 int main(int argc, char **argv){
