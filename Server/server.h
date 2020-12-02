@@ -35,5 +35,5 @@ typedef struct _Client {
 	SOCKET client_socket; // Client socket
 }Client;
 
-// Client clients[MAX_ALLOWED] = { 0 };
+Client clients[MAX_ALLOWED] = { 0 };
 

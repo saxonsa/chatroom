@@ -75,6 +75,8 @@ int main(int argc, char **argv){
 	// print connected server information
 	printf("Successful connect to server IP: %s; Port: %d\n", inet_ntoa(server_addr.sin_addr), htons(server_addr.sin_port));
 
+	_beginthread(recv_msg, 0, (void *) connect_sock);
+
 	while (1) {
 
 		printf("input character string:\n");
@@ -100,24 +102,6 @@ int main(int argc, char **argv){
 			WSACleanup();
 			return -1;
 		}
-
-		msg_len = recv(connect_sock, szBuff, sizeof(szBuff), 0);
-	
-		if (msg_len == SOCKET_ERROR){
-			fprintf(stderr, "send() failed with error %d\n", WSAGetLastError());
-			closesocket(connect_sock);
-			WSACleanup();
-			return -1;
-		}
-
-		if (msg_len == 0){
-			printf("server closed connection\n");
-			closesocket(connect_sock);
-			WSACleanup();
-			return -1;
-		}
-
-		printf("Echo from the server %s.\n", szBuff);
 	}
 
 	closesocket(connect_sock);
@@ -126,6 +110,23 @@ int main(int argc, char **argv){
 	return 0;
 }
 
-void THRE_RECV(SOCKET ClientSocket) {
-	return;
+void recv_msg(void *client_socket) {
+	while (1) {
+		msg_len = recv(connect_sock, szBuff, sizeof(szBuff), 0);
+	
+		if (msg_len == SOCKET_ERROR){
+			fprintf(stderr, "send() failed with error %d\n", WSAGetLastError());
+			break;
+		}
+
+		if (msg_len == 0){
+			printf("server closed connection\n");
+			break;
+		}
+
+		printf("Echo from the server %s.\n", szBuff);
+	}
+	closesocket(connect_sock);
+	WSACleanup();
+	_endthread();
 }

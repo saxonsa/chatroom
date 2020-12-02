@@ -1,3 +1,10 @@
+#include "stdafx.h"
+#include <winsock2.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <process.h>
+#pragma comment(lib,"ws2_32.lib")
 
 #define DEFAULT_PORT	5019
 
@@ -18,6 +25,8 @@ int msg_len;
 struct hostent *hp;
 
 
-// call a thread to receive message from server
-// void THRE_RECV(SOCKET ClientSocket);
+char name[255] = {};
 
+
+// call a thread to receive message from server
+void recv_msg(void *client_socket);
