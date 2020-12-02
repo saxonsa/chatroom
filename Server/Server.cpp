@@ -35,12 +35,23 @@ void accept_conn(void *dummy) {
 
 			if (msg_len == SOCKET_ERROR){
 				fprintf(stderr, "recv() failed with error %d\n", WSAGetLastError());
+				for (int s = 0; s < MAX_ALLOWED; s++) {
+					if (clients[s].client_socket == sub_sock) {
+						clients[s].client_socket = INVALID_SOCKET;
+					}
+				}
+				closesocket(sub_sock);
 				break;
 				//return -1;
 			}
-
+			
 			if (msg_len == 0){
 				printf("Client closed connection\n");
+				for (int s = 0; s < MAX_ALLOWED; s++) {
+					if (clients[s].client_socket == sub_sock) {
+						clients[s].client_socket = INVALID_SOCKET;
+					}
+				}
 				closesocket(sub_sock);
 				break;
 				//return -1;
@@ -93,6 +104,7 @@ int main(int argc, char **argv){
 	}
 
 	for (int i = 0; i < MAX_ALLOWED; i++) {
+		clients[i].fd = i;
 		clients[i].client_socket = INVALID_SOCKET;
 	}
 
