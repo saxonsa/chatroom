@@ -12,11 +12,11 @@ Client：向客户端连接->新建线程用来接收服务器端发送的消息
 
 Server：
 
-​		可支持指定数目(MAX_ALLOWED)个客户端发信息，收到信息后并返回给他们
+​		可支持指定数目(MAX_ALLOWED)个客户端发信息，收到信息后并广播给所有人
 
 Client：
 
-​		可以向服务器端多次发送信息，当输入end的时候断开连接
+​		可以多个client向服务器端多次发送信息，当输入end的时候断开连接
 
 
 
@@ -24,13 +24,13 @@ Client：
 
 Server：
 
-1. 接收信息广播给所有人 （多线程，封装accept，recv, send）
+1. 获取client名字，发送给不同的client的时候同时发送名字
 2. 用数据库来存储client发送的信息
 3. search method
 
 Client：
 
-1. 单用户可多次接收其他用户信息
+1. 连接的时候发送聊天姓名
 2. search历史记录 method
 
 Additional：
