@@ -5,8 +5,12 @@
 #include <string.h>
 #include <process.h>
 #include <signal.h> // for signal() function
+#include <mysql.h> // for database functions
 #include "server.h"
+
 #pragma comment(lib,"ws2_32.lib")
+#pragma comment(lib,"libmysql.lib")
+
 
 /*
 	exit_clean: (safe exit function)
@@ -63,6 +67,20 @@ void accept_conn(void *dummy) {
 }
 
 int main(int argc, char **argv){
+
+	MYSQL mysqlConnect; 
+	MYSQL_RES *res;
+	MYSQL_FIELD *field; 
+	MYSQL_ROW nextRow;
+	int ret;
+
+	mysql_init(&mysqlConnect);
+	if (!(mysql_real_connect(&mysqlConnect, "localhost", "root", "", "chatroom", 3306, NULL, 0))) {
+		printf("Failed to access to the database...Error: %s\n", mysql_error(&mysqlConnect));
+	}else{
+		printf("Success! \n");
+	}
+
 
 	// Register signal handlers to prevent accidental exits and release ports
     signal(SIGTERM, exit_clean);
