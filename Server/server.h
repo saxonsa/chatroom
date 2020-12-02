@@ -7,7 +7,7 @@
 
 WSADATA	wsaData = { 0 };	
 SOCKET sock = INVALID_SOCKET;		// master server socket
-SOCKET msg_sock = INVALID_SOCKET;	// slave server socket
+SOCKET msg_sock = INVALID_SOCKET;	// client socket
 
 /*************************************************************/
 
@@ -21,16 +21,19 @@ int msg_len;
 int addr_len;
 
 int connecting = 0; // cuurent number of clients connected with server
-int MAX_ALLOWED = 5; // the max number of clients supported by server 
+const int MAX_ALLOWED = 3; // the max number of clients supported by server 
 
 
 // client structure
+// an array to store all the clients connecting with server
 typedef struct _Client {
-	int client_fd;
-	char client_name[32];
-	struct sockaddr_in client_addr;
+	int fd;
+	char buff[1000]; // Client buffer
+	char name[32]; // Client name
+	char IP[20]; // Client IP
+	struct sockaddr_in client_addr; // Client IP address
+	SOCKET client_socket; // Client socket
 }Client;
 
-// an array to store all the clients connecting with server
-static Client *clients = NULL;
+// Client clients[MAX_ALLOWED] = { 0 };
 

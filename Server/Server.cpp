@@ -17,7 +17,6 @@
 */
 void exit_clean(int arg) {
 	WSACleanup();
-	free(clients);
 	exit(0);
 }
 
