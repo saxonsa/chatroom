@@ -49,12 +49,21 @@ void accept_conn(void *dummy) {
 			printf("Bytes Received: %d, message: %s from %s\n", msg_len, szBuff, inet_ntoa(client_addr.sin_addr));
 
 			/* Send message back to Client */
-			msg_len = send(sub_sock, szBuff, sizeof(szBuff), 0);
-			if (msg_len <= 0){
-				printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
-				closesocket(sub_sock);
-				break;
-				//return -1;
+			// msg_len = send(sub_sock, szBuff, sizeof(szBuff), 0);
+
+			for (int i = 0; i < MAX_ALLOWED; i++) {
+				if (clients[i].client_socket != INVALID_SOCKET) {
+					msg_len = send(clients[i].client_socket, szBuff, sizeof(szBuff), 0);
+
+					if (msg_len <= 0){
+						printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+						closesocket(sub_sock);
+						connecting--;
+						printf("current number of clients: %d\n", connecting);
+						_endthread();
+						//return -1;
+					}
+				}
 			}
 		}
 		connecting--;
@@ -81,6 +90,10 @@ int main(int argc, char **argv){
 		//WSACleanup function terminates use of the Windows Sockets DLL. 
 		WSACleanup();
 		return -1;
+	}
+
+	for (int i = 0; i < MAX_ALLOWED; i++) {
+		clients[i].client_socket = INVALID_SOCKET;
 	}
 
 
@@ -136,10 +149,16 @@ int main(int argc, char **argv){
 			inet_ntoa(client_addr.sin_addr),
 			htons(client_addr.sin_port));
 
+		for (int num = 0; num < MAX_ALLOWED; num++) {
+			if (clients[num].client_socket == INVALID_SOCKET) {
+				clients[num].client_socket = msg_sock;
+				break;
+			}
+		}
+
 		_beginthread(accept_conn,0,(void*)msg_sock);
 	}
 
 
 	exit_clean(0);
-	return 0;
 }
