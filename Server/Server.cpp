@@ -5,8 +5,11 @@
 #include <string.h>
 #include <process.h>
 #include <signal.h> // for signal() function
+#include <mysql.h> // for database functions
 #include "server.h"
+
 #pragma comment(lib,"ws2_32.lib")
+#pragma comment(lib,"libmysql.lib")
 
 /*
 	exit_clean: (safe exit function)
@@ -20,13 +23,93 @@ void exit_clean(int arg) {
 	exit(0);
 }
 
+void insert_into_database(char user_name[], char content[]){
+	char toInsertHistory[250] = "Insert INTO history(user_name,content) VALUES(";
+	
+	char userName[1000] = "'";
+	strcat_s(userName,sizeof userName,user_name);
+	strcat_s(userName,sizeof userName,"','");
+
+	printf("%s \n",userName);
+
+	// char userName[] = "'David','";
+
+	char finalString[300];
+	
+	// Concat strings
+	strcat_s(toInsertHistory,sizeof toInsertHistory,userName);
+	strcat_s(toInsertHistory,sizeof toInsertHistory,content);
+	strcat_s(toInsertHistory,sizeof toInsertHistory,"');");
+
+	strcpy(finalString,toInsertHistory);
+
+	printf("%s \n",userName);
+
+	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	// A hint that shows the insertion is complte
+	// printf("History record succeed! \n");
+
+	return;
+}
+
+void search_history(){
+	// The selection query
+	ret = mysql_query(&mysqlConnect, "SELECT * FROM `history`");
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		return;
+	}
+
+	res = mysql_store_result(&mysqlConnect);// Check the res value
+
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
+			int row = mysql_num_rows(res);
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+				}
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return;
+}
+
 // function to accept a connection
 void accept_conn(void *dummy) {
 		SOCKET sub_sock = (SOCKET) dummy;
 
 		connecting++;
 		printf("current number of clients: %d\n", connecting);
-		
+
+		char current_user_name[300];
+
 		while (1) {
 
 			msg_len = recv(sub_sock, szBuff, sizeof(szBuff), 0);
@@ -96,7 +179,7 @@ void accept_conn(void *dummy) {
 			}
 
 			// broadcast name msg depends on different clients
-			if (first == 1) { // not the first time
+			if (first == 1) { // the first time
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (clients[i].client_socket != INVALID_SOCKET) {
 						if (clients[i].client_socket == sub_sock) {
@@ -110,6 +193,8 @@ void accept_conn(void *dummy) {
 								_endthread();
 								//return -1;
 							}
+							strcpy(current_user_name,szBuff);
+
 						} else {
 							msg_len = send(clients[i].client_socket, enterMsgOther, sizeof(enterMsgOther), 0);
 
@@ -128,6 +213,8 @@ void accept_conn(void *dummy) {
 
 			// broadcast normal chat msg to all clients in the chatroom
 			if (first == 0) { // not the first time
+				insert_into_database(current_user_name, szBuff); // Insert the history into the database
+				search_history();// Search history from database
 				for (int c = 0; c < MAX_ALLOWED; c++) {
 					if (clients[c].client_socket == sub_sock) {
 						// save the client name in normalMsg
@@ -147,17 +234,28 @@ void accept_conn(void *dummy) {
 							printf("current number of clients: %d\n", connecting);
 							_endthread();
 							//return -1;
-						}
+						}						
 					}
 				}
 			}
 		}
 		connecting--;
 		printf("current number of clients: %d\n", connecting);
+		closesocket(sub_sock);
 		_endthread();
 }
 
 int main(int argc, char **argv){
+
+
+
+	mysql_init(&mysqlConnect);
+	if (!(mysql_real_connect(&mysqlConnect, "localhost", "root", "", "chatroom", 3306, NULL, 0))) {
+		printf("Failed to access to the database...Error: %s\n", mysql_error(&mysqlConnect));
+	}else{
+		printf("Success! \n");
+	}
+
 
 	// Register signal handlers to prevent accidental exits and release ports
     signal(SIGTERM, exit_clean);

@@ -22,6 +22,14 @@ int addr_len;
 int connecting = 0; // cuurent number of clients connected with server
 const int MAX_ALLOWED = 3; // the max number of clients supported by server 
 
+//Database global variables
+
+MYSQL mysqlConnect; 
+MYSQL_RES *res;
+MYSQL_FIELD *field; 
+MYSQL_ROW nextRow;
+int ret;
+
 
 // client structure
 // an array to store all the clients connecting with server
