@@ -23,18 +23,27 @@ void exit_clean(int arg) {
 	exit(0);
 }
 
-void insert_into_database(char content[]){
+void insert_into_database(char user_name[], char content[]){
 	char toInsertHistory[250] = "Insert INTO history(user_name,content) VALUES(";
-	char userName[] = "'David','";
+	
+	char userName[1000] = "'";
+	strcat_s(userName,sizeof userName,user_name);
+	strcat_s(userName,sizeof userName,"','");
+
+	printf("%s \n",userName);
+
+	// char userName[] = "'David','";
 
 	char finalString[300];
 	
 	// Concat strings
-	strcat(toInsertHistory,userName);
-	strcat(toInsertHistory,content);
-	strcat(toInsertHistory,"');");
+	strcat_s(toInsertHistory,sizeof toInsertHistory,userName);
+	strcat_s(toInsertHistory,sizeof toInsertHistory,content);
+	strcat_s(toInsertHistory,sizeof toInsertHistory,"');");
 
-	strcpy(finalString,toInsertHistory);	
+	strcpy(finalString,toInsertHistory);
+
+	printf("%s \n",userName);
 
 	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
 
@@ -98,7 +107,9 @@ void accept_conn(void *dummy) {
 
 		connecting++;
 		printf("current number of clients: %d\n", connecting);
-		
+
+		char current_user_name[300];
+
 		while (1) {
 
 			msg_len = recv(sub_sock, szBuff, sizeof(szBuff), 0);
@@ -133,9 +144,6 @@ void accept_conn(void *dummy) {
 
 			printf("Bytes Received: %d, message: %s from %s\n", msg_len, szBuff, inet_ntoa(client_addr.sin_addr));
 
-			insert_into_database(szBuff); // Insert the history into the database
-			search_history();// Search history from database
-
 			/* Send message back to Client */
 
 			// check if it's the first time received from clinet
@@ -161,7 +169,7 @@ void accept_conn(void *dummy) {
 			}
 
 			// broadcast name msg depends on different clients
-			if (first == 1) { // not the first time
+			if (first == 1) { // the first time
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (clients[i].client_socket != INVALID_SOCKET) {
 						if (clients[i].client_socket == sub_sock) {
@@ -175,6 +183,8 @@ void accept_conn(void *dummy) {
 								_endthread();
 								//return -1;
 							}
+							strcpy(current_user_name,szBuff);
+
 						} else {
 							msg_len = send(clients[i].client_socket, enterMsgOther, sizeof(enterMsgOther), 0);
 
@@ -193,6 +203,8 @@ void accept_conn(void *dummy) {
 
 			// broadcast normal chat msg to all clients in the chatroom
 			if (first == 0) { // not the first time
+				insert_into_database(current_user_name, szBuff); // Insert the history into the database
+				search_history();// Search history from database
 				for (int c = 0; c < MAX_ALLOWED; c++) {
 					if (clients[c].client_socket == sub_sock) {
 						// save the client name in normalMsg
@@ -212,7 +224,7 @@ void accept_conn(void *dummy) {
 							printf("current number of clients: %d\n", connecting);
 							_endthread();
 							//return -1;
-						}
+						}						
 					}
 				}
 			}
