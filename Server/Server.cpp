@@ -26,7 +26,7 @@ void accept_conn(void *dummy) {
 
 		connecting++;
 		printf("current number of clients: %d\n", connecting);
-
+		
 		while (1) {
 
 			msg_len = recv(sub_sock, szBuff, sizeof(szBuff), 0);
@@ -38,6 +38,7 @@ void accept_conn(void *dummy) {
 				for (int s = 0; s < MAX_ALLOWED; s++) {
 					if (clients[s].client_socket == sub_sock) {
 						clients[s].client_socket = INVALID_SOCKET;
+						memset(clients[s].name, 0, sizeof(clients[s].name));
 					}
 				}
 				closesocket(sub_sock);
@@ -50,6 +51,7 @@ void accept_conn(void *dummy) {
 				for (int s = 0; s < MAX_ALLOWED; s++) {
 					if (clients[s].client_socket == sub_sock) {
 						clients[s].client_socket = INVALID_SOCKET;
+						memset(clients[s].name, 0, sizeof(clients[s].name));
 					}
 				}
 				closesocket(sub_sock);
@@ -60,19 +62,37 @@ void accept_conn(void *dummy) {
 			printf("Bytes Received: %d, message: %s from %s\n", msg_len, szBuff, inet_ntoa(client_addr.sin_addr));
 
 			/* Send message back to Client */
-			// msg_len = send(sub_sock, szBuff, sizeof(szBuff), 0);
 
-			for (int i = 0; i < MAX_ALLOWED; i++) {
-				if (clients[i].client_socket != INVALID_SOCKET) {
-					msg_len = send(clients[i].client_socket, szBuff, sizeof(szBuff), 0);
+			// check if it's the first time received from clinet
+			// if first -- it should be username
+			// if not -- it should be the normal msg and should be broadcast
+			int first = 0;
+			for (int s = 0; s < MAX_ALLOWED; s++) {
+				if (clients[s].client_socket == sub_sock) {
+					if (!strlen(clients[s].name)) {
+						memcpy(clients[s].name, szBuff, sizeof(clients[s].name));
+						first = 1;
+						break;
+					} else {
+						break;
+					}
+				}
+			}
 
-					if (msg_len <= 0){
-						printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
-						closesocket(sub_sock);
-						connecting--;
-						printf("current number of clients: %d\n", connecting);
-						_endthread();
-						//return -1;
+			// broadcast msg
+			if (first == 0) {
+				for (int i = 0; i < MAX_ALLOWED; i++) {
+					if (clients[i].client_socket != INVALID_SOCKET) {
+						msg_len = send(clients[i].client_socket, szBuff, sizeof(szBuff), 0);
+
+						if (msg_len <= 0){
+							printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+							closesocket(sub_sock);
+							connecting--;
+							printf("current number of clients: %d\n", connecting);
+							_endthread();
+							//return -1;
+						}
 					}
 				}
 			}
@@ -106,6 +126,7 @@ int main(int argc, char **argv){
 	for (int i = 0; i < MAX_ALLOWED; i++) {
 		clients[i].fd = i;
 		clients[i].client_socket = INVALID_SOCKET;
+		memset(clients[i].name, 0, sizeof(clients[i].name));
 	}
 
 

@@ -14,6 +14,8 @@ int main(int argc, char **argv){
 	gets_s(serverIP);
 	printf("Please input the server's port: ");
 	gets_s(server_port);
+	printf("Please input your name to chat: ");
+	gets_s(name);
 
 	server_name = serverIP;
 	port = atoi(server_port);
@@ -75,8 +77,22 @@ int main(int argc, char **argv){
 	// print connected server information
 	printf("Successful connect to server IP: %s; Port: %d\n", inet_ntoa(server_addr.sin_addr), htons(server_addr.sin_port));
 
-	
 	_beginthread(recv_msg, 0, (void *) connect_sock);
+
+	// send client name to server
+	msg_len = send(connect_sock, name, sizeof(name), 0);
+	if (msg_len == SOCKET_ERROR){
+		fprintf(stderr, "send() failed with error %d\n", WSAGetLastError());
+		WSACleanup();
+		return -1;
+	}
+
+	if (msg_len == 0){
+		printf("server closed connection\n");
+		closesocket(connect_sock);
+		WSACleanup();
+		return -1;
+	}
 
 	while (1) {
 
@@ -102,7 +118,7 @@ int main(int argc, char **argv){
 				printf("Empty message cannot be sent!\n");
 				empty = 0;
 				continue;
-			} else 
+			} else // correct input
 				break;
 		}
 
@@ -139,7 +155,7 @@ void recv_msg(void *client_socket) {
 		msg_len = recv(connect_sock, szBuff, sizeof(szBuff), 0);
 	
 		if (msg_len == SOCKET_ERROR){
-			fprintf(stderr, "send() failed with error %d\n", WSAGetLastError());
+			fprintf(stderr, "recv() failed with error %d\n", WSAGetLastError());
 			break;
 		}
 
