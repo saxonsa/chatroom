@@ -79,8 +79,32 @@ int main(int argc, char **argv){
 	_beginthread(recv_msg, 0, (void *) connect_sock);
 
 	while (1) {
-		printf("input character string:\n");
-		gets_s(szBuff);
+
+		// get input
+		int empty = 0;
+		while (1) {
+			printf("input character string:\n");
+			gets_s(szBuff);
+
+			// empty input is not allowed
+			if (strlen(szBuff) == 0) { // empty string
+				empty = 1;
+			} else {
+				for (unsigned int c = 0; c < strlen(szBuff); c++) { // a string of spaces
+					if (szBuff[c] != ' ') {
+						empty = 0;
+						break;
+					} else
+						empty = 1;
+				}
+			}
+			if (empty == 1) {
+				printf("Empty message cannot be sent!\n");
+				empty = 0;
+				continue;
+			} else 
+				break;
+		}
 
 		// when user type end in, the client will close the socket
 		if (strcmp(szBuff, "end") == 0) {

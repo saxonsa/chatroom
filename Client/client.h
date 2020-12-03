@@ -30,3 +30,5 @@ char name[255] = {};
 
 // call a thread to receive message from server
 void recv_msg(void *client_socket);
+
+
