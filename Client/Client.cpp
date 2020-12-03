@@ -76,11 +76,9 @@ int main(int argc, char **argv){
 	printf("Successful connect to server IP: %s; Port: %d\n", inet_ntoa(server_addr.sin_addr), htons(server_addr.sin_port));
 
 	
+	_beginthread(recv_msg, 0, (void *) connect_sock);
 
 	while (1) {
-
-		_beginthread(recv_msg, 0, (void *) connect_sock);
-
 		printf("input character string:\n");
 		gets_s(szBuff);
 
