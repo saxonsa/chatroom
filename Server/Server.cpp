@@ -143,6 +143,7 @@ void accept_conn(void *dummy) {
 		}
 		connecting--;
 		printf("current number of clients: %d\n", connecting);
+		closesocket(sub_sock);
 		_endthread();
 }
 
