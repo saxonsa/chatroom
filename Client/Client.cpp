@@ -99,7 +99,6 @@ int main(int argc, char **argv){
 		// get input
 		int empty = 0;
 		while (1) {
-			printf("input character string:\n");
 			gets_s(szBuff);
 
 			// empty input is not allowed
@@ -164,7 +163,7 @@ void recv_msg(void *client_socket) {
 			break;
 		}
 
-		printf("%s.\n", szBuff);
+		printf("%s\n", szBuff);
 	}
 	closesocket(connect_sock);
 	WSACleanup();

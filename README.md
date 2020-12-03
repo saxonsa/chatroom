@@ -24,14 +24,12 @@ Client：
 
 Server：
 
-1. 获取client名字，发送给不同的client的时候同时发送名字
-2. 用数据库来存储client发送的信息
-3. search method
+1. 用数据库来存储client发送的信息
+2. search method
 
 Client：
 
-1. 连接的时候发送聊天姓名
-2. search历史记录 method
+1. search历史记录 method
 
 Additional：
 

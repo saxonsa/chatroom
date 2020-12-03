@@ -59,7 +59,17 @@ void accept_conn(void *dummy) {
 				//return -1;
 			}
 
-			printf("Bytes Received: %d, message: %s from %s\n", msg_len, szBuff, inet_ntoa(client_addr.sin_addr));
+			for (int index = 0; index < MAX_ALLOWED; index++) {
+				if (clients[index].client_socket == sub_sock) {
+					// IP: inet_ntoa(client_addr.sin_addr)
+					if (strlen(clients[index].name)) {
+						printf("Bytes Received: %d, message: %s from name: %s\n", msg_len, szBuff, clients[index].name);
+					} else {
+						printf("Bytes Received: %d, message: %s from IP: %s\n", msg_len, szBuff, inet_ntoa(client_addr.sin_addr));
+					}
+				}
+			}
+			
 
 			/* Send message back to Client */
 
