@@ -164,7 +164,7 @@ void recv_msg(void *client_socket) {
 			break;
 		}
 
-		printf("Echo from the server %s.\n", szBuff);
+		printf("%s.\n", szBuff);
 	}
 	closesocket(connect_sock);
 	WSACleanup();

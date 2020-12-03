@@ -1,4 +1,3 @@
-
 #define		DEFAULT_PORT		5019	// server Listening Port
 
 
@@ -36,4 +35,6 @@ typedef struct _Client {
 }Client;
 
 Client clients[MAX_ALLOWED] = { 0 };
+
+char normalMsg[1000] = { 0 }; // the normal msg sent to all... e.x: Saxon: msg
 

@@ -67,10 +67,16 @@ void accept_conn(void *dummy) {
 			// if first -- it should be username
 			// if not -- it should be the normal msg and should be broadcast
 			int first = 0;
+			char enterMsgOther[100] = { 0 }; // the enter msg sent to others
+			char enterMsgSelf[100] = "Welcome "; // the enter msg sent to the client himhelf
 			for (int s = 0; s < MAX_ALLOWED; s++) {
 				if (clients[s].client_socket == sub_sock) {
 					if (!strlen(clients[s].name)) {
+						// construct the msg towards different clients
 						memcpy(clients[s].name, szBuff, sizeof(clients[s].name));
+						memcpy(enterMsgOther, clients[s].name, sizeof(clients[s].name));
+						strcat_s(enterMsgSelf, sizeof(clients[s].name), clients[s].name);
+						strcat_s(enterMsgOther, sizeof(enterMsgOther), " enters the chatroom!");
 						first = 1;
 						break;
 					} else {
@@ -79,11 +85,50 @@ void accept_conn(void *dummy) {
 				}
 			}
 
-			// broadcast msg
-			if (first == 0) {
+			// broadcast name msg depends on different clients
+			if (first == 1) { // not the first time
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (clients[i].client_socket != INVALID_SOCKET) {
-						msg_len = send(clients[i].client_socket, szBuff, sizeof(szBuff), 0);
+						if (clients[i].client_socket == sub_sock) {
+							msg_len = send(clients[i].client_socket, enterMsgSelf, sizeof(enterMsgSelf), 0);
+
+							if (msg_len <= 0){
+								printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+								closesocket(sub_sock);
+								connecting--;
+								printf("current number of clients: %d\n", connecting);
+								_endthread();
+								//return -1;
+							}
+						} else {
+							msg_len = send(clients[i].client_socket, enterMsgOther, sizeof(enterMsgOther), 0);
+
+							if (msg_len <= 0){
+								printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+								closesocket(sub_sock);
+								connecting--;
+								printf("current number of clients: %d\n", connecting);
+								_endthread();
+								//return -1;
+							}
+						}
+					}
+				}
+			}
+
+			// broadcast normal chat msg to all clients in the chatroom
+			if (first == 0) { // not the first time
+				for (int c = 0; c < MAX_ALLOWED; c++) {
+					if (clients[c].client_socket == sub_sock) {
+						// save the client name in normalMsg
+						memcpy(normalMsg, clients[c].name, sizeof(normalMsg));
+						strcat_s(normalMsg, sizeof(normalMsg), ": ");
+						strcat_s(normalMsg, sizeof(normalMsg), szBuff);
+					}
+				}
+				for (int i = 0; i < MAX_ALLOWED; i++) {
+					if (clients[i].client_socket != INVALID_SOCKET) {
+						msg_len = send(clients[i].client_socket, normalMsg, sizeof(normalMsg), 0);
 
 						if (msg_len <= 0){
 							printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
