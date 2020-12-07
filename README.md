@@ -24,12 +24,12 @@ Client：
 
 Server：
 
-1. 用数据库来存储client发送的信息
-2. search method
+1. search method
 
 Client：
 
-1. search历史记录 method
+1. 检测输入中的'和"，如果有需要转义--> /' & /"
+2. search历史记录 method
 
 Additional：
 
