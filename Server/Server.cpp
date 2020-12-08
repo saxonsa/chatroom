@@ -59,128 +59,24 @@ void insert_into_database(char user_name[], char content[]){
 	return;
 }
 
-void search_by_name(char user_name[]){
-	char toSearchByName[250] = "SELECT * FROM `history` WHERE user_name = ";
-	char userName[1000] = "'";
-	strcat_s(userName,sizeof userName,user_name);
+// 
+void search_by_keyword(char keyword[]){
+	char toSearchByKeyword[300] = "SELECT * FROM `history` WHERE user_name LIKE '%";
+
+	// Concat strings
+	strcat_s(toSearchByKeyword,sizeof toSearchByKeyword, keyword);
+	strcat_s(toSearchByKeyword,sizeof toSearchByKeyword, "%' OR DATE_FORMAT(create_time, '%Y%m%d') LIKE '%");
+	strcat_s(toSearchByKeyword,sizeof toSearchByKeyword, keyword);
+	strcat_s(toSearchByKeyword,sizeof toSearchByKeyword, "%' OR content LIKE '%");
+	strcat_s(toSearchByKeyword,sizeof toSearchByKeyword, keyword);
+	strcat_s(toSearchByKeyword,sizeof toSearchByKeyword, "%';");
 
 	// char userName[] = "'David'";
 
 	char finalString[300];
-	
-	// Concat strings
-	strcat_s(toSearchByName,sizeof toSearchByName,userName);
-	strcat_s(toSearchByName,sizeof toSearchByName,"';");
 
-	strcpy(finalString,toSearchByName);
+	strcpy(finalString,toSearchByKeyword);
 
-	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
-
-	// If the query failed, close the function
-	if (ret != 0) {
-		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
-		// return;
-	}
-
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
-
-	return;
-}
-
-void search_by_content(char content[]){
-	char toSearchByContent[250] = "SELECT * FROM `history` WHERE content LIKE "; // vague query
-	char searchContent[1000] = "'%";
-	strcat_s(searchContent,sizeof searchContent,content);
-
-	char finalString[300];
-	
-	// Concat strings
-	strcat_s(toSearchByContent,sizeof toSearchByContent,searchContent);
-	strcat_s(toSearchByContent,sizeof toSearchByContent,"%';");
-
-	strcpy(finalString,toSearchByContent);
-
-	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
-
-	// If the query failed, close the function
-	if (ret != 0) {
-		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
-		// return;
-	}
-
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
-
-	return;
-}
-
-void search_by_date(int date){
-	char toSearchByDate[250] = "SELECT * FROM `history` WHERE DATE_FORMAT(create_time, '%Y%m%d') = ";
-	char searchDate[1000] = {0};
-	itoa(date, searchDate, 10);
-
-	// char userName[] = "'David'";
-
-	char finalString[300];
-	
-	// Concat strings
-	strcat_s(toSearchByDate,sizeof toSearchByDate,searchDate);
-	strcat_s(toSearchByDate,sizeof toSearchByDate,";");
-
-	strcpy(finalString,toSearchByDate);
 	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
 
 	// If the query failed, close the function
@@ -374,7 +270,7 @@ void accept_conn(void *dummy) {
 			// broadcast normal chat msg to all clients in the chatroom
 			if (first == 0) { // not the first time
 				insert_into_database(current_user_name, szBuff); // Insert the history into the database
-				search_by_date(20201207);
+
 				search_history();// Search history from database
 				
 				for (int c = 0; c < MAX_ALLOWED; c++) {
