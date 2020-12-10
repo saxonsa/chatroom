@@ -16,15 +16,21 @@ Server：
 
 Client：
 
-​		可以多个client向服务器端多次发送信息，当输入end的时候断开连接
+​		可以多个client向服务器端多次发送信息 + GUI
 
 
 
 #### **剩余任务待处理**
 
+***Main Task:***
+
+1. 一个用户可以向另一个指定用户自由传信息
+2. 用户可以自由form group进行communication
+3. search功能对应GUI
+
 Server：
 
-1. search method
+1. rich set of search function
 
 Client：
 
@@ -33,7 +39,6 @@ Client：
 
 Additional：
 
-1. GUI
 2. 管理员禁言等功能
 3. 用户可以传文件，图片等支持多种格式
 
