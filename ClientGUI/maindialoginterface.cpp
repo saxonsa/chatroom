@@ -8,6 +8,7 @@
 #include <string>
 using namespace std;
 
+
 MainDialogInterface::MainDialogInterface(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainDialogInterface)
@@ -56,14 +57,18 @@ void MainDialogInterface::on_Send_clicked()
 
     char *bufferToString = transfered_buffer.data();
 
-    // normal msg: type: 0
-    char msg[1000];
-    string chatMsg = "type: 0, content: ";
-    string content(bufferToString);
-    chatMsg = chatMsg + content;
-    strcpy(msg, chatMsg.c_str());
+    strcpy(usr.type, "CHAT");
+    strcpy(usr.msg, bufferToString);
 
-    msg_len = send(connect_sock, msg, 1000, 0);
+
+    // normal msg: type: 0
+//    char msg[1000];
+//    string chatMsg = "type: 0, content: ";
+//    string content(bufferToString);
+//    chatMsg = chatMsg + content;
+//    strcpy(msg, chatMsg.c_str());
+
+    msg_len = send(connect_sock, (char*)&usr, 1000, 0);
 
     if (msg_len == SOCKET_ERROR) {
       fprintf(stderr, "send() failed with error %d\n", WSAGetLastError());

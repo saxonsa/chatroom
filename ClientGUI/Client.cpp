@@ -19,6 +19,7 @@ struct hostent *hp;
 
 char name[255] = {};
 
+usrData usr;
 
 //void recv_msg(void* client_socket) {
 //  while (1) {
@@ -60,13 +61,12 @@ char name[255] = {};
 
 //    printf("%s\n", szBuff);
 //    return szBuff;
-////    ui->historyBrowser->append();
+//    ui->historyBrowser->append();
 //}
 
 
-int clinet_connect(char* serverIP, char* server_port, char* name) {
+int client_connect(char* serverIP, char* server_port, char* name) {
   printf("%s %s %s", serverIP, server_port, name);
-
   port = atoi(server_port);
 
   if (WSAStartup(0x202, &wsaData) == SOCKET_ERROR) {

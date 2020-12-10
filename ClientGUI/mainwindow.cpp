@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "maindialoginterface.h"
 #include <QDebug>
 #include <QString>
 #include <QTextCodec>
@@ -41,18 +42,23 @@ void MainWindow::on_EnterBtn_clicked()
     portNum = portNumByte.data();
     userName = userNameByte.data();
 
-    if (clinet_connect(ip,portNum,userName) == 0){
+    if (client_connect(ip,portNum,userName) == 0){
         Reciever *recver = new Reciever();
         connect(recver, SIGNAL(recv_success(QString)),mainDialog,SLOT(receiveData(QString)));
         recver->start(); // start the thread
 
-        char msg[1000];
-        string userInfo = "type: 1, content: ";
-        string content(userName);
-        userInfo = userInfo + content;
-        strcpy(msg, userInfo.c_str());
 
-        msg_len = send(connect_sock, msg, 255, 0);
+        strcpy(usr.name, userName);
+        strcpy(usr.type, "ENTER");
+        strcpy(usr.msg, userName);
+
+//        char msg[1000];
+//        string userInfo = "type: 1, content: ";
+//        string content(userName);
+//        userInfo = userInfo + content;
+//        strcpy(msg, userInfo.c_str());
+
+        msg_len = send(connect_sock, (char*)&usr, sizeof usr, 0);
         if (msg_len == SOCKET_ERROR) {
            fprintf(stderr, "send() failed with error %d\n", WSAGetLastError());
            WSACleanup();

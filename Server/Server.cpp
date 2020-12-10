@@ -93,7 +93,7 @@ void search_by_keyword(char keyword[]){
 		if (fieldCount > 0) {
 			int column = mysql_num_fields(res);
 			int row = mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+			for (unsigned int i = 0; field = mysql_fetch_field(res); i++) { 
 				printf("%25s", field->name);
 				printf(" |");
 			}
@@ -135,7 +135,7 @@ void search_history(){
 		if (fieldCount > 0) {
 			int column = mysql_num_fields(res);
 			int row = mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+			for (unsigned int i = 0; field = mysql_fetch_field(res); i++) { 
 				printf("%25s", field->name);
 				printf(" |");
 			}
@@ -167,11 +167,14 @@ void accept_conn(void *dummy) {
 		printf("current number of clients: %d\n", connecting);
 
 		char current_user_name[300];
+		usrData usrInfo;
 
 		while (1) {
 
 			msg_len = recv(sub_sock, szBuff, sizeof(szBuff), 0);
 
+			memcpy(&usrInfo, szBuff, sizeof szBuff);
+			printf("usrInfo: name: %s content: %s type: %s\n", usrInfo.name, usrInfo.msg, usrInfo.type);
 			printf("msg_len: %d\n", msg_len);
 
 			if (msg_len == SOCKET_ERROR){
@@ -193,7 +196,7 @@ void accept_conn(void *dummy) {
 					if (clients[s].client_socket == sub_sock) {
 						clients[s].client_socket = INVALID_SOCKET;
 						memset(clients[s].name, 0, sizeof(clients[s].name));
-						}
+					}
 				}
 				closesocket(sub_sock);
 				break;
@@ -201,18 +204,19 @@ void accept_conn(void *dummy) {
 			}
 
 			// decompose szBuff to seperate type and content
-			char *typeMsg = "type: ";
-			char *contentMsg = "content: ";
-			int type = szBuff[strlen(typeMsg)] - 48;
-			char *content = szBuff + strlen(typeMsg) + strlen(contentMsg) + 3;
+			// char *typeMsg = "type: ";
+			// char *contentMsg = "content: ";
+			// int type = szBuff[strlen(typeMsg)] - 48;
+			// char *content = szBuff + strlen(typeMsg) + strlen(contentMsg) + 3;
+
 
 			for (int index = 0; index < MAX_ALLOWED; index++) {
 				if (clients[index].client_socket == sub_sock) {
 					// IP: inet_ntoa(client_addr.sin_addr)
 					if (strlen(clients[index].name)) {
-						printf("Bytes Received: %d, message: %s from name: %s\n", msg_len, content, clients[index].name);
+						printf("Bytes Received: %d, message: %s from name: %s\n", msg_len, usrInfo.msg, clients[index].name);
 					} else {
-						printf("Bytes Received: %d, message: %s from IP: %s\n", msg_len, content, inet_ntoa(client_addr.sin_addr));
+						printf("Bytes Received: %d, message: %s from IP: %s\n", msg_len, usrInfo.msg, inet_ntoa(client_addr.sin_addr));
 					}
 				}
 			}
@@ -223,14 +227,15 @@ void accept_conn(void *dummy) {
 			// check if it's the first time received from clinet
 			// if first -- it should be username
 			// if not -- it should be the normal msg and should be broadcast
-			if (type == 1) {
+
+			if (strcmp(usrInfo.type, "ENTER") == 0) {
 				char enterMsgOther[100] = { 0 }; // the enter msg sent to others
 				char enterMsgSelf[100] = "Welcome "; // the enter msg sent to the client himhelf
 				for (int s = 0; s < MAX_ALLOWED; s++) {
 					if (clients[s].client_socket == sub_sock) {
 						if (!strlen(clients[s].name)) {
 							// construct the msg towards different clients
-							memcpy(clients[s].name, content, sizeof(clients[s].name));
+							memcpy(clients[s].name, usrInfo.msg, sizeof(clients[s].name));
 							memcpy(enterMsgOther, clients[s].name, sizeof(clients[s].name));
 							strcat_s(enterMsgSelf, sizeof(clients[s].name), clients[s].name);
 							strcat_s(enterMsgOther, sizeof(enterMsgOther), " enters the chatroom!");
@@ -253,7 +258,7 @@ void accept_conn(void *dummy) {
 								_endthread();
 								//return -1;
 							}
-							strcpy(current_user_name,content);
+							strcpy(current_user_name,usrInfo.msg);
 
 						} else {
 							msg_len = send(clients[i].client_socket, enterMsgOther, sizeof(enterMsgOther), 0);
@@ -272,8 +277,8 @@ void accept_conn(void *dummy) {
 			}
 
 			// broadcast normal chat msg to all clients in the chatroom
-			if (type == 0) { // not the first time
-				insert_into_database(current_user_name, content); // Insert the history into the database
+			if (strcmp(usrInfo.type, "CHAT") == 0) { // not the first time
+				insert_into_database(current_user_name, usrInfo.msg); // Insert the history into the database
 
 				search_history();// Search history from database
 				
@@ -282,7 +287,7 @@ void accept_conn(void *dummy) {
 						// save the client name in normalMsg
 						memcpy(normalMsg, clients[c].name, sizeof(normalMsg));
 						strcat_s(normalMsg, sizeof(normalMsg), ": ");
-						strcat_s(normalMsg, sizeof(normalMsg), content);
+						strcat_s(normalMsg, sizeof(normalMsg), usrInfo.msg);
 					}
 				}
 				for (int i = 0; i < MAX_ALLOWED; i++) {
