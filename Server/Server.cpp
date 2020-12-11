@@ -24,29 +24,20 @@ void exit_clean(int arg) {
 	exit(0);
 }
 
-void insert_into_database(char user_name[], char content[]){
-	char toInsertHistory[250] = "Insert INTO history(user_name,content) VALUES(";
-	
-	char userName[1000] = "'";
-	strcat_s(userName,sizeof userName,user_name);
-	strcat_s(userName,sizeof userName,"','");
+void insert_into_database(char user_name[], char creat_time[], char content[]){
+	char toInsertHistory[1000] = "Insert INTO history(user_name,create_time,content) VALUES('";
 
-	printf("%s \n",userName);
-
-	// char userName[] = "'David','";
-
-	char finalString[300];
-	
 	// Concat strings
-	strcat_s(toInsertHistory,sizeof toInsertHistory,userName);
+	strcat_s(toInsertHistory,sizeof toInsertHistory,user_name);
+	strcat_s(toInsertHistory,sizeof toInsertHistory,"','");
+	strcat_s(toInsertHistory,sizeof toInsertHistory,creat_time);
+	strcat_s(toInsertHistory,sizeof toInsertHistory,"','");
 	strcat_s(toInsertHistory,sizeof toInsertHistory,content);
 	strcat_s(toInsertHistory,sizeof toInsertHistory,"');");
 
-	strcpy_s(finalString, sizeof finalString, toInsertHistory);
+	printf("%s \n",user_name);
 
-	printf("%s \n",userName);
-
-	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
+	ret = mysql_query(&mysqlConnect, toInsertHistory); // Pass the query to database
 
 	// If the query failed, close the function
 	if (ret != 0) {
@@ -337,9 +328,16 @@ void accept_conn(void *dummy) {
 		while (1) {
 
 			msg_len = recv(sub_sock, szBuff, sizeof(szBuff), 0);
-
+			
 			memcpy(&usrInfo, szBuff, sizeof szBuff);
 			printf("usrInfo: name: %s content: %s type: %s\n", usrInfo.name, usrInfo.msg, usrInfo.type);
+
+			time_t timep;
+			struct tm p;
+			time(&timep); // get how many seconds pass sence 1900
+			localtime_s(&p, &timep); // use local time to transform from second to stucture tm
+			sprintf_s(usrInfo.createTime,"%d/%d/%d %02d:%02d:%02d\n", 1900 + p.tm_year, 1+ p.tm_mon, p.tm_mday,p.tm_hour, p.tm_min, p.tm_sec);
+
 			printf("msg_len: %d\n", msg_len);
 
 			// recv fails, destroy the socket
@@ -375,24 +373,14 @@ void accept_conn(void *dummy) {
 			// int type = szBuff[strlen(typeMsg)] - 48;
 			// char *content = szBuff + strlen(typeMsg) + strlen(contentMsg) + 3;
 
-
-			for (int index = 0; index < MAX_ALLOWED; index++) {
-				if (clients[index].client_socket == sub_sock) {
-					// IP: inet_ntoa(client_addr.sin_addr)
-					if (strlen(clients[index].name)) {
-						printf("Bytes Received: %d, message: %s from name: %s\n", msg_len, usrInfo.msg, clients[index].name);
-					} else {
-						printf("Bytes Received: %d, message: %s from IP: %s\n", msg_len, usrInfo.msg, inet_ntoa(client_addr.sin_addr));
-					}
-				}
+			if (usrInfo.name) {
+				printf("Bytes Received: %d, message: %s from name: %s\n", msg_len, usrInfo.msg, usrInfo.name);
+			} else {
+				printf("Bytes Received: %d, message: %s from IP: %s\n", msg_len, usrInfo.msg, inet_ntoa(client_addr.sin_addr));
 			}
 			
 
 			/* Send message back to Client */
-
-			// check if it's the first time received from clinet
-			// if first -- it should be username
-			// if not -- it should be the normal msg and should be broadcast
 
 			if (strcmp(usrInfo.type, "ENTER") == 0) {
 				char enterMsgOther[100] = { 0 }; // the enter msg sent to others
@@ -414,7 +402,8 @@ void accept_conn(void *dummy) {
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (clients[i].client_socket != INVALID_SOCKET) {
 						if (clients[i].client_socket == sub_sock) {
-							msg_len = send(clients[i].client_socket, enterMsgSelf, sizeof(enterMsgSelf), 0);
+							strcpy_s(usrInfo.msg, sizeof usrInfo.msg, enterMsgSelf);
+							msg_len = send(clients[i].client_socket, (char*)&usrInfo, 1000, 0);
 
 							if (msg_len <= 0){
 								printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
@@ -426,7 +415,8 @@ void accept_conn(void *dummy) {
 							}
 
 						} else {
-							msg_len = send(clients[i].client_socket, enterMsgOther, sizeof(enterMsgOther), 0);
+							strcpy_s(usrInfo.msg, sizeof usrInfo.msg, enterMsgOther);
+							msg_len = send(clients[i].client_socket, (char*)&usrInfo, 1000, 0);
 
 							if (msg_len <= 0){
 								printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
@@ -443,30 +433,15 @@ void accept_conn(void *dummy) {
 
 			// broadcast normal chat msg to all clients in the chatroom
 			if (strcmp(usrInfo.type, "CHAT") == 0) {
-				insert_into_database(usrInfo.name, usrInfo.msg); // Insert the history into the database
-
+				insert_into_database(usrInfo.name, usrInfo.createTime, usrInfo.msg); // Insert the history into the database
+				printf("curr name: %s\n", usrInfo.name);
+				printf("curr time: %s\n", usrInfo.createTime);
+				printf("curr msg: %s\n", usrInfo.msg);
 				search_history();// Search history from database
 				
-				for (int c = 0; c < MAX_ALLOWED; c++) {
-					if (clients[c].client_socket == sub_sock) {
-						// save the client name in normalMsg
-
-						// get current time
-						time_t timep;
-						struct tm p;
-						time(&timep); // get how many seconds pass sence 1900
-						localtime_s(&p, &timep); // use local time to transform from second to stucture tm
-						char curr_time[50];
-						sprintf_s(curr_time,"%d/%d/%d %02d:%02d:%02d\n", 1900 + p.tm_year, 1+ p.tm_mon, p.tm_mday,p.tm_hour, p.tm_min, p.tm_sec);
-						memcpy(normalMsg, curr_time, sizeof(normalMsg));
-						strcat_s(normalMsg, sizeof(normalMsg), clients[c].name);
-						strcat_s(normalMsg, sizeof(normalMsg), ": ");
-						strcat_s(normalMsg, sizeof(normalMsg), usrInfo.msg);
-					}
-				}
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (clients[i].client_socket != INVALID_SOCKET) {
-						msg_len = send(clients[i].client_socket, normalMsg, sizeof(normalMsg), 0);
+						msg_len = send(clients[i].client_socket, (char*)&usrInfo, 1000, 0);
 
 						if (msg_len <= 0){
 							printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
@@ -480,6 +455,7 @@ void accept_conn(void *dummy) {
 				}
 			}
 		}
+		// if client closes socket, clear its information in client array
 		for (unsigned i = 0; i < MAX_ALLOWED; i++) {
 			if (clients[i].client_socket == sub_sock) {
 				clients[i].fd = 0;

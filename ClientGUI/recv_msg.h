@@ -6,12 +6,14 @@
 #include <QThread>
 #include <QtDebug>
 #include <string>
+using namespace std;
 
 class Reciever : public QThread
 {
     Q_OBJECT
     void run() override{
         while (1) {
+            char *chatMsg = "";
 //            usrData recvData;
 //            qDebug()<< "I am inside the thread!";
 //            qDebug()<< connect_sock;
@@ -34,13 +36,14 @@ class Reciever : public QThread
             }
 
             memcpy(&usr, szBuff, sizeof szBuff);
-//            strcpy(usr.msg, recvData.msg);
-//            strcpy(usr.type, recvData.type);
-//            usr.room = recvData.room;
 
-//            printf("%s\n", szBuff);
+            strcat(chatMsg, usr.createTime);
+            strcat(chatMsg, "\n");
+            strcat(chatMsg, usr.name);
+            strcat(chatMsg, ":");
+            strcat(chatMsg, usr.msg);
 
-            emit recv_success(szBuff);
+            emit recv_success(chatMsg);
         }
         return;
     }
