@@ -331,8 +331,6 @@ void accept_conn(void *dummy) {
 			
 			memcpy(&usrInfo, szBuff, sizeof szBuff);
 
-
-
 			printf("usrInfo: name: %s content: %s type: %s\n", usrInfo.name, usrInfo.msg, usrInfo.type);
 
 			time_t timep;
@@ -442,6 +440,12 @@ void accept_conn(void *dummy) {
 				printf("curr time: %s\n", usrInfo.createTime);
 				printf("curr msg: %s\n", usrInfo.msg);
 				search_history();// Search history from database
+
+				for (int i = 0; i < MAX_ALLOWED; i++) {
+					if (clients[i].client_socket == sub_sock) {
+						strcpy_s(usrInfo.name, sizeof usrInfo.name, clients[i].name);
+					}
+				}
 				
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (clients[i].client_socket != INVALID_SOCKET) {
