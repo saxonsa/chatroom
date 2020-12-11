@@ -42,7 +42,7 @@ void insert_into_database(char user_name[], char content[]){
 	strcat_s(toInsertHistory,sizeof toInsertHistory,content);
 	strcat_s(toInsertHistory,sizeof toInsertHistory,"');");
 
-	strcpy(finalString,toInsertHistory);
+	strcpy_s(finalString, sizeof finalString, toInsertHistory);
 
 	printf("%s \n",userName);
 
@@ -76,7 +76,7 @@ void search_by_keyword(char keyword[]){
 
 	char finalString[300];
 
-	strcpy(finalString,toSearchByKeyword);
+	strcpy_s(finalString, sizeof finalString, toSearchByKeyword);
 
 	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
 
@@ -92,8 +92,8 @@ void search_by_keyword(char keyword[]){
 		int fieldCount = mysql_field_count(&mysqlConnect);
 		//Print the result table
 		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = mysql_num_rows(res);
+			int column = (int)mysql_num_fields(res);
+			int row = (int)mysql_num_rows(res);
 			for (unsigned int i = 0; field = mysql_fetch_field(res); i++) { 
 				printf("%25s", field->name);
 				printf(" |");
@@ -132,7 +132,7 @@ void search_by_name(char user_name[]){
 	strcat_s(toSearchByName,sizeof toSearchByName,userName);
 	strcat_s(toSearchByName,sizeof toSearchByName,"';");
 
-	strcpy(finalString,toSearchByName);
+	strcpy_s(finalString, sizeof finalString, toSearchByName);
 
 	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
 
@@ -149,7 +149,7 @@ void search_by_name(char user_name[]){
 		//Print the result table
 		if (fieldCount > 0) {
 			int column = mysql_num_fields(res);
-			int row = mysql_num_rows(res);
+			int row = (int)mysql_num_rows(res);
 			for (int i = 0; field = mysql_fetch_field(res); i++) { 
 				printf("%25s", field->name);
 				printf(" |");
@@ -186,7 +186,7 @@ void search_by_content(char content[]){
 	strcat_s(toSearchByContent,sizeof toSearchByContent,searchContent);
 	strcat_s(toSearchByContent,sizeof toSearchByContent,"%';");
 
-	strcpy(finalString,toSearchByContent);
+	strcpy_s(finalString, sizeof finalString, toSearchByContent);
 
 	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
 
@@ -203,7 +203,7 @@ void search_by_content(char content[]){
 		//Print the result table
 		if (fieldCount > 0) {
 			int column = mysql_num_fields(res);
-			int row = mysql_num_rows(res);
+			int row = (int)mysql_num_rows(res);
 			for (int i = 0; field = mysql_fetch_field(res); i++) { 
 				printf("%25s", field->name);
 				printf(" |");
@@ -232,7 +232,7 @@ void search_by_content(char content[]){
 void search_by_date(int date){
 	char toSearchByDate[250] = "SELECT * FROM `history` WHERE DATE_FORMAT(create_time, '%Y%m%d') = ";
 	char searchDate[1000] = {0};
-	itoa(date, searchDate, 10);
+	_itoa_s(date, searchDate, 10);
 
 	// char userName[] = "'David'";
 
@@ -242,7 +242,7 @@ void search_by_date(int date){
 	strcat_s(toSearchByDate,sizeof toSearchByDate,searchDate);
 	strcat_s(toSearchByDate,sizeof toSearchByDate,";");
 
-	strcpy(finalString,toSearchByDate);
+	strcpy_s(finalString, sizeof finalString, toSearchByDate);
 	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
 
 	// If the query failed, close the function
@@ -258,7 +258,7 @@ void search_by_date(int date){
 		//Print the result table
 		if (fieldCount > 0) {
 			int column = mysql_num_fields(res);
-			int row = mysql_num_rows(res);
+			int row = (int)mysql_num_rows(res);
 			for (int i = 0; field = mysql_fetch_field(res); i++) { 
 				printf("%25s", field->name);
 				printf(" |");
@@ -300,7 +300,7 @@ void search_history(){
 		//Print the result table
 		if (fieldCount > 0) {
 			int column = mysql_num_fields(res);
-			int row = mysql_num_rows(res);
+			int row = (int)mysql_num_rows(res);
 			for (unsigned int i = 0; field = mysql_fetch_field(res); i++) { 
 				printf("%25s", field->name);
 				printf(" |");
@@ -332,7 +332,6 @@ void accept_conn(void *dummy) {
 		connecting++;
 		printf("current number of clients: %d\n", connecting);
 
-		char current_user_name[300];
 		usrData usrInfo;
 
 		while (1) {
@@ -402,7 +401,7 @@ void accept_conn(void *dummy) {
 					if (clients[s].client_socket == sub_sock) {
 						if (!strlen(clients[s].name)) {
 							// construct the msg towards different clients
-							memcpy(clients[s].name, usrInfo.msg, sizeof(clients[s].name));
+							memcpy(clients[s].name, usrInfo.name, sizeof(clients[s].name));
 							memcpy(enterMsgOther, clients[s].name, sizeof(clients[s].name));
 							strcat_s(enterMsgSelf, sizeof(clients[s].name), clients[s].name);
 							strcat_s(enterMsgOther, sizeof(enterMsgOther), " enters the chatroom!");
@@ -425,7 +424,6 @@ void accept_conn(void *dummy) {
 								_endthread();
 								//return -1;
 							}
-							strcpy(current_user_name,usrInfo.msg);
 
 						} else {
 							msg_len = send(clients[i].client_socket, enterMsgOther, sizeof(enterMsgOther), 0);
@@ -444,8 +442,8 @@ void accept_conn(void *dummy) {
 			}
 
 			// broadcast normal chat msg to all clients in the chatroom
-			if (strcmp(usrInfo.type, "CHAT") == 0) { // not the first time
-				insert_into_database(current_user_name, usrInfo.msg); // Insert the history into the database
+			if (strcmp(usrInfo.type, "CHAT") == 0) {
+				insert_into_database(usrInfo.name, usrInfo.msg); // Insert the history into the database
 
 				search_history();// Search history from database
 				
@@ -455,11 +453,11 @@ void accept_conn(void *dummy) {
 
 						// get current time
 						time_t timep;
-						struct tm *p;
+						struct tm p;
 						time(&timep); // get how many seconds pass sence 1900
-						p = localtime(&timep); // use local time to transform from second to stucture tm
+						localtime_s(&p, &timep); // use local time to transform from second to stucture tm
 						char curr_time[50];
-						sprintf(curr_time,"%d/%d/%d %02d:%02d:%02d\n", 1900 + p->tm_year, 1+ p->tm_mon, p->tm_mday,p->tm_hour, p->tm_min, p->tm_sec);
+						sprintf_s(curr_time,"%d/%d/%d %02d:%02d:%02d\n", 1900 + p.tm_year, 1+ p.tm_mon, p.tm_mday,p.tm_hour, p.tm_min, p.tm_sec);
 						memcpy(normalMsg, curr_time, sizeof(normalMsg));
 						strcat_s(normalMsg, sizeof(normalMsg), clients[c].name);
 						strcat_s(normalMsg, sizeof(normalMsg), ": ");
@@ -480,6 +478,13 @@ void accept_conn(void *dummy) {
 						}						
 					}
 				}
+			}
+		}
+		for (unsigned i = 0; i < MAX_ALLOWED; i++) {
+			if (clients[i].client_socket == sub_sock) {
+				clients[i].fd = 0;
+				clients[i].client_socket = INVALID_SOCKET;
+				memset(clients[i].name, 0, sizeof clients[i].name);
 			}
 		}
 		connecting--;
