@@ -29,18 +29,19 @@ extern struct hostent *hp;
 
 extern char name[255];// = {};
 
-//struct usrData {
-//   char name[255];
-
-//};
-
-//extern struct userData usr;
-
+typedef struct {
+   char name[100];
+   char type[100];
+   char msg[1000];
+   char createTime[100];
+   int room;
+}usrData;
+extern usrData usr;
 
 // call a thread to receive message from server
 //void recv_msg(void *client_socket);
 
-int clinet_connect(char serverIP[],char server_port[], char* name);
+int client_connect(char serverIP[],char server_port[], char* name);
 
 //char* recv_msg_dialog();
 

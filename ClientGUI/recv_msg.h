@@ -2,15 +2,17 @@
 #define TEST_CONNECTION_H
 
 #include "client.h"
+#include "maindialoginterface.h"
 #include <QThread>
 #include <QtDebug>
-
+#include <string>
 
 class Reciever : public QThread
 {
     Q_OBJECT
     void run() override{
         while (1) {
+//            usrData recvData;
 //            qDebug()<< "I am inside the thread!";
 //            qDebug()<< connect_sock;
             msg_len = recv(connect_sock, szBuff, sizeof(szBuff), 0);
@@ -30,6 +32,11 @@ class Reciever : public QThread
               qDebug() << "server closed connection\n";
               return;
             }
+
+            memcpy(&usr, szBuff, sizeof szBuff);
+//            strcpy(usr.msg, recvData.msg);
+//            strcpy(usr.type, recvData.type);
+//            usr.room = recvData.room;
 
 //            printf("%s\n", szBuff);
 

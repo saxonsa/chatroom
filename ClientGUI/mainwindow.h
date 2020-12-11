@@ -22,6 +22,8 @@ public:
 private slots:
     void on_EnterBtn_clicked();
 
+    void on_ExitBtn_clicked();
+
 signals:
     void sendData(QString);
 

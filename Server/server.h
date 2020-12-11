@@ -28,7 +28,7 @@ MYSQL mysqlConnect;
 MYSQL_RES *res;
 MYSQL_FIELD *field; 
 MYSQL_ROW nextRow;
-int ret;
+int ret = 0;
 
 
 // client structure
@@ -43,6 +43,16 @@ typedef struct _Client {
 }Client;
 
 Client clients[MAX_ALLOWED] = { 0 };
+
+typedef struct {
+	char name[100];
+	char type[100];
+	char msg[1000];
+	char createTime[100];
+	int room;
+}usrData;
+
+usrData usr[MAX_ALLOWED] = { 0 };
 
 char normalMsg[1000] = { 0 }; // the normal msg sent to all... e.x: Saxon: msg
 
