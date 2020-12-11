@@ -56,7 +56,7 @@ void MainWindow::on_EnterBtn_clicked()
 
         strcpy(usr.name, userName);
         strcpy(usr.type, "ENTER");
-        strcpy(usr.msg, userName);
+        memset(usr.msg, 0, sizeof usr.msg);
 
 //        char msg[1000];
 //        string userInfo = "type: 1, content: ";

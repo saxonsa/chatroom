@@ -22,7 +22,7 @@ extern char *server_name;// = (char*)"localhost";
 extern unsigned short port;// = DEFAULT_PORT;
 extern unsigned int addr;
 
-extern char szBuff[1000];
+extern char szBuff[1500];
 extern int msg_len;
 extern struct hostent *hp;
 
