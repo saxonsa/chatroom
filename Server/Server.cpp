@@ -6,6 +6,7 @@
 #include <process.h>
 #include <signal.h> // for signal() function
 #include <mysql.h> // for database functions
+#include <time.h>
 #include "server.h"
 
 #pragma comment(lib,"ws2_32.lib")
@@ -59,7 +60,7 @@ void insert_into_database(char user_name[], char content[]){
 	return;
 }
 
-// 
+// Use keyword to search
 void search_by_keyword(char keyword[]){
 	char toSearchByKeyword[300] = "SELECT * FROM `history` WHERE user_name LIKE '%";
 
@@ -77,6 +78,171 @@ void search_by_keyword(char keyword[]){
 
 	strcpy(finalString,toSearchByKeyword);
 
+	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	res = mysql_store_result(&mysqlConnect);// Check the res value
+
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
+			int row = mysql_num_rows(res);
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+				}
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return;
+}
+
+// Use name to search
+void search_by_name(char user_name[]){
+	char toSearchByName[250] = "SELECT * FROM `history` WHERE user_name = ";
+	char userName[1000] = "'";
+	strcat_s(userName,sizeof userName,user_name);
+
+	// char userName[] = "'David'";
+
+	char finalString[300];
+	
+	// Concat strings
+	strcat_s(toSearchByName,sizeof toSearchByName,userName);
+	strcat_s(toSearchByName,sizeof toSearchByName,"';");
+
+	strcpy(finalString,toSearchByName);
+
+	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	res = mysql_store_result(&mysqlConnect);// Check the res value
+
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
+			int row = mysql_num_rows(res);
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+				}
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return;
+}
+
+// Use content to search
+void search_by_content(char content[]){
+	char toSearchByContent[250] = "SELECT * FROM `history` WHERE content LIKE "; // vague query
+	char searchContent[1000] = "'%";
+	strcat_s(searchContent,sizeof searchContent,content);
+
+	char finalString[300];
+	
+	// Concat strings
+	strcat_s(toSearchByContent,sizeof toSearchByContent,searchContent);
+	strcat_s(toSearchByContent,sizeof toSearchByContent,"%';");
+
+	strcpy(finalString,toSearchByContent);
+
+	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	res = mysql_store_result(&mysqlConnect);// Check the res value
+
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
+			int row = mysql_num_rows(res);
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+				}
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return;
+}
+
+// Use date to search
+void search_by_date(int date){
+	char toSearchByDate[250] = "SELECT * FROM `history` WHERE DATE_FORMAT(create_time, '%Y%m%d') = ";
+	char searchDate[1000] = {0};
+	itoa(date, searchDate, 10);
+
+	// char userName[] = "'David'";
+
+	char finalString[300];
+	
+	// Concat strings
+	strcat_s(toSearchByDate,sizeof toSearchByDate,searchDate);
+	strcat_s(toSearchByDate,sizeof toSearchByDate,";");
+
+	strcpy(finalString,toSearchByDate);
 	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
 
 	// If the query failed, close the function
@@ -174,6 +340,7 @@ void accept_conn(void *dummy) {
 
 			printf("msg_len: %d\n", msg_len);
 
+			// recv fails, destroy the socket
 			if (msg_len == SOCKET_ERROR){
 				fprintf(stderr, "recv() failed with error %d\n", WSAGetLastError());
 				for (int s = 0; s < MAX_ALLOWED; s++) {
@@ -280,7 +447,16 @@ void accept_conn(void *dummy) {
 				for (int c = 0; c < MAX_ALLOWED; c++) {
 					if (clients[c].client_socket == sub_sock) {
 						// save the client name in normalMsg
-						memcpy(normalMsg, clients[c].name, sizeof(normalMsg));
+
+						// get current time
+						time_t timep;
+						struct tm *p;
+						time(&timep); // get how many seconds pass sence 1900
+						p = localtime(&timep); // use local time to transform from second to stucture tm
+						char curr_time[50];
+						sprintf(curr_time,"%d/%d/%d %02d:%02d:%02d\n", 1900 + p->tm_year, 1+ p->tm_mon, p->tm_mday,p->tm_hour, p->tm_min, p->tm_sec);
+						memcpy(normalMsg, curr_time, sizeof(normalMsg));
+						strcat_s(normalMsg, sizeof(normalMsg), clients[c].name);
 						strcat_s(normalMsg, sizeof(normalMsg), ": ");
 						strcat_s(normalMsg, sizeof(normalMsg), content);
 					}

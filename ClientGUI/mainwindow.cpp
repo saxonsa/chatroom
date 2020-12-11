@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include <QString>
+#include <QMessageBox>
 #include <QTextCodec>
 #include <cstdio>
 #include <string>
@@ -23,6 +24,11 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::on_ExitBtn_clicked()
+{
+    this->close();
 }
 
 void MainWindow::on_EnterBtn_clicked()
@@ -67,5 +73,13 @@ void MainWindow::on_EnterBtn_clicked()
         this->hide();
         // Show the dialog interface
         mainDialog->show();
+    } else {
+        // error message
+        QString dlgTitle="Warning!!!";
+        QString strInfo="Connection fails.";
+        QMessageBox::warning(this, dlgTitle, strInfo);
     }
+
 }
+
+
