@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <string>
+#include "client.h"
 
 namespace Ui {
 class MainDialogInterface;
@@ -20,8 +21,9 @@ private:
 //public:
     Ui::MainDialogInterface *ui;
 private slots:
-    void receiveData(QString data);
+    void receiveData(QString data, nameList* onlineList);
     void on_Send_clicked();
+    void displayOnlineList(nameList* onlineList);
 //    void addOnlineList(std::string name);
 //    void deleteOnlineList(std::string name);
 };

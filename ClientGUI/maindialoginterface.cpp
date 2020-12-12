@@ -6,6 +6,7 @@
 #include <QtDebug>
 #include <QTextCodec>
 #include <string>
+#include <QStringListModel>
 using namespace std;
 
 
@@ -25,9 +26,10 @@ MainDialogInterface::~MainDialogInterface()
 }
 
 
-void MainDialogInterface::receiveData(QString data)
+void MainDialogInterface::receiveData(QString data, nameList* onlineList)
 {
-    qDebug() << data;
+    displayOnlineList(onlineList);
+    //qDebug() << data;
 
     // add clinet name to Online List
 //    string msg = data.toStdString();
@@ -51,9 +53,11 @@ void MainDialogInterface::receiveData(QString data)
 void MainDialogInterface::on_Send_clicked()
 {
      // send message to server
+    QTextCodec *codec =QTextCodec::codecForName("UTF-8");
 
     QString buffer = ui->textEditor->toPlainText();
-    QByteArray transfered_buffer = buffer.toLocal8Bit();
+    QString transcoding_buffer = codec->toUnicode(buffer.toStdString().c_str());
+    QByteArray transfered_buffer = transcoding_buffer.toLocal8Bit();
 
     char *bufferToString = transfered_buffer.data();
 
@@ -89,11 +93,25 @@ void MainDialogInterface::on_Send_clicked()
 
 }
 
+void MainDialogInterface::displayOnlineList(nameList* onlineList) {
+    qDebug() << onlineList[0].name;
+    QStringList usrOnlineList;
+    for (int i = 0; i < MAX_ALLOWED; i++) {
+        if (onlineList[i].uid != -1) {
+            usrOnlineList << onlineList[i].name;
+        }
+    }
+    QStringListModel *model = new QStringListModel(usrOnlineList);
+    ui->onlineList->setModel(model);
+}
+
 //void MainDialogInterface::addOnlineList(string name) {
 //    QString addName = QString::fromStdString(name);
+
 //    QListWidgetItem* item = new QListWidgetItem;
 //    item->setText(addName);
 //    ui->onlineList->addItem(item);
+
 //}
 
 //void MainDialogInterface::deleteOnlineList(string name) {

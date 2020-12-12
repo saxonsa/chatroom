@@ -35,14 +35,18 @@ int ret = 0;
 // an array to store all the clients connecting with server
 typedef struct _Client {
 	int fd;
-	char buff[1000]; // Client buffer
-	char name[32]; // Client name
-	char IP[20]; // Client IP
-	struct sockaddr_in client_addr; // Client IP address
+	char name[100]; // Client name
 	SOCKET client_socket; // Client socket
 }Client;
 
 Client clients[MAX_ALLOWED] = { 0 };
+
+typedef struct _nameList {
+	int uid;
+	char name[100];
+}nameList;
+
+int onlineList_msg = 0;
 
 typedef struct {
 	char name[100];
@@ -50,9 +54,9 @@ typedef struct {
 	char msg[1000];
 	char createTime[100];
 	int room;
+	nameList onlineList[MAX_ALLOWED];
 }usrData;
 
-usrData usr[MAX_ALLOWED] = { 0 };
 
 char normalMsg[1000] = { 0 }; // the normal msg sent to all... e.x: Saxon: msg
 

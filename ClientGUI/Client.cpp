@@ -21,6 +21,8 @@ char name[255] = {};
 
 usrData usr;
 
+
+
 //void recv_msg(void* client_socket) {
 //  while (1) {
 //    msg_len = recv(connect_sock, szBuff, sizeof(szBuff), 0);

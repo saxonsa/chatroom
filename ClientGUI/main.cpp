@@ -8,6 +8,6 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("GB2312"));
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     return a.exec();
 }

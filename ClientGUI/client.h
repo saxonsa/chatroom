@@ -26,8 +26,14 @@ extern char szBuff[1500];
 extern int msg_len;
 extern struct hostent *hp;
 
+const int MAX_ALLOWED = 3; // the max number of clients supported by server
 
 extern char name[255];// = {};
+
+typedef struct _nameList {
+   int uid;
+   char name[100];
+}nameList;
 
 typedef struct {
    char name[100];
@@ -35,8 +41,10 @@ typedef struct {
    char msg[1000];
    char createTime[100];
    int room;
+   nameList onlineList[MAX_ALLOWED];
 }usrData;
 extern usrData usr;
+
 
 // call a thread to receive message from server
 //void recv_msg(void *client_socket);
