@@ -1,26 +1,27 @@
-#include <QDebug>
 #include "client.h"
+
+#include <QDebug>
+
 
 SOCKET connect_sock = INVALID_SOCKET;
 
 WSADATA wsaData;
 
-struct sockaddr_in server_addr; // server end address
+struct sockaddr_in server_addr;  // server end address
 
-char serverIP[32] = { 0 };
-char server_port[10]= { 0 };
-char *server_name = (char*)"localhost";
+char serverIP[32] = {0};
+char server_port[10] = {0};
+char* server_name = (char*)"localhost";
 unsigned short port = DEFAULT_PORT;
 unsigned int addr;
 
 char szBuff[1500];
 int msg_len;
-struct hostent *hp;
+struct hostent* hp;
 
 char name[255] = {};
 
 usrData usr;
-
 
 int client_connect(char* serverIP, char* server_port, char* name) {
   printf("%s %s %s", serverIP, server_port, name);

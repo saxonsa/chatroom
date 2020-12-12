@@ -328,6 +328,11 @@ void accept_conn(void *dummy) {
 
 		usrData usrInfo;
 
+		// init onlineList
+		for (int i = 0; i < MAX_ALLOWED; i++) {
+			usrInfo.onlineList[i].uid = -1;
+		}
+
 		while (1) {
 
 			msg_len = recv(sub_sock, szBuff, sizeof(szBuff), 0);
@@ -388,6 +393,8 @@ void accept_conn(void *dummy) {
 			/* Send message back to Client */
 
 			if (strcmp(usrInfo.type, "ENTER") == 0) {
+				
+				/* send enter room msg */
 				char enterMsgOther[100] = { 0 }; // the enter msg sent to others
 				char enterMsgSelf[100] = "Welcome "; // the enter msg sent to the client himhelf
 				for (int s = 0; s < MAX_ALLOWED; s++) {
@@ -400,6 +407,14 @@ void accept_conn(void *dummy) {
 							strcat_s(enterMsgOther, sizeof(enterMsgOther), " enters the chatroom!");
 						}
 						break;
+					}
+				}
+
+				// online list logic
+				for (int i = 0; i < MAX_ALLOWED; i++) {
+					if (clients[i].client_socket != INVALID_SOCKET) {
+						usrInfo.onlineList[i].uid = i;
+						memcpy(usrInfo.onlineList[i].name, clients[i].name, sizeof(usrInfo.onlineList[i].name));
 					}
 				}
 
@@ -509,12 +524,13 @@ int main(int argc, char **argv){
 		return -1;
 	}
 
+	
 	for (int i = 0; i < MAX_ALLOWED; i++) {
+		// init clients
 		clients[i].fd = i;
 		clients[i].client_socket = INVALID_SOCKET;
 		memset(clients[i].name, 0, sizeof(clients[i].name));
 	}
-
 
 	/* Set the attributes of server address */
 	local.sin_family		= AF_INET; // The way of connection

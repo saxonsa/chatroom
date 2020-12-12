@@ -6,6 +6,7 @@
 #include <QThread>
 #include <QtDebug>
 #include <string>
+#include <iostream>
 using namespace std;
 
 class Reciever : public QThread
@@ -35,6 +36,7 @@ class Reciever : public QThread
 
             memcpy(&usr, szBuff, sizeof szBuff);
 
+
             if (strcmp(usr.type, "ENTER") == 0) {
                 strcat(chatMsg, usr.msg);
             } else if (strcmp(usr.type, "CHAT") == 0) {
@@ -43,15 +45,13 @@ class Reciever : public QThread
                 strcat(chatMsg, ":");
                 strcat(chatMsg, usr.msg);
             }
-
-
-            emit recv_success(chatMsg);
+            emit recv_success(chatMsg, usr.onlineList);
         }
         return;
     }
 
 signals:
-    void recv_success(QString);
+    void recv_success(QString, nameList*);
 };
 
 #endif // TEST_CONNECTION_H

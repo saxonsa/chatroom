@@ -50,7 +50,7 @@ void MainWindow::on_EnterBtn_clicked()
 
     if (client_connect(ip,portNum,userName) == 0){
         Reciever *recver = new Reciever();
-        connect(recver, SIGNAL(recv_success(QString)),mainDialog,SLOT(receiveData(QString)));
+        connect(recver, SIGNAL(recv_success(QString, nameList*)),mainDialog,SLOT(receiveData(QString, nameList*)));
         recver->start(); // start the thread
 
 
