@@ -9,6 +9,7 @@
 #include <process.h>
 
 #define DEFAULT_PORT	5019
+#define BufferSize 2820
 
 extern WSADATA wsaData;
 
@@ -22,7 +23,7 @@ extern char *server_name;// = (char*)"localhost";
 extern unsigned short port;// = DEFAULT_PORT;
 extern unsigned int addr;
 
-extern char szBuff[1500];
+extern char szBuff[BufferSize];
 extern int msg_len;
 extern struct hostent *hp;
 
@@ -36,13 +37,21 @@ typedef struct _nameList {
 }nameList;
 
 typedef struct {
+    char search_name[100];
+    char search_time[100];
+    char search_content[1000];
+}search;
+
+typedef struct {
    char name[100];
    char type[100];
    char msg[1000];
    char createTime[100];
    int room;
    nameList onlineList[MAX_ALLOWED];
+   search searchMsg;
 }usrData;
+
 extern usrData usr;
 
 

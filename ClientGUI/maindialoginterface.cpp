@@ -75,7 +75,7 @@ void MainDialogInterface::on_Send_clicked()
 //    chatMsg = chatMsg + content;
 //    strcpy(msg, chatMsg.c_str());
 
-    msg_len = send(connect_sock, (char*)&usr, 1000, 0);
+    msg_len = send(connect_sock, (char*)&usr, sizeof szBuff, 0);
 
     if (msg_len == SOCKET_ERROR) {
       fprintf(stderr, "send() failed with error %d\n", WSAGetLastError());

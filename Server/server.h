@@ -1,4 +1,5 @@
 #define		DEFAULT_PORT		5019	// server Listening Port
+#define BufferSize 2820
 
 
 /*************************************************************/
@@ -15,7 +16,7 @@ struct sockaddr_in local = { 0 };		// server end address
 struct sockaddr_in client_addr = { 0 };	// client end address
 
 
-char szBuff[1000];
+char szBuff[BufferSize];
 int msg_len;
 int addr_len;
 
@@ -49,12 +50,19 @@ typedef struct _nameList {
 int onlineList_msg = 0;
 
 typedef struct {
+	char search_name[100];
+	char search_time[100];
+	char search_content[1000];
+}search;
+
+typedef struct {
 	char name[100];
 	char type[100];
 	char msg[1000];
 	char createTime[100];
 	int room;
 	nameList onlineList[MAX_ALLOWED];
+	search searchMsg;
 }usrData;
 
 

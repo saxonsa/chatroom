@@ -64,7 +64,7 @@ void MainWindow::on_EnterBtn_clicked()
 //        userInfo = userInfo + content;
 //        strcpy(msg, userInfo.c_str());
 
-        msg_len = send(connect_sock, (char*)&usr, sizeof usr, 0);
+        msg_len = send(connect_sock, (char*)&usr, sizeof szBuff, 0);
         if (msg_len == SOCKET_ERROR) {
            fprintf(stderr, "send() failed with error %d\n", WSAGetLastError());
            WSACleanup();

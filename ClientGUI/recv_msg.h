@@ -16,7 +16,7 @@ class Reciever : public QThread
         while (1) {
             char chatMsg[] = "";
 
-            msg_len = recv(connect_sock, szBuff, sizeof(szBuff), 0);
+            msg_len = recv(connect_sock, szBuff, sizeof szBuff, 0);
 
             if (msg_len == SOCKET_ERROR) {
               fprintf(stderr, "recv() failed with error %d\n", WSAGetLastError());

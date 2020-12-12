@@ -377,6 +377,10 @@ void accept_conn(void *dummy) {
 				//return -1;
 			}
 
+			// printf("Msg from search request --- name: %s\n", usrInfo.searchMsg->search_name);
+			// printf("Msg from search request --- content: %s\n", usrInfo.searchMsg->search_content);
+			// printf("Msg from search request --- time: %s\n", usrInfo.searchMsg->search_time);
+
 			// decompose szBuff to seperate type and content
 			// char *typeMsg = "type: ";
 			// char *contentMsg = "content: ";
@@ -423,7 +427,7 @@ void accept_conn(void *dummy) {
 					if (clients[i].client_socket != INVALID_SOCKET) {
 						if (clients[i].client_socket == sub_sock) {
 							strcpy_s(usrInfo.msg, sizeof usrInfo.msg, enterMsgSelf);
-							msg_len = send(clients[i].client_socket, (char*)&usrInfo, 1500, 0);
+							msg_len = send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
 
 							if (msg_len <= 0){
 								printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
@@ -436,7 +440,7 @@ void accept_conn(void *dummy) {
 
 						} else {
 							strcpy_s(usrInfo.msg, sizeof usrInfo.msg, enterMsgOther);
-							msg_len = send(clients[i].client_socket, (char*)&usrInfo, 1500, 0);
+							msg_len = send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
 
 							if (msg_len <= 0){
 								printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
@@ -467,7 +471,7 @@ void accept_conn(void *dummy) {
 				
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (clients[i].client_socket != INVALID_SOCKET) {
-						msg_len = send(clients[i].client_socket, (char*)&usrInfo, 1500, 0);
+						msg_len = send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
 
 						if (msg_len <= 0){
 							printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
@@ -480,6 +484,15 @@ void accept_conn(void *dummy) {
 					}
 				}
 			}
+
+			if (strcmp(usrInfo.type, "SEARCH") == 0) {
+				printf("Msg from search request --- name: %s\n", usrInfo.searchMsg.search_name);
+				printf("Msg from search request --- content: %s\n", usrInfo.searchMsg.search_content);
+				printf("Msg from search request --- time: %s\n", usrInfo.searchMsg.search_time);
+			}
+
+
+
 		}
 		// if client closes socket, clear its information in client array
 		for (unsigned i = 0; i < MAX_ALLOWED; i++) {

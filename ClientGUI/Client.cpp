@@ -15,7 +15,7 @@ char* server_name = (char*)"localhost";
 unsigned short port = DEFAULT_PORT;
 unsigned int addr;
 
-char szBuff[1500];
+char szBuff[];
 int msg_len;
 struct hostent* hp;
 

@@ -43,5 +43,22 @@ void SearchHistory::on_Search_clicked()
 
     strcpy(usr.type, "SEARCH");
 
+    memcpy(usr.searchMsg.search_name,search_name, sizeof usr.searchMsg.search_name);
+    memcpy(usr.searchMsg.search_content, search_content, sizeof usr.searchMsg.search_content);
+    memcpy(usr.searchMsg.search_time, search_time, sizeof usr.searchMsg.search_time);
+
+
+    msg_len = send(connect_sock, (char*)&usr, sizeof (szBuff), 0);
+
+    if (msg_len == SOCKET_ERROR) {
+       fprintf(stderr, "send() failed with error %d\n", WSAGetLastError());
+       WSACleanup();
+    }
+
+    if (msg_len == 0) {
+       printf("server closed connection\n");
+       closesocket(connect_sock);
+       WSACleanup();
+    }
 
 }

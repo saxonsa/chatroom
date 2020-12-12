@@ -322,7 +322,7 @@
                <number>0</number>
               </property>
               <item>
-               <widget class="QListView" name="listView">
+               <widget class="QListView" name="onlineList">
                 <property name="styleSheet">
                  <string notr="true">border:none</string>
                 </property>
