@@ -50,13 +50,18 @@ void MainWindow::on_EnterBtn_clicked()
 
     if (client_connect(ip,portNum,userName) == 0){
         Reciever *recver = new Reciever();
-        connect(recver, SIGNAL(recv_success(QString, nameList*)),mainDialog,SLOT(receiveData(QString, nameList*)));
+        connect(recver, SIGNAL(recv_success(QString, nameList*, char*)),mainDialog,SLOT(receiveData(QString, nameList*, char*)));
         recver->start(); // start the thread
 
 
         strcpy(usr.name, userName);
         strcpy(usr.type, "ENTER");
         memset(usr.msg, 0, sizeof usr.msg);
+        for (int i = 0; i < MAX_ALLOWED; i++) {
+            usr.onlineList[i].uid = -1;
+            memset(usr.onlineList[i].name, 0, sizeof usr.onlineList[i].name);
+        }
+
 
 //        char msg[1000];
 //        string userInfo = "type: 1, content: ";

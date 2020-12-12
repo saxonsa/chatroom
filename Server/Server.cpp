@@ -335,6 +335,8 @@ void accept_conn(void *dummy) {
 
 		while (1) {
 
+			
+
 			msg_len = recv(sub_sock, szBuff, sizeof(szBuff), 0);
 			
 			memcpy(&usrInfo, szBuff, sizeof szBuff);
@@ -359,7 +361,6 @@ void accept_conn(void *dummy) {
 						memset(clients[s].name, 0, sizeof(clients[s].name));
 					}
 				}
-				closesocket(sub_sock);
 				break;
 				//return -1;
 			}
@@ -372,7 +373,6 @@ void accept_conn(void *dummy) {
 						memset(clients[s].name, 0, sizeof(clients[s].name));
 					}
 				}
-				closesocket(sub_sock);
 				break;
 				//return -1;
 			}
@@ -420,6 +420,10 @@ void accept_conn(void *dummy) {
 						usrInfo.onlineList[i].uid = i;
 						memcpy(usrInfo.onlineList[i].name, clients[i].name, sizeof(usrInfo.onlineList[i].name));
 					}
+				}
+
+				for (int i = 0; i < MAX_ALLOWED; i++) {
+					printf("---usrInfo.online.uid: %d\n", usrInfo.onlineList[i].uid);
 				}
 
 				// broadcast name msg depends on different clients
@@ -494,6 +498,11 @@ void accept_conn(void *dummy) {
 
 
 		}
+
+		for (int i = 0; i < MAX_ALLOWED; i++) {
+			printf("---usrInfo.online.uid: %d\n", usrInfo.onlineList[i].uid);
+		}
+
 		// if client closes socket, clear its information in client array
 		for (unsigned i = 0; i < MAX_ALLOWED; i++) {
 			if (clients[i].client_socket == sub_sock) {
@@ -502,6 +511,33 @@ void accept_conn(void *dummy) {
 				memset(clients[i].name, 0, sizeof clients[i].name);
 			}
 		}
+		
+		for (unsigned i = 0; i < MAX_ALLOWED; i++) {
+			if (clients[i].client_socket == INVALID_SOCKET) {
+				usrInfo.onlineList[i].uid = -1;
+				memset(usrInfo.onlineList[i].name, 0, sizeof usrInfo.onlineList[i].name);
+			}
+		}
+
+		memcpy(usrInfo.type, "QUIT", sizeof usrInfo.type);
+		for (int i = 0; i < MAX_ALLOWED; i++) {
+			printf("usrInfo.online.uid: %d\n", usrInfo.onlineList[i].uid);
+		}
+
+		for (unsigned i = 0; i < MAX_ALLOWED; i++) {
+			if (clients[i].client_socket != INVALID_SOCKET) {
+				msg_len = send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
+				if (msg_len <= 0){
+					printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+					closesocket(sub_sock);
+					connecting--;
+					printf("current number of clients: %d\n", connecting);
+					_endthread();
+					//return -1;
+				}	
+			}
+		}
+
 		connecting--;
 		printf("current number of clients: %d\n", connecting);
 		closesocket(sub_sock);

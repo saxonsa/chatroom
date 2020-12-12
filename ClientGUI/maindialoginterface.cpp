@@ -29,27 +29,9 @@ MainDialogInterface::~MainDialogInterface()
 }
 
 
-void MainDialogInterface::receiveData(QString data, nameList* onlineList)
+void MainDialogInterface::receiveData(QString data, nameList* onlineList, char* type)
 {
     displayOnlineList(onlineList);
-    //qDebug() << data;
-
-    // add clinet name to Online List
-//    string msg = data.toStdString();
-//    string welcome = "Welcome ";
-//    string enterMsg = " enters the chatroom!";
-//    string name;
-//    if (!msg.compare(0, welcome.length(), welcome, 0, welcome.length())) {
-//        name = msg.erase(0, welcome.length());
-//        addOnlineList(name);
-//    }
-//    if (msg.length() > enterMsg.length()
-//            && !msg.compare(msg.length() - enterMsg.length(), msg.length(), enterMsg, 0, enterMsg.length())
-//            && msg.find(":") == string::npos) {
-//        name = msg.substr(0, msg.length() - enterMsg.length());
-//        addOnlineList(name);
-//    }
-
     ui->historyBrowser->append(data);
 }
 
@@ -98,8 +80,11 @@ void MainDialogInterface::on_Send_clicked()
 
 void MainDialogInterface::displayOnlineList(nameList* onlineList) {
     qDebug() << onlineList[0].name;
+    qDebug() << onlineList[1].name;
+    qDebug() << onlineList[2].name;
     QStringList usrOnlineList;
     for (int i = 0; i < MAX_ALLOWED; i++) {
+        qDebug() << onlineList[i].uid;
         if (onlineList[i].uid != -1) {
             usrOnlineList << onlineList[i].name;
         }

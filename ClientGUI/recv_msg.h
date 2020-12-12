@@ -45,13 +45,13 @@ class Reciever : public QThread
                 strcat(chatMsg, ":");
                 strcat(chatMsg, usr.msg);
             }
-            emit recv_success(chatMsg, usr.onlineList);
+            emit recv_success(chatMsg, usr.onlineList, usr.type);
         }
         return;
     }
 
 signals:
-    void recv_success(QString, nameList*);
+    void recv_success(QString, nameList*, char*);
 };
 
 #endif // TEST_CONNECTION_H
