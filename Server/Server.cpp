@@ -330,6 +330,7 @@ void accept_conn(void *dummy) {
 			msg_len = recv(sub_sock, szBuff, sizeof(szBuff), 0);
 			
 			memcpy(&usrInfo, szBuff, sizeof szBuff);
+
 			printf("usrInfo: name: %s content: %s type: %s\n", usrInfo.name, usrInfo.msg, usrInfo.type);
 
 			time_t timep;
@@ -337,6 +338,7 @@ void accept_conn(void *dummy) {
 			time(&timep); // get how many seconds pass sence 1900
 			localtime_s(&p, &timep); // use local time to transform from second to stucture tm
 			sprintf_s(usrInfo.createTime,"%d/%d/%d %02d:%02d:%02d\n", 1900 + p.tm_year, 1+ p.tm_mon, p.tm_mday,p.tm_hour, p.tm_min, p.tm_sec);
+			printf("create time: %s\n", usrInfo.createTime);
 
 			printf("msg_len: %d\n", msg_len);
 
@@ -403,7 +405,7 @@ void accept_conn(void *dummy) {
 					if (clients[i].client_socket != INVALID_SOCKET) {
 						if (clients[i].client_socket == sub_sock) {
 							strcpy_s(usrInfo.msg, sizeof usrInfo.msg, enterMsgSelf);
-							msg_len = send(clients[i].client_socket, (char*)&usrInfo, 1000, 0);
+							msg_len = send(clients[i].client_socket, (char*)&usrInfo, 1500, 0);
 
 							if (msg_len <= 0){
 								printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
@@ -416,7 +418,7 @@ void accept_conn(void *dummy) {
 
 						} else {
 							strcpy_s(usrInfo.msg, sizeof usrInfo.msg, enterMsgOther);
-							msg_len = send(clients[i].client_socket, (char*)&usrInfo, 1000, 0);
+							msg_len = send(clients[i].client_socket, (char*)&usrInfo, 1500, 0);
 
 							if (msg_len <= 0){
 								printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
@@ -438,10 +440,16 @@ void accept_conn(void *dummy) {
 				printf("curr time: %s\n", usrInfo.createTime);
 				printf("curr msg: %s\n", usrInfo.msg);
 				search_history();// Search history from database
+
+				for (int i = 0; i < MAX_ALLOWED; i++) {
+					if (clients[i].client_socket == sub_sock) {
+						strcpy_s(usrInfo.name, sizeof usrInfo.name, clients[i].name);
+					}
+				}
 				
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (clients[i].client_socket != INVALID_SOCKET) {
-						msg_len = send(clients[i].client_socket, (char*)&usrInfo, 1000, 0);
+						msg_len = send(clients[i].client_socket, (char*)&usrInfo, 1500, 0);
 
 						if (msg_len <= 0){
 							printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));

@@ -13,7 +13,7 @@ class Reciever : public QThread
     Q_OBJECT
     void run() override{
         while (1) {
-            char *chatMsg = "";
+            char chatMsg[] = "";
 //            usrData recvData;
 //            qDebug()<< "I am inside the thread!";
 //            qDebug()<< connect_sock;
@@ -37,11 +37,15 @@ class Reciever : public QThread
 
             memcpy(&usr, szBuff, sizeof szBuff);
 
-            strcat(chatMsg, usr.createTime);
-            strcat(chatMsg, "\n");
-            strcat(chatMsg, usr.name);
-            strcat(chatMsg, ":");
-            strcat(chatMsg, usr.msg);
+            if (strcmp(usr.type, "ENTER") == 0) {
+                strcat(chatMsg, usr.msg);
+            } else if (strcmp(usr.type, "CHAT") == 0) {
+                strcat(chatMsg, usr.createTime);
+                strcat(chatMsg, usr.name);
+                strcat(chatMsg, ":");
+                strcat(chatMsg, usr.msg);
+            }
+
 
             emit recv_success(chatMsg);
         }
