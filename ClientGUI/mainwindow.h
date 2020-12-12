@@ -5,6 +5,7 @@
 #include <QString>
 #include "maindialoginterface.h"
 
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -18,6 +19,7 @@ public:
     ~MainWindow();
 
     MainDialogInterface *mainDialog = NULL;
+
 
 private slots:
     void on_EnterBtn_clicked();

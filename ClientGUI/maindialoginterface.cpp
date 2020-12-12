@@ -1,6 +1,7 @@
 #include "maindialoginterface.h"
 #include "ui_maindialoginterface.h"
 #include "mainwindow.h"
+
 #include "client.h"
 #include <QString>
 #include <QtDebug>
@@ -14,6 +15,8 @@ MainDialogInterface::MainDialogInterface(QWidget *parent) :
     ui(new Ui::MainDialogInterface)
 {
     ui->setupUi(this);
+
+    searchHistory = new SearchHistory;
 }
 
 
@@ -100,3 +103,8 @@ void MainDialogInterface::on_Send_clicked()
 //    QString deleteName = QString::fromStdString(name);
 
 //}
+
+void MainDialogInterface::on_History_clicked()
+{
+    searchHistory->show();
+}

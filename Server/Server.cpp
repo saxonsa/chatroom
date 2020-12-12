@@ -8,6 +8,9 @@
 #include <mysql.h> // for database functions
 #include <time.h>
 #include "server.h"
+#include <iostream>
+
+using namespace std;
 
 #pragma comment(lib,"ws2_32.lib")
 #pragma comment(lib,"libmysql.lib")
@@ -436,10 +439,10 @@ void accept_conn(void *dummy) {
 			// broadcast normal chat msg to all clients in the chatroom
 			if (strcmp(usrInfo.type, "CHAT") == 0) {
 				insert_into_database(usrInfo.name, usrInfo.createTime, usrInfo.msg); // Insert the history into the database
-				printf("curr name: %s\n", usrInfo.name);
-				printf("curr time: %s\n", usrInfo.createTime);
-				printf("curr msg: %s\n", usrInfo.msg);
-				search_history();// Search history from database
+				// printf("curr name: %s\n", usrInfo.name);
+				// printf("curr time: %s\n", usrInfo.createTime);
+				// printf("curr msg: %s\n", usrInfo.msg);
+				// search_history();// Search history from database
 
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (clients[i].client_socket == sub_sock) {

@@ -24,19 +24,22 @@ SOURCES += \
     maindialoginterface.cpp \
     mainwindow.cpp \
 #    recv_msg.cpp
- #    stdafx.cpp
+ \ #    stdafx.cpp
+    searchhistory.cpp
 
 HEADERS += \
     client.h \
     maindialoginterface.h \
     mainwindow.h \
-    recv_msg.h
+    recv_msg.h \
+    searchhistory.h
 #    stdafx.h \
  #    targetver.h
 
 FORMS += \
     maindialoginterface.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    searchhistory.ui
 
 LIBS += \
     -lws2_32

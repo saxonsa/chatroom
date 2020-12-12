@@ -14,9 +14,7 @@ class Reciever : public QThread
     void run() override{
         while (1) {
             char chatMsg[] = "";
-//            usrData recvData;
-//            qDebug()<< "I am inside the thread!";
-//            qDebug()<< connect_sock;
+
             msg_len = recv(connect_sock, szBuff, sizeof(szBuff), 0);
 
             if (msg_len == SOCKET_ERROR) {

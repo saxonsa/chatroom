@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "maindialoginterface.h"
 #include <QDebug>
 #include <QString>
 #include <QMessageBox>
@@ -18,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     // Create a new scene
     mainDialog = new MainDialogInterface;
+
 
 //    connect(this,SIGNAL(sendData(QString)),mainDialog,SLOT(receiveData(QString)));
 }

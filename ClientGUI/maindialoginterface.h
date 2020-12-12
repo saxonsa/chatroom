@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <string>
+#include "searchhistory.h"
 
 namespace Ui {
 class MainDialogInterface;
@@ -16,6 +17,8 @@ public:
     explicit MainDialogInterface(QWidget *parent = nullptr);
     ~MainDialogInterface();
 
+    SearchHistory *searchHistory = NULL;
+
 private:
 //public:
     Ui::MainDialogInterface *ui;
@@ -24,6 +27,7 @@ private slots:
     void on_Send_clicked();
 //    void addOnlineList(std::string name);
 //    void deleteOnlineList(std::string name);
+    void on_History_clicked();
 };
 
 #endif // MAINDIALOGINTERFACE_H
