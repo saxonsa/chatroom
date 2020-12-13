@@ -58,7 +58,7 @@ void print_table(MYSQL_RES *res){
 	return;
 }
 
-// insert gourp info ��Ⱥ��������ʷ��¼
+// insert gourp info
 void insert_into_group(char user_name[], char creat_time[], char content[], int rid){
 	char toInsertHistory[1000];
 	
@@ -84,7 +84,7 @@ void insert_into_group(char user_name[], char creat_time[], char content[], int 
 	return;
 }
 
-// insert private info ��˽��������ʷ��¼
+// insert private info
 void insert_into_private(char sender[], char creat_time[], char content[], char receiver[]){
 	char toInsertHistory[1000];
 
@@ -109,7 +109,7 @@ void insert_into_private(char sender[], char creat_time[], char content[], char 
 	return;
 }
 
-// Use name to search private ��������˽��
+// Use name to search private
 void search_private_by_name(char sender[], char receiver[]){
 	char toSearchByName[250];
 	
@@ -129,7 +129,7 @@ void search_private_by_name(char sender[], char receiver[]){
 	return;
 }
 
-// Use name to search group ��������Ⱥ��
+// Use name to search group
 void search_group_by_name(char user_name[], int rid){
 	char toSearchByName[250];
 	
@@ -149,7 +149,7 @@ void search_group_by_name(char user_name[], int rid){
 	return;
 }
 
-// Use content to search private �����ݲ�˽��
+// Use content to search private
 void search_private_by_content(char sender[], char receiver[], char content[]){
 	char toSearchByContent[250]; // vague query
 
@@ -172,7 +172,7 @@ void search_private_by_content(char sender[], char receiver[], char content[]){
 	return;
 }
 
-// Use content to search group �����ݲ�Ⱥ��
+// Use content to search group
 void search_group_by_content(char content[], int rid){
 	char toSearchByContent[250]; // vague query
 
@@ -192,7 +192,7 @@ void search_group_by_content(char content[], int rid){
 	return;
 }
 
-// Use date to search private ��ʱ���˽��
+// Use date to search private
 void search_private_by_date(char sender[], char receiver[], char date[]){
 	char toSearchByDate[250];
 
@@ -215,7 +215,7 @@ void search_private_by_date(char sender[], char receiver[], char date[]){
 	return;
 }
 
-// Use date to search group ��ʱ���Ⱥ��
+// Use date to search group
 void search_group_by_date(char date[], int rid,SOCKET socks,usrData usrInfo){
 	char toSearchByDate[250];
 
@@ -279,7 +279,7 @@ void search_group_by_date(char date[], int rid,SOCKET socks,usrData usrInfo){
 	return;
 }
 
-// Get all private history ��ȫ��˽�ļ�¼
+// Get all private history
 void search_private_history(){
 	// The selection query
 	ret = mysql_query(&mysqlConnect, "SELECT * FROM `private_history`;");
@@ -296,7 +296,7 @@ void search_private_history(){
 	return;
 }
 
-// Get all group history ��ȫ��Ⱥ�ļ�¼
+// Get all group history
 void search_gourp_history(){
 	// The selection query
 	ret = mysql_query(&mysqlConnect, "SELECT * FROM `group_history`;");
@@ -313,7 +313,7 @@ void search_gourp_history(){
 	return;
 }
 
-// for user to sign up ע�ắ��
+// for user to sign up
 void user_sign_up(char user_name[], char pwd[]){
 	char signUpInfo[250];
 
@@ -359,9 +359,9 @@ void add_room(char admin[], char room_name[]){
 	return;
 }
 
-// add a member to a chat room ���ض�chatroom�������
+// add a member to a chat room
 void add_mem(int rid, char mem_name[]){
-	char addMemberInfo[250] = "INSERT INTO room_mem VALUES(";
+	char addMemberInfo[250];
 
 	sprintf_s(addMemberInfo,"INSERT INTO room_mem VALUES VALUES(%d,'%s');"
 			,rid
@@ -381,9 +381,9 @@ void add_mem(int rid, char mem_name[]){
 	return;
 }
 
-// add a private chat ˽��
+// add a private chat
 void add_private_chat(char sender[], char creat_time[], char content[], char recevier[]){
-	char addPrivateInfo[250] = "INSERT INTO private_history VALUES('";
+	char addPrivateInfo[250];
 
 	sprintf_s(addPrivateInfo,"INSERT INTO private_history VALUES('%s','%s','%s','%s');"
 			,sender
@@ -405,6 +405,55 @@ void add_private_chat(char sender[], char creat_time[], char content[], char rec
 	return;
 }
 
+
+void check_login(char user_name[], char pwd[]){
+	char loginInfo[250];
+
+	sprintf_s(loginInfo,"SELECT * FROM users WHERE user_name = '%s';"
+			,user_name);
+
+	MYSQL_RES *res = mysql_store_result(&mysqlConnect);
+	MYSQL_FIELD *field; 
+	MYSQL_ROW nextRow;
+
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			nextRow = mysql_fetch_row(res);
+
+			// current status is online
+			if (nextRow[2] == 1){
+				send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
+				
+			}
+
+			// check pwd
+			if (strcmp(pwd, nextRow[1]) == 0){
+				// pwd right
+				char *updateQuery[250];
+				sprintf(updateQuery,"UPDATE users SET status = 1 WHERE user_name = '%s';", nextRow[1]);
+				ret = mysql_query(&mysqlConnect, updateQuery);
+				if (ret != 0) {
+					printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+					return;
+				}
+			} else {
+				// pwd wrong, send back an error message
+
+			}
+
+		}
+		else {
+			// new user sign up 
+			user_sign_up();
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+}
+
 // function to accept a connection
 void accept_conn(void *dummy) {
 		SOCKET sub_sock = (SOCKET) dummy;
@@ -420,8 +469,6 @@ void accept_conn(void *dummy) {
 		}
 
 		while (1) {
-
-			
 
 			msg_len = recv(sub_sock, szBuff, sizeof(szBuff), 0);
 			
@@ -463,22 +510,11 @@ void accept_conn(void *dummy) {
 				//return -1;
 			}
 
-			// printf("Msg from search request --- name: %s\n", usrInfo.searchMsg->search_name);
-			// printf("Msg from search request --- content: %s\n", usrInfo.searchMsg->search_content);
-			// printf("Msg from search request --- time: %s\n", usrInfo.searchMsg->search_time);
-
-			// decompose szBuff to seperate type and content
-			// char *typeMsg = "type: ";
-			// char *contentMsg = "content: ";
-			// int type = szBuff[strlen(typeMsg)] - 48;
-			// char *content = szBuff + strlen(typeMsg) + strlen(contentMsg) + 3;
-
 			if (usrInfo.name) {
 				printf("Bytes Received: %d, message: %s from name: %s\n", msg_len, usrInfo.msg, usrInfo.name);
 			} else {
 				printf("Bytes Received: %d, message: %s from IP: %s\n", msg_len, usrInfo.msg, inet_ntoa(client_addr.sin_addr));
 			}
-			
 
 			/* Send message back to Client */
 
@@ -548,10 +584,6 @@ void accept_conn(void *dummy) {
 			// broadcast normal chat msg to all clients in the chatroom
 			if (strcmp(usrInfo.type, "CHAT") == 0) {
 				insert_into_group(usrInfo.name, usrInfo.createTime, usrInfo.msg,usrInfo.room); // Insert the history into the database
-				// printf("curr name: %s\n", usrInfo.name);
-				// printf("curr time: %s\n", usrInfo.createTime);
-				// printf("curr msg: %s\n", usrInfo.msg);
-				// search_history();// Search history from database
 
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (clients[i].client_socket == sub_sock) {
