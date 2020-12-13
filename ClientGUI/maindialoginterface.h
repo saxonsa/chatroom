@@ -25,9 +25,9 @@ class MainDialogInterface : public QMainWindow {
   // public:
   Ui::MainDialogInterface *ui;
  private slots:
-  void receiveData(QString data, nameList *onlineList, char* type);
+  void receiveData(QString data);
   void on_Send_clicked();
-  void displayOnlineList(nameList *onlineList);
+  void displayOnlineList();
   //    void addOnlineList(std::string name);
   //    void deleteOnlineList(std::string name);
   void on_History_clicked();

@@ -29,9 +29,9 @@ MainDialogInterface::~MainDialogInterface()
 }
 
 
-void MainDialogInterface::receiveData(QString data, nameList* onlineList, char* type)
+void MainDialogInterface::receiveData(QString data)
 {
-    displayOnlineList(onlineList);
+    displayOnlineList();
     ui->historyBrowser->append(data);
 }
 
@@ -78,34 +78,16 @@ void MainDialogInterface::on_Send_clicked()
 
 }
 
-void MainDialogInterface::displayOnlineList(nameList* onlineList) {
-    qDebug() << onlineList[0].name;
-    qDebug() << onlineList[1].name;
-    qDebug() << onlineList[2].name;
+void MainDialogInterface::displayOnlineList() {
     QStringList usrOnlineList;
     for (int i = 0; i < MAX_ALLOWED; i++) {
-        qDebug() << onlineList[i].uid;
-        if (onlineList[i].uid != -1) {
-            usrOnlineList << onlineList[i].name;
+        if (usr.onlineList[i].uid != -1) {
+            usrOnlineList << usr.onlineList[i].name;
         }
     }
     QStringListModel *model = new QStringListModel(usrOnlineList);
     ui->onlineList->setModel(model);
 }
-
-//void MainDialogInterface::addOnlineList(string name) {
-//    QString addName = QString::fromStdString(name);
-
-//    QListWidgetItem* item = new QListWidgetItem;
-//    item->setText(addName);
-//    ui->onlineList->addItem(item);
-
-//}
-
-//void MainDialogInterface::deleteOnlineList(string name) {
-//    QString deleteName = QString::fromStdString(name);
-
-//}
 
 void MainDialogInterface::on_History_clicked()
 {
