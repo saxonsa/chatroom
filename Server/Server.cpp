@@ -216,10 +216,10 @@ void search_private_by_date(char sender[], char receiver[], char date[]){
 }
 
 // Use date to search group ��ʱ���Ⱥ��
-void search_group_by_date(char date[], int rid){
+void search_group_by_date(char date[], int rid,SOCKET socks,usrData usrInfo){
 	char toSearchByDate[250];
 
-	sprintf_s(toSearchByDate,"SELECT * FROM `group_history` WHERE rid = %d AND DATE_FORMAT(create_time, '%Y%m%d') = '%s';"
+	sprintf_s(toSearchByDate,"SELECT * FROM `group_history` WHERE rid = %d AND DATE_FORMAT(create_time, '%Y-%m-%d') = '%s';"
 			,rid
 			,date);
 
@@ -233,6 +233,48 @@ void search_group_by_date(char date[], int rid){
 
 	// Check the res value
 	print_table(mysql_store_result(&mysqlConnect));
+
+	res = mysql_store_result(&mysqlConnect);// Check the res value
+
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
+			int row = (int)mysql_num_rows(res);
+			usrData hisRes;
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+					switch(j){
+						case 1: 
+							memcpy(usrInfo.searchMsg.search_name,nextRow[1],sizeof usrInfo.searchMsg.search_name);
+							break;
+						case 2: 
+							memcpy(usrInfo.searchMsg.search_time,nextRow[2],sizeof usrInfo.searchMsg.search_time);
+							break;
+						case 3: 
+							memcpy(usrInfo.searchMsg.search_content,nextRow[3],sizeof usrInfo.searchMsg.search_content);
+							break;
+					}
+				}
+				send(socks,(char*)&usrInfo,sizeof usrInfo,0);
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
 
 	return;
 }
@@ -505,7 +547,7 @@ void accept_conn(void *dummy) {
 
 			// broadcast normal chat msg to all clients in the chatroom
 			if (strcmp(usrInfo.type, "CHAT") == 0) {
-				insert_into_database(usrInfo.name, usrInfo.createTime, usrInfo.msg); // Insert the history into the database
+				insert_into_group(usrInfo.name, usrInfo.createTime, usrInfo.msg,usrInfo.room); // Insert the history into the database
 				// printf("curr name: %s\n", usrInfo.name);
 				// printf("curr time: %s\n", usrInfo.createTime);
 				// printf("curr msg: %s\n", usrInfo.msg);
@@ -543,7 +585,7 @@ void accept_conn(void *dummy) {
 				if (strcmp(usrInfo.searchMsg.search_name,"") == 0){
 					// The case that only search by date
 					if(strcmp(usrInfo.searchMsg.search_content,"") == 0){
-						search_by_date(usrInfo.searchMsg.search_time,sub_sock,usrInfo);
+						search_group_by_date(usrInfo.searchMsg.search_time,usrInfo.room,sub_sock,usrInfo);
 					}
 					// The case that only search by date and content
 					else{
