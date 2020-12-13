@@ -80,7 +80,9 @@ void MainDialogInterface::on_Send_clicked()
 }
 
 void MainDialogInterface::displayOnlineList(QString data) {
-    receiveData(data);
+    if (strcmp(usr.type, "ENTER") == 0) {
+        receiveData(data);
+    }
     QStringList usrOnlineList;
     for (int i = 0; i < MAX_ALLOWED; i++) {
         if (usr.onlineList[i].uid != -1) {

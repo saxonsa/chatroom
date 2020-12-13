@@ -284,6 +284,13 @@ void accept_conn(void *dummy)
 	resMsg = set_user_status(usrInfo.name, 0);
 	printf("set status to 0 msg: %s\n", resMsg);
 
+	for (int i = 0; i < MAX_ALLOWED; i++) {
+		if (strcmp(usrInfo.onlineList[i].name, usrInfo.name) == 0) {
+			usrInfo.onlineList[i].uid = -1;
+			memset(usrInfo.onlineList[i].name, 0, sizeof usrInfo.onlineList[0].name);
+		}
+	}
+
 	// if client closes socket, clear its information in client array
 	for (unsigned i = 0; i < MAX_ALLOWED; i++)
 	{
