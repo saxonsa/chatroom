@@ -24,11 +24,42 @@ void exit_clean(int arg) {
 	exit(0);
 }
 
+void print_table(MYSQL_RES *res){
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
+			int row = (int)mysql_num_rows(res);
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+				}
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return;
+}
+
 // insert gourp info 给群聊添加历史记录
 void insert_into_group(char user_name[], char creat_time[], char content[], int rid){
 	char toInsertHistory[1000];
 	
-	sprintf(toInsertHistory,"Insert INTO group_history(user_name,create_time,content,room_name) VALUES('%s','%s','%s',%d);"
+	sprintf_s(toInsertHistory,"Insert INTO group_history(user_name,create_time,content,room_name) VALUES('%s','%s','%s',%d);"
 			,user_name
 			,creat_time
 			,content
@@ -55,7 +86,7 @@ void insert_into_private(char sender[], char creat_time[], char content[], char 
 	char toInsertHistory[1000];
 
 	// Concat strings
-	sprintf(toInsertHistory,"Insert INTO private_history VALUES('%s','%s','%s','%s');"
+	sprintf_s(toInsertHistory,"Insert INTO private_history VALUES('%s','%s','%s','%s');"
 			,sender
 			,creat_time
 			,content
@@ -79,7 +110,7 @@ void insert_into_private(char sender[], char creat_time[], char content[], char 
 void search_private_by_name(char sender[], char receiver[]){
 	char toSearchByName[250];
 	
-	sprintf(toSearchByName,"SELECT * FROM `private_history` WHERE user_name = '%s' AND recevie_name = '%s';", sender, receiver);
+	sprintf_s(toSearchByName,"SELECT * FROM `private_history` WHERE user_name = '%s' AND recevie_name = '%s';", sender, receiver);
 
 	ret = mysql_query(&mysqlConnect, toSearchByName); // Pass the query to database
 
@@ -89,34 +120,8 @@ void search_private_by_name(char sender[], char receiver[]){
 		// return;
 	}
 
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = (int)mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
+	// Check the res value
+	print_table(mysql_store_result(&mysqlConnect));
 
 	return;
 }
@@ -125,7 +130,7 @@ void search_private_by_name(char sender[], char receiver[]){
 void search_group_by_name(char user_name[], int rid){
 	char toSearchByName[250];
 	
-	sprintf(toSearchByName,"SELECT * FROM `group_history` WHERE user_name = '%s' AND rid = %d;", user_name, rid);
+	sprintf_s(toSearchByName,"SELECT * FROM `group_history` WHERE user_name = '%s' AND rid = %d;", user_name, rid);
 
 	ret = mysql_query(&mysqlConnect, toSearchByName); // Pass the query to database
 
@@ -135,34 +140,8 @@ void search_group_by_name(char user_name[], int rid){
 		// return;
 	}
 
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = (int)mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
+	// Check the res value
+	print_table(mysql_store_result(&mysqlConnect));
 
 	return;
 }
@@ -171,7 +150,7 @@ void search_group_by_name(char user_name[], int rid){
 void search_private_by_content(char sender[], char receiver[], char content[]){
 	char toSearchByContent[250]; // vague query
 
-	sprintf(toSearchByContent,"SELECT * FROM `private_history` WHERE user_name = '%s' AND recevie_name = '%s' AND content LIKE '%s';"
+	sprintf_s(toSearchByContent,"SELECT * FROM `private_history` WHERE user_name = '%s' AND recevie_name = '%s' AND content LIKE '%s';"
 			,sender
 			,receiver
 			,content);
@@ -184,34 +163,8 @@ void search_private_by_content(char sender[], char receiver[], char content[]){
 		// return;
 	}
 
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = (int)mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
+	// Check the res value
+	print_table(mysql_store_result(&mysqlConnect));
 
 	return;
 }
@@ -220,7 +173,7 @@ void search_private_by_content(char sender[], char receiver[], char content[]){
 void search_group_by_content(char content[], int rid){
 	char toSearchByContent[250]; // vague query
 
-	sprintf(toSearchByContent,"SELECT * FROM `group_history` WHERE rid = %d AND content LIKE '%s';", rid, content);
+	sprintf_s(toSearchByContent,"SELECT * FROM `group_history` WHERE rid = %d AND content LIKE '%s';", rid, content);
 
 	ret = mysql_query(&mysqlConnect, toSearchByContent); // Pass the query to database
 
@@ -230,34 +183,8 @@ void search_group_by_content(char content[], int rid){
 		// return;
 	}
 
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = (int)mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
+	// Check the res value
+	print_table(mysql_store_result(&mysqlConnect));
 
 	return;
 }
@@ -266,7 +193,7 @@ void search_group_by_content(char content[], int rid){
 void search_private_by_date(char sender[], char receiver[], char date[]){
 	char toSearchByDate[250];
 
-	sprintf(toSearchByDate,"SELECT * FROM `private_history` WHERE user_name = '%s' AND recevie_name = '%s' AND DATE_FORMAT(create_time, '%Y%m%d') = '%s';"
+	sprintf_s(toSearchByDate,"SELECT * FROM `private_history` WHERE user_name = '%s' AND recevie_name = '%s' AND DATE_FORMAT(create_time, '%Y%m%d') = '%s';"
 			,sender
 			,receiver
 			,date);
@@ -279,34 +206,8 @@ void search_private_by_date(char sender[], char receiver[], char date[]){
 		// return;
 	}
 
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = (int)mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
+	// Check the res value
+	print_table(mysql_store_result(&mysqlConnect));
 
 	return;
 }
@@ -315,7 +216,7 @@ void search_private_by_date(char sender[], char receiver[], char date[]){
 void search_group_by_date(char date[], int rid){
 	char toSearchByDate[250];
 
-	sprintf(toSearchByDate,"SELECT * FROM `group_history` WHERE rid = %d AND DATE_FORMAT(create_time, '%Y%m%d') = '%s';"
+	sprintf_s(toSearchByDate,"SELECT * FROM `group_history` WHERE rid = %d AND DATE_FORMAT(create_time, '%Y%m%d') = '%s';"
 			,rid
 			,date);
 
@@ -327,34 +228,8 @@ void search_group_by_date(char date[], int rid){
 		// return;
 	}
 
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = (int)mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
+	// Check the res value
+	print_table(mysql_store_result(&mysqlConnect));
 
 	return;
 }
@@ -370,34 +245,8 @@ void search_private_history(){
 		return;
 	}
 
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = (int)mysql_num_rows(res);
-			for (unsigned int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
+	// Check the res value
+	print_table(mysql_store_result(&mysqlConnect));
 
 	return;
 }
@@ -413,47 +262,20 @@ void search_gourp_history(){
 		return;
 	}
 
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = (int)mysql_num_rows(res);
-			for (unsigned int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
+	// Check the res value
+	print_table(mysql_store_result(&mysqlConnect));
 
 	return;
 }
 
 // for user to sign up 注册函数
 void user_sign_up(char user_name[], char pwd[]){
-	char signUpInfo[250] = "INSERT INTO users VALUES('";
+	char signUpInfo[250];
 
 	// connect sql
-	strcat_s(signUpInfo,sizeof signUpInfo,user_name);
-	strcat_s(signUpInfo,sizeof signUpInfo,"','");
-	strcat_s(signUpInfo,sizeof signUpInfo,pwd);
-	strcat_s(signUpInfo,sizeof signUpInfo,"');");
+	sprintf_s(signUpInfo,"INSERT INTO users VALUES('%s','%s');"
+			,user_name
+			,pwd);
 
 	ret = mysql_query(&mysqlConnect, signUpInfo); // Pass the query to database
 
@@ -463,47 +285,20 @@ void user_sign_up(char user_name[], char pwd[]){
 		// return;
 	}
 
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = (int)mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
+	// Check the res value
+	print_table(mysql_store_result(&mysqlConnect));
 
 	return;
 }
 
 // create new chatroom
 void add_room(char admin[], char room_name[]){
-	char addRoomInfo[250] = "INSERT INTO room_info(administrator,room_name) VALUES('";
+	char addRoomInfo[250];
 
 	// connect sql
-	strcat_s(addRoomInfo,sizeof addRoomInfo,admin);
-	strcat_s(addRoomInfo,sizeof addRoomInfo,"','");
-	strcat_s(addRoomInfo,sizeof addRoomInfo,room_name);
-	strcat_s(addRoomInfo,sizeof addRoomInfo,"');");
+	sprintf_s(addRoomInfo,"INSERT INTO room_info(administrator,room_name) VALUES('%s','%s');"
+			,admin
+			,room_name);
 
 	ret = mysql_query(&mysqlConnect, addRoomInfo); // Pass the query to database
 
@@ -513,34 +308,8 @@ void add_room(char admin[], char room_name[]){
 		// return;
 	}
 
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-	
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = (int)mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
+	// Check the res value
+	print_table(mysql_store_result(&mysqlConnect));
 
 	return;
 }
@@ -549,14 +318,9 @@ void add_room(char admin[], char room_name[]){
 void add_mem(int rid, char mem_name[]){
 	char addMemberInfo[250] = "INSERT INTO room_mem VALUES(";
 
-	char str_rid[10] = { 0 };
-	itoa(rid, str_rid, 10);
-
-	// connect sql
-	strcat_s(addMemberInfo,sizeof addMemberInfo,str_rid);
-	strcat_s(addMemberInfo,sizeof addMemberInfo,",'");
-	strcat_s(addMemberInfo,sizeof addMemberInfo,mem_name);
-	strcat_s(addMemberInfo,sizeof addMemberInfo,"');");
+	sprintf_s(addMemberInfo,"INSERT INTO room_mem VALUES VALUES(%d,'%s');"
+			,rid
+			,mem_name);
 
 	ret = mysql_query(&mysqlConnect, addMemberInfo); // Pass the query to database
 
@@ -566,34 +330,8 @@ void add_mem(int rid, char mem_name[]){
 		// return;
 	}
 
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-	
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = (int)mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
+	// Check the res value
+	print_table(mysql_store_result(&mysqlConnect));
 
 	return;
 }
@@ -602,15 +340,11 @@ void add_mem(int rid, char mem_name[]){
 void add_private_chat(char sender[], char creat_time[], char content[], char recevier[]){
 	char addPrivateInfo[250] = "INSERT INTO private_history VALUES('";
 
-	// connect sql
-	strcat_s(addPrivateInfo,sizeof addPrivateInfo,sender);
-	strcat_s(addPrivateInfo,sizeof addPrivateInfo,"','");
-	strcat_s(addPrivateInfo,sizeof addPrivateInfo,creat_time);
-	strcat_s(addPrivateInfo,sizeof addPrivateInfo,"','");
-	strcat_s(addPrivateInfo,sizeof addPrivateInfo,content);
-	strcat_s(addPrivateInfo,sizeof addPrivateInfo,"','");
-	strcat_s(addPrivateInfo,sizeof addPrivateInfo,recevier);
-	strcat_s(addPrivateInfo,sizeof addPrivateInfo,"');");
+	sprintf_s(addPrivateInfo,"INSERT INTO private_history VALUES('%s','%s','%s','%s');"
+			,sender
+			,creat_time
+			,content
+			,recevier);
 
 	ret = mysql_query(&mysqlConnect, addPrivateInfo); // Pass the query to database
 
@@ -620,34 +354,8 @@ void add_private_chat(char sender[], char creat_time[], char content[], char rec
 		// return;
 	}
 
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-	
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = (int)mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
+	// Check the res value
+	print_table(mysql_store_result(&mysqlConnect));
 
 	return;
 }
@@ -784,7 +492,6 @@ void accept_conn(void *dummy) {
 				printf("curr name: %s\n", usrInfo.name);
 				printf("curr time: %s\n", usrInfo.createTime);
 				printf("curr msg: %s\n", usrInfo.msg);
-				search_history();// Search history from database
 
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (clients[i].client_socket == sub_sock) {
@@ -918,7 +625,6 @@ int main(int argc, char **argv){
 
 		_beginthread(accept_conn,0,(void*)msg_sock);
 	}
-
 
 	exit_clean(0);
 }
