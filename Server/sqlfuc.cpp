@@ -1,4 +1,7 @@
 #include "sqlfuc.h"
+#include <iostream>
+
+using namespace std;
 
 void print_table(MYSQL_RES *res) {
   if (res) {
@@ -223,7 +226,7 @@ void search_group_by_date(char date[], int rid, SOCKET socks, usrData usrInfo) {
     if (fieldCount > 0) {
       int column = mysql_num_fields(res);
       int row = (int)mysql_num_rows(res);
-      usrData hisRes;
+      // usrData hisRes;
       for (int i = 0; field = mysql_fetch_field(res); i++) {
         printf("%25s", field->name);
         printf(" |");
@@ -383,10 +386,20 @@ void add_private_chat(char sender[], char creat_time[], char content[], char rec
 	return;
 }
 
-void check_login(char user_name[], char pwd[]){
+char* check_login(char user_name[], char pwd[]){
 	char loginInfo[250];
 
 	sprintf_s(loginInfo,"SELECT * FROM users WHERE user_name = '%s';",user_name);
+
+	cout << loginInfo << endl;
+
+	ret = mysql_query(&mysqlConnect, loginInfo); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Add member failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
 
 	MYSQL_RES *res = mysql_store_result(&mysqlConnect);
 	MYSQL_FIELD *field; 
@@ -399,33 +412,36 @@ void check_login(char user_name[], char pwd[]){
 			nextRow = mysql_fetch_row(res);
 
 			// current status is online
-			if (nextRow[2] == 1){
-				send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
-				
+			if (nextRow[2] == "1"){
+				//send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
+				return "isOnline";
 			}
 
 			// check pwd
 			if (strcmp(pwd, nextRow[1]) == 0){
 				// pwd right
-				char *updateQuery[250];
-				sprintf(updateQuery,"UPDATE users SET status = 1 WHERE user_name = '%s';", nextRow[1]);
+				char updateQuery[250];
+				sprintf_s(updateQuery,"UPDATE users SET status = 1 WHERE user_name = '%s';", nextRow[0]);
 				ret = mysql_query(&mysqlConnect, updateQuery);
 				if (ret != 0) {
 					printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
-					return;
+					return "Failed";
 				}
+				return "Success";
 			} else {
 				// pwd wrong, send back an error message
-
+				return "wrongPwd";
 			}
 
 		}
 		else {
 			// new user sign up 
-			user_sign_up();
+			//user_sign_up();
+			return "new";
 		}
 	}
 	else {
 		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+		return "sqlErr";
 	}
 }

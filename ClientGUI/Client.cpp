@@ -73,7 +73,7 @@ int client_connect(char* serverIP, char* server_port, char* name) {
 
   // print connected server information
   printf("Successful connect to server IP: %s; Port: %d\n",
-         inet_ntoa(server_addr.sin_addr), htons(server_addr.sin_port));
+         inet_ntoa(server_addr.sin_addr), htons(server_addr.sin_port));  
 
   return 0;
 }

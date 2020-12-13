@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include <winsock2.h>
 #include <stdlib.h>
-#include <stdio.h>
+//#include <stdio.h>
 #include <string.h>
 #include <process.h>
 #include <signal.h> // for signal() function
@@ -15,6 +15,37 @@ using namespace std;
 
 #pragma comment(lib,"ws2_32.lib")
 #pragma comment(lib,"libmysql.lib")
+
+WSADATA wsaData = { 0 };
+SOCKET sock = INVALID_SOCKET;		// master server socket
+SOCKET msg_sock = INVALID_SOCKET;	// client socket
+
+/*************************************************************/
+
+
+struct sockaddr_in local = { 0 };		// server end address
+struct sockaddr_in client_addr = { 0 };	// client end address
+
+
+char szBuff[BufferSize];
+int msg_len;
+int addr_len;
+
+int connecting = 0; // cuurent number of clients connected with server
+
+//Database global variables
+
+MYSQL mysqlConnect; 
+MYSQL_RES *res;
+MYSQL_FIELD *field; 
+MYSQL_ROW nextRow;
+int ret = 0;
+
+Client clients[MAX_ALLOWED] = { 0 };
+
+int onlineList_msg = 0;
+
+char normalMsg[1000];
 
 /*
 	exit_clean: (safe exit function)
@@ -45,7 +76,7 @@ void accept_conn(void *dummy) {
 	while (1) {
 
 		msg_len = recv(sub_sock, szBuff, sizeof(szBuff), 0);
-			
+
 		memcpy(&usrInfo, szBuff, sizeof szBuff);
 
 		printf("usrInfo: name: %s content: %s type: %s\n", usrInfo.name, usrInfo.msg, usrInfo.type);
@@ -71,7 +102,7 @@ void accept_conn(void *dummy) {
 			break;
 			//return -1;
 		}
-			
+
 		if (msg_len == 0){
 			printf("Client closed connection\n");
 			for (int s = 0; s < MAX_ALLOWED; s++) {
@@ -89,12 +120,32 @@ void accept_conn(void *dummy) {
 		} else {
 			printf("Bytes Received: %d, message: %s from IP: %s\n", msg_len, usrInfo.msg, inet_ntoa(client_addr.sin_addr));
 		}
-			
+
 
 		/* Send message back to Client */
 
+		if(strcmp(usrInfo.type,"LOGIN") == 0) {
+			char* resStr = check_login(usrInfo.name,usrInfo.pwd);
+
+			if(strcmp(resStr,"Success") == 0 || strcmp(resStr,"new") == 0) {
+				strcpy(usrInfo.type,"Login");
+				send(sub_sock,(char*)&usrInfo, BufferSize,0);
+			}				
+			else{
+				strcpy(usrInfo.type,"LoginF");
+				strcpy(usrInfo.msg,resStr);
+				send(sub_sock,(char*)&usrInfo, BufferSize,0);
+				printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+				closesocket(sub_sock);
+				connecting--;
+				printf("current number of clients: %d\n", connecting);
+				_endthread();
+			}		
+
+		}
+
 		if (strcmp(usrInfo.type, "ENTER") == 0) {
-				
+
 			/* send enter room msg */
 			char enterMsgOther[100] = { 0 }; // the enter msg sent to others
 			char enterMsgSelf[100] = "Welcome "; // the enter msg sent to the client himhelf
@@ -126,29 +177,19 @@ void accept_conn(void *dummy) {
 			// broadcast name msg depends on different clients
 			for (int i = 0; i < MAX_ALLOWED; i++) {
 				if (clients[i].client_socket != INVALID_SOCKET) {
-					if (clients[i].client_socket == sub_sock) {
+					if (clients[i].client_socket == sub_sock)
 						strcpy_s(usrInfo.msg, sizeof usrInfo.msg, enterMsgSelf);
-						msg_len = send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
-
-						if (msg_len <= 0){
-							printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
-							closesocket(sub_sock);
-							connecting--;
-							printf("current number of clients: %d\n", connecting);
-							_endthread();
-						}
-
-					} else {
+					else
 						strcpy_s(usrInfo.msg, sizeof usrInfo.msg, enterMsgOther);
-						msg_len = send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
 
-						if (msg_len <= 0){
-							printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
-							closesocket(sub_sock);
-							connecting--;
-							printf("current number of clients: %d\n", connecting);
-							_endthread();
-						}
+					msg_len = send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
+
+					if (msg_len <= 0){
+						printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+						closesocket(sub_sock);
+						connecting--;
+						printf("current number of clients: %d\n", connecting);
+						_endthread();
 					}
 				}
 			}
@@ -167,7 +208,7 @@ void accept_conn(void *dummy) {
 					strcpy_s(usrInfo.name, sizeof usrInfo.name, clients[i].name);
 				}
 			}
-			
+
 			for (int i = 0; i < MAX_ALLOWED; i++) {
 				if (clients[i].client_socket != INVALID_SOCKET) {
 					msg_len = send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
@@ -178,7 +219,7 @@ void accept_conn(void *dummy) {
 						connecting--;
 						printf("current number of clients: %d\n", connecting);
 						_endthread();
-					}						
+					}
 				}
 			}
 		}
@@ -197,7 +238,7 @@ void accept_conn(void *dummy) {
 				}
 				// The case that only search by date and content
 				else{
-						
+
 				}
 			}else{
 				if(strcmp(usrInfo.searchMsg.search_content,"") == 0){
@@ -219,7 +260,7 @@ void accept_conn(void *dummy) {
 			memset(clients[i].name, 0, sizeof clients[i].name);
 		}
 	}
-		
+
 	for (unsigned i = 0; i < MAX_ALLOWED; i++) {
 		if (clients[i].client_socket == INVALID_SOCKET) {
 			usrInfo.onlineList[i].uid = -1;
@@ -241,8 +282,7 @@ void accept_conn(void *dummy) {
 				connecting--;
 				printf("current number of clients: %d\n", connecting);
 				_endthread();
-				//return -1;
-			}	
+			}
 		}
 	}
 
@@ -253,8 +293,6 @@ void accept_conn(void *dummy) {
 }
 
 int main(int argc, char **argv){
-
-	
 	mysql_init(&mysqlConnect);
 	if (!(mysql_real_connect(&mysqlConnect, "localhost", "root", "", "chatroom", 3306, NULL, 0))) {
 		printf("Failed to access to the database...Error: %s\n", mysql_error(&mysqlConnect));
@@ -268,7 +306,7 @@ int main(int argc, char **argv){
 
 	/*  Initilize WSA
 
-		WSAStartup: 
+		WSAStartup:
 			@param1: request Socket version
 			@param2: variable to save version information
 	*/
@@ -276,12 +314,12 @@ int main(int argc, char **argv){
 	if (WSAStartup(0x202, &wsaData) == SOCKET_ERROR){
 		// stderr: standard error are printed to the screen.
 		fprintf(stderr, "WSAStartup failed with error %d\n", WSAGetLastError());
-		//WSACleanup function terminates use of the Windows Sockets DLL. 
+		//WSACleanup function terminates use of the Windows Sockets DLL.
 		WSACleanup();
 		return -1;
 	}
 
-	
+
 	for (int i = 0; i < MAX_ALLOWED; i++) {
 		// init clients
 		clients[i].fd = i;

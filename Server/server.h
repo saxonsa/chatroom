@@ -1,35 +1,39 @@
-#define		DEFAULT_PORT		5019	// server Listening Port
+#ifndef SERVER_H_
+#define SERVER_H_
+
+#define DEFAULT_PORT 5019	// server Listening Port
 #define BufferSize 2820
+#define MAX_ALLOWED 3 // the max number of clients supported by server 
+
 
 
 /*************************************************************/
 /************* structure to store socket *********************/
 
-WSADATA	wsaData = { 0 };	
-SOCKET sock = INVALID_SOCKET;		// master server socket
-SOCKET msg_sock = INVALID_SOCKET;	// client socket
+extern WSADATA wsaData;	
+extern SOCKET sock;		// master server socket
+extern SOCKET msg_sock;	// client socket
 
 /*************************************************************/
 
 
-struct sockaddr_in local = { 0 };		// server end address
-struct sockaddr_in client_addr = { 0 };	// client end address
+extern struct sockaddr_in local;		// server end address
+extern struct sockaddr_in client_addr;	// client end address
 
 
-char szBuff[BufferSize];
-int msg_len;
-int addr_len;
+extern char szBuff[BufferSize];
+extern int msg_len;
+extern int addr_len;
 
-int connecting = 0; // cuurent number of clients connected with server
-const int MAX_ALLOWED = 3; // the max number of clients supported by server 
+extern int connecting; // cuurent number of clients connected with server
 
 //Database global variables
 
-MYSQL mysqlConnect; 
-MYSQL_RES *res;
-MYSQL_FIELD *field; 
-MYSQL_ROW nextRow;
-int ret = 0;
+extern MYSQL mysqlConnect; 
+extern MYSQL_RES *res;
+extern MYSQL_FIELD *field; 
+extern MYSQL_ROW nextRow;
+extern int ret;
 
 
 // client structure
@@ -40,14 +44,14 @@ typedef struct _Client {
 	SOCKET client_socket; // Client socket
 }Client;
 
-Client clients[MAX_ALLOWED] = { 0 };
+extern Client clients[MAX_ALLOWED];                                
 
 typedef struct _nameList {
 	int uid;
 	char name[100];
 }nameList;
 
-int onlineList_msg = 0;
+extern int onlineList_msg;
 
 typedef struct {
 	char search_name[100];
@@ -57,6 +61,7 @@ typedef struct {
 
 typedef struct {
 	char name[100];
+	char pwd[100];
 	char type[100];
 	char msg[1000];
 	char createTime[100];
@@ -72,5 +77,6 @@ typedef struct {
 }historyRes;*/
 
 
-char normalMsg[1000] = { 0 }; // the normal msg sent to all... e.x: Saxon: msg
+extern char normalMsg[1000]; // the normal msg sent to all... e.x: Saxon: msg
 
+#endif

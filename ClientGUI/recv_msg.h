@@ -46,6 +46,11 @@ class Reciever : public QThread
             } else if (strcmp(usr.type, "SEARCH") == 0){
                 sprintf(chatMsg,"%s\n%s: %s",usr.searchMsg.search_time,usr.searchMsg.search_name,usr.searchMsg.search_content);
                 emit search_success(chatMsg);
+            } else if (strcmp(usr.type, "Login") == 0){
+                emit login_success(usr.name);
+            } else if (strcmp(usr.type, "LoginF") == 0){
+                qDebug() << "I am here!!!!!!!!!!";
+                emit login_failed(usr.msg);
             }
 //            emit recv_success(chatMsg);
         }
@@ -56,6 +61,8 @@ signals:
     void recv_success(QString);
     void enter_success(QString, nameList*);
     void search_success(QString);
+    void login_success(char*);
+    void login_failed(char*);
 };
 
 #endif // TEST_CONNECTION_H

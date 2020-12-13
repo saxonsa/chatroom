@@ -44,6 +44,7 @@ typedef struct {
 
 typedef struct {
    char name[100];
+   char pwd[100];
    char type[100];
    char msg[1000];
    char createTime[100];

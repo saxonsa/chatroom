@@ -26,6 +26,10 @@ private slots:
 
     void on_ExitBtn_clicked();
 
+    void recv_Login_signal(char*);
+
+    void reject_Login_signal(char*);
+
 signals:
     void sendData(QString);
 
