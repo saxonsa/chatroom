@@ -37,7 +37,7 @@ class Reciever : public QThread
             memcpy(&usr, szBuff, sizeof szBuff);
 
 
-            if (strcmp(usr.type, "ENTER") == 0) {
+            if (strcmp(usr.type, "ENTER") == 0 || strcmp(usr.type, "QUIT") == 0) {
                 strcat(chatMsg, usr.msg);
                 emit enter_success(chatMsg,usr.onlineList);
             } else if (strcmp(usr.type, "CHAT") == 0) {
