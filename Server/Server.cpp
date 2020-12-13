@@ -190,11 +190,6 @@ void accept_conn(void *dummy)
 				}
 			}
 
-			for (int i = 0; i < MAX_ALLOWED; i++)
-			{
-				printf("---usrInfo.online.uid: %d\n", usrInfo.onlineList[i].uid);
-			}
-
 			// broadcast name msg depends on different clients
 			for (int i = 0; i < MAX_ALLOWED; i++)
 			{
@@ -283,10 +278,11 @@ void accept_conn(void *dummy)
 		}
 	}
 
-	for (int i = 0; i < MAX_ALLOWED; i++)
-	{
-		printf("---usrInfo.online.uid: %d\n", usrInfo.onlineList[i].uid);
-	}
+	// set status to 0 when usr quit the room
+	char* resMsg;
+	// set status to 0
+	resMsg = set_user_status(usrInfo.name, 0);
+	printf("set status to 0 msg: %s\n", resMsg);
 
 	// if client closes socket, clear its information in client array
 	for (unsigned i = 0; i < MAX_ALLOWED; i++)
@@ -299,15 +295,6 @@ void accept_conn(void *dummy)
 		}
 	}
 
-	for (unsigned i = 0; i < MAX_ALLOWED; i++)
-	{
-		if (clients[i].client_socket == INVALID_SOCKET)
-		{
-			usrInfo.onlineList[i].uid = -1;
-			memset(usrInfo.onlineList[i].name, 0, sizeof usrInfo.onlineList[i].name);
-		}
-	}
-
 	memcpy(usrInfo.type, "QUIT", sizeof usrInfo.type);
 
 	for (int i = 0; i < MAX_ALLOWED; i++) {
@@ -315,11 +302,6 @@ void accept_conn(void *dummy)
 			usrInfo.onlineList[i].uid = clients[i].fd;
 			memcpy(usrInfo.onlineList[i].name, clients[i].name, sizeof usrInfo.onlineList[i].name);
 		}
-	}
-
-	for (int i = 0; i < MAX_ALLOWED; i++)
-	{
-		printf("usrInfo.online.uid: %d\n", usrInfo.onlineList[i].uid);
 	}
 
 	for (unsigned i = 0; i < MAX_ALLOWED; i++)
