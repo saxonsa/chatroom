@@ -26,20 +26,13 @@ void exit_clean(int arg) {
 
 // insert gourp info 给群聊添加历史记录
 void insert_into_group(char user_name[], char creat_time[], char content[], int rid){
-	char toInsertHistory[1000] = "Insert INTO group_history(user_name,create_time,content,room_name) VALUES('";
+	char toInsertHistory[1000];
 	
-	char str_rid[10] = { 0 };
-	itoa(rid, str_rid, 10);
-
-	// Concat strings
-	strcat_s(toInsertHistory,sizeof toInsertHistory,user_name);
-	strcat_s(toInsertHistory,sizeof toInsertHistory,"','");
-	strcat_s(toInsertHistory,sizeof toInsertHistory,creat_time);
-	strcat_s(toInsertHistory,sizeof toInsertHistory,"','");
-	strcat_s(toInsertHistory,sizeof toInsertHistory,content);
-	strcat_s(toInsertHistory,sizeof toInsertHistory,"',");
-	strcat_s(toInsertHistory,sizeof toInsertHistory,str_rid);
-	strcat_s(toInsertHistory,sizeof toInsertHistory,");");
+	sprintf(toInsertHistory,"Insert INTO group_history(user_name,create_time,content,room_name) VALUES('%s','%s','%s',%d);"
+			,user_name
+			,creat_time
+			,content
+			,rid);
 
 	printf("%s \n",user_name);
 
@@ -57,25 +50,38 @@ void insert_into_group(char user_name[], char creat_time[], char content[], int 
 	return;
 }
 
-// Use keyword to search
-void search_by_keyword(char keyword[]){
-	char toSearchByKeyword[300] = "SELECT * FROM `history` WHERE user_name LIKE '%";
+// insert private info 给私聊添加历史记录
+void insert_into_private(char sender[], char creat_time[], char content[], char receiver[]){
+	char toInsertHistory[1000];
 
 	// Concat strings
-	strcat_s(toSearchByKeyword,sizeof toSearchByKeyword, keyword);
-	strcat_s(toSearchByKeyword,sizeof toSearchByKeyword, "%' OR DATE_FORMAT(create_time, '%Y%m%d') LIKE '%");
-	strcat_s(toSearchByKeyword,sizeof toSearchByKeyword, keyword);
-	strcat_s(toSearchByKeyword,sizeof toSearchByKeyword, "%' OR content LIKE '%");
-	strcat_s(toSearchByKeyword,sizeof toSearchByKeyword, keyword);
-	strcat_s(toSearchByKeyword,sizeof toSearchByKeyword, "%';");
+	sprintf(toInsertHistory,"Insert INTO private_history VALUES('%s','%s','%s','%s');"
+			,sender
+			,creat_time
+			,content
+			,receiver);
 
-	// char userName[] = "'David'";
+	ret = mysql_query(&mysqlConnect, toInsertHistory); // Pass the query to database
 
-	char finalString[300];
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
 
-	strcpy_s(finalString, sizeof finalString, toSearchByKeyword);
+	// A hint that shows the insertion is complte
+	// printf("History record succeed! \n");
 
-	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
+	return;
+}
+
+// Use name to search private 用人名查私聊
+void search_private_by_name(char sender[], char receiver[]){
+	char toSearchByName[250];
+	
+	sprintf(toSearchByName,"SELECT * FROM `private_history` WHERE user_name = '%s' AND recevie_name = '%s';", sender, receiver);
+
+	ret = mysql_query(&mysqlConnect, toSearchByName); // Pass the query to database
 
 	// If the query failed, close the function
 	if (ret != 0) {
@@ -89,7 +95,288 @@ void search_by_keyword(char keyword[]){
 		int fieldCount = mysql_field_count(&mysqlConnect);
 		//Print the result table
 		if (fieldCount > 0) {
-			int column = (int)mysql_num_fields(res);
+			int column = mysql_num_fields(res);
+			int row = (int)mysql_num_rows(res);
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+				}
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return;
+}
+
+// Use name to search group 用人名查群聊
+void search_group_by_name(char user_name[], int rid){
+	char toSearchByName[250];
+	
+	sprintf(toSearchByName,"SELECT * FROM `group_history` WHERE user_name = '%s' AND rid = %d;", user_name, rid);
+
+	ret = mysql_query(&mysqlConnect, toSearchByName); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	res = mysql_store_result(&mysqlConnect);// Check the res value
+
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
+			int row = (int)mysql_num_rows(res);
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+				}
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return;
+}
+
+// Use content to search private 用内容查私聊
+void search_private_by_content(char sender[], char receiver[], char content[]){
+	char toSearchByContent[250]; // vague query
+
+	sprintf(toSearchByContent,"SELECT * FROM `private_history` WHERE user_name = '%s' AND recevie_name = '%s' AND content LIKE '%s';"
+			,sender
+			,receiver
+			,content);
+
+	ret = mysql_query(&mysqlConnect, toSearchByContent); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	res = mysql_store_result(&mysqlConnect);// Check the res value
+
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
+			int row = (int)mysql_num_rows(res);
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+				}
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return;
+}
+
+// Use content to search group 用内容查群聊
+void search_group_by_content(char content[], int rid){
+	char toSearchByContent[250]; // vague query
+
+	sprintf(toSearchByContent,"SELECT * FROM `group_history` WHERE rid = %d AND content LIKE '%s';", rid, content);
+
+	ret = mysql_query(&mysqlConnect, toSearchByContent); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	res = mysql_store_result(&mysqlConnect);// Check the res value
+
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
+			int row = (int)mysql_num_rows(res);
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+				}
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return;
+}
+
+// Use date to search private 用时间查私聊
+void search_private_by_date(char sender[], char receiver[], char date[]){
+	char toSearchByDate[250];
+
+	sprintf(toSearchByDate,"SELECT * FROM `private_history` WHERE user_name = '%s' AND recevie_name = '%s' AND DATE_FORMAT(create_time, '%Y%m%d') = '%s';"
+			,sender
+			,receiver
+			,date);
+
+	ret = mysql_query(&mysqlConnect, toSearchByDate); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	res = mysql_store_result(&mysqlConnect);// Check the res value
+
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
+			int row = (int)mysql_num_rows(res);
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+				}
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return;
+}
+
+// Use date to search group 用时间查群聊
+void search_group_by_date(char date[], int rid){
+	char toSearchByDate[250];
+
+	sprintf(toSearchByDate,"SELECT * FROM `group_history` WHERE rid = %d AND DATE_FORMAT(create_time, '%Y%m%d') = '%s';"
+			,rid
+			,date);
+
+	ret = mysql_query(&mysqlConnect, toSearchByDate); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	res = mysql_store_result(&mysqlConnect);// Check the res value
+
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
+			int row = (int)mysql_num_rows(res);
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+				}
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return;
+}
+
+// Get all private history 查全部私聊记录
+void search_private_history(){
+	// The selection query
+	ret = mysql_query(&mysqlConnect, "SELECT * FROM `private_history`;");
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		return;
+	}
+
+	res = mysql_store_result(&mysqlConnect);// Check the res value
+
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
 			int row = (int)mysql_num_rows(res);
 			for (unsigned int i = 0; field = mysql_fetch_field(res); i++) { 
 				printf("%25s", field->name);
@@ -115,171 +402,10 @@ void search_by_keyword(char keyword[]){
 	return;
 }
 
-// Use name to search
-void search_by_name(char user_name[]){
-	char toSearchByName[250] = "SELECT * FROM `history` WHERE user_name = ";
-	char userName[1000] = "'";
-	strcat_s(userName,sizeof userName,user_name);
-
-	// char userName[] = "'David'";
-
-	char finalString[300];
-	
-	// Concat strings
-	strcat_s(toSearchByName,sizeof toSearchByName,userName);
-	strcat_s(toSearchByName,sizeof toSearchByName,"';");
-
-	strcpy_s(finalString, sizeof finalString, toSearchByName);
-
-	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
-
-	// If the query failed, close the function
-	if (ret != 0) {
-		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
-		// return;
-	}
-
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = (int)mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
-
-	return;
-}
-
-// Use content to search
-void search_by_content(char content[]){
-	char toSearchByContent[250] = "SELECT * FROM `history` WHERE content LIKE "; // vague query
-	char searchContent[1000] = "'%";
-	strcat_s(searchContent,sizeof searchContent,content);
-
-	char finalString[300];
-	
-	// Concat strings
-	strcat_s(toSearchByContent,sizeof toSearchByContent,searchContent);
-	strcat_s(toSearchByContent,sizeof toSearchByContent,"%';");
-
-	strcpy_s(finalString, sizeof finalString, toSearchByContent);
-
-	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
-
-	// If the query failed, close the function
-	if (ret != 0) {
-		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
-		// return;
-	}
-
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = (int)mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
-
-	return;
-}
-
-// Use date to search
-void search_by_date(char date[]){
-	char toSearchByDate[250] = "SELECT * FROM `history` WHERE DATE_FORMAT(create_time, '%Y%m%d') = '";
-
-	char finalString[300];
-	
-	// Concat strings
-	strcat_s(toSearchByDate,sizeof toSearchByDate,date);
-	strcat_s(toSearchByDate,sizeof toSearchByDate,"';");
-
-	strcpy_s(finalString, sizeof finalString, toSearchByDate);
-	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
-
-	// If the query failed, close the function
-	if (ret != 0) {
-		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
-		// return;
-	}
-
-	res = mysql_store_result(&mysqlConnect);// Check the res value
-
-	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
-		//Print the result table
-		if (fieldCount > 0) {
-			int column = mysql_num_fields(res);
-			int row = (int)mysql_num_rows(res);
-			for (int i = 0; field = mysql_fetch_field(res); i++) { 
-				printf("%25s", field->name);
-				printf(" |");
-			}
-			printf("\n");
-			while (nextRow = mysql_fetch_row(res)) {
-				for (int j = 0; j < column; j++) {
-					printf("%25s", nextRow[j]);
-					printf(" |");
-				}
-				printf("\n");
-			}
-		}
-		else {
-			printf("No resullt. This is the result of a character splitting query... \n");
-		}
-	}
-	else {
-		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
-	}
-
-	return;
-}
-
-// 这个函数有问题，找的这个history是群聊的还是私聊的？？？？
-void search_history(){
+// Get all group history 查全部群聊记录
+void search_gourp_history(){
 	// The selection query
-	ret = mysql_query(&mysqlConnect, "SELECT * FROM `history`");
+	ret = mysql_query(&mysqlConnect, "SELECT * FROM `group_history`;");
 
 	// If the query failed, close the function
 	if (ret != 0) {
@@ -481,7 +607,7 @@ void add_private_chat(char sender[], char creat_time[], char content[], char rec
 	strcat_s(addPrivateInfo,sizeof addPrivateInfo,"','");
 	strcat_s(addPrivateInfo,sizeof addPrivateInfo,creat_time);
 	strcat_s(addPrivateInfo,sizeof addPrivateInfo,"','");
-	strcat_s(toInsertHistory,sizeof toInsertHistory,content);
+	strcat_s(addPrivateInfo,sizeof addPrivateInfo,content);
 	strcat_s(addPrivateInfo,sizeof addPrivateInfo,"','");
 	strcat_s(addPrivateInfo,sizeof addPrivateInfo,recevier);
 	strcat_s(addPrivateInfo,sizeof addPrivateInfo,"');");
