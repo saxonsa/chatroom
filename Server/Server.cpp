@@ -24,8 +24,12 @@ void exit_clean(int arg) {
 	exit(0);
 }
 
-void insert_into_database(char user_name[], char creat_time[], char content[]){
-	char toInsertHistory[1000] = "Insert INTO history(user_name,create_time,content) VALUES('";
+// insert gourp info 给群聊添加历史记录
+void insert_into_group(char user_name[], char creat_time[], char content[], int rid){
+	char toInsertHistory[1000] = "Insert INTO group_history(user_name,create_time,content,room_name) VALUES('";
+	
+	char str_rid[10] = { 0 };
+	itoa(rid, str_rid, 10);
 
 	// Concat strings
 	strcat_s(toInsertHistory,sizeof toInsertHistory,user_name);
@@ -33,7 +37,9 @@ void insert_into_database(char user_name[], char creat_time[], char content[]){
 	strcat_s(toInsertHistory,sizeof toInsertHistory,creat_time);
 	strcat_s(toInsertHistory,sizeof toInsertHistory,"','");
 	strcat_s(toInsertHistory,sizeof toInsertHistory,content);
-	strcat_s(toInsertHistory,sizeof toInsertHistory,"');");
+	strcat_s(toInsertHistory,sizeof toInsertHistory,"',");
+	strcat_s(toInsertHistory,sizeof toInsertHistory,str_rid);
+	strcat_s(toInsertHistory,sizeof toInsertHistory,");");
 
 	printf("%s \n",user_name);
 
@@ -220,18 +226,14 @@ void search_by_content(char content[]){
 }
 
 // Use date to search
-void search_by_date(int date){
-	char toSearchByDate[250] = "SELECT * FROM `history` WHERE DATE_FORMAT(create_time, '%Y%m%d') = ";
-	char searchDate[1000] = {0};
-	_itoa_s(date, searchDate, 10);
-
-	// char userName[] = "'David'";
+void search_by_date(char date[]){
+	char toSearchByDate[250] = "SELECT * FROM `history` WHERE DATE_FORMAT(create_time, '%Y%m%d') = '";
 
 	char finalString[300];
 	
 	// Concat strings
-	strcat_s(toSearchByDate,sizeof toSearchByDate,searchDate);
-	strcat_s(toSearchByDate,sizeof toSearchByDate,";");
+	strcat_s(toSearchByDate,sizeof toSearchByDate,date);
+	strcat_s(toSearchByDate,sizeof toSearchByDate,"';");
 
 	strcpy_s(finalString, sizeof finalString, toSearchByDate);
 	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
@@ -274,6 +276,7 @@ void search_by_date(int date){
 	return;
 }
 
+// 这个函数有问题，找的这个history是群聊的还是私聊的？？？？
 void search_history(){
 	// The selection query
 	ret = mysql_query(&mysqlConnect, "SELECT * FROM `history`");
@@ -293,6 +296,213 @@ void search_history(){
 			int column = mysql_num_fields(res);
 			int row = (int)mysql_num_rows(res);
 			for (unsigned int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+				}
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return;
+}
+
+// for user to sign up 注册函数
+void user_sign_up(char user_name[], char pwd[]){
+	char signUpInfo[250] = "INSERT INTO users VALUES('";
+
+	// connect sql
+	strcat_s(signUpInfo,sizeof signUpInfo,user_name);
+	strcat_s(signUpInfo,sizeof signUpInfo,"','");
+	strcat_s(signUpInfo,sizeof signUpInfo,pwd);
+	strcat_s(signUpInfo,sizeof signUpInfo,"');");
+
+	ret = mysql_query(&mysqlConnect, signUpInfo); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("User sign up failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	res = mysql_store_result(&mysqlConnect);// Check the res value
+
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
+			int row = (int)mysql_num_rows(res);
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+				}
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return;
+}
+
+// create new chatroom
+void add_room(char admin[], char room_name[]){
+	char addRoomInfo[250] = "INSERT INTO room_info(administrator,room_name) VALUES('";
+
+	// connect sql
+	strcat_s(addRoomInfo,sizeof addRoomInfo,admin);
+	strcat_s(addRoomInfo,sizeof addRoomInfo,"','");
+	strcat_s(addRoomInfo,sizeof addRoomInfo,room_name);
+	strcat_s(addRoomInfo,sizeof addRoomInfo,"');");
+
+	ret = mysql_query(&mysqlConnect, addRoomInfo); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	res = mysql_store_result(&mysqlConnect);// Check the res value
+	
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
+			int row = (int)mysql_num_rows(res);
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+				}
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return;
+}
+
+// add a member to a chat room 往特定chatroom里面加人
+void add_mem(int rid, char mem_name[]){
+	char addMemberInfo[250] = "INSERT INTO room_mem VALUES(";
+
+	char str_rid[10] = { 0 };
+	itoa(rid, str_rid, 10);
+
+	// connect sql
+	strcat_s(addMemberInfo,sizeof addMemberInfo,str_rid);
+	strcat_s(addMemberInfo,sizeof addMemberInfo,",'");
+	strcat_s(addMemberInfo,sizeof addMemberInfo,mem_name);
+	strcat_s(addMemberInfo,sizeof addMemberInfo,"');");
+
+	ret = mysql_query(&mysqlConnect, addMemberInfo); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Add member failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	res = mysql_store_result(&mysqlConnect);// Check the res value
+	
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
+			int row = (int)mysql_num_rows(res);
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
+				printf("%25s", field->name);
+				printf(" |");
+			}
+			printf("\n");
+			while (nextRow = mysql_fetch_row(res)) {
+				for (int j = 0; j < column; j++) {
+					printf("%25s", nextRow[j]);
+					printf(" |");
+				}
+				printf("\n");
+			}
+		}
+		else {
+			printf("No resullt. This is the result of a character splitting query... \n");
+		}
+	}
+	else {
+		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return;
+}
+
+// add a private chat 私聊
+void add_private_chat(char sender[], char creat_time[], char content[], char recevier[]){
+	char addPrivateInfo[250] = "INSERT INTO private_history VALUES('";
+
+	// connect sql
+	strcat_s(addPrivateInfo,sizeof addPrivateInfo,sender);
+	strcat_s(addPrivateInfo,sizeof addPrivateInfo,"','");
+	strcat_s(addPrivateInfo,sizeof addPrivateInfo,creat_time);
+	strcat_s(addPrivateInfo,sizeof addPrivateInfo,"','");
+	strcat_s(toInsertHistory,sizeof toInsertHistory,content);
+	strcat_s(addPrivateInfo,sizeof addPrivateInfo,"','");
+	strcat_s(addPrivateInfo,sizeof addPrivateInfo,recevier);
+	strcat_s(addPrivateInfo,sizeof addPrivateInfo,"');");
+
+	ret = mysql_query(&mysqlConnect, addPrivateInfo); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	res = mysql_store_result(&mysqlConnect);// Check the res value
+	
+	if (res) {
+		int fieldCount = mysql_field_count(&mysqlConnect);
+		//Print the result table
+		if (fieldCount > 0) {
+			int column = mysql_num_fields(res);
+			int row = (int)mysql_num_rows(res);
+			for (int i = 0; field = mysql_fetch_field(res); i++) { 
 				printf("%25s", field->name);
 				printf(" |");
 			}
@@ -435,7 +645,16 @@ void accept_conn(void *dummy) {
 
 			// broadcast normal chat msg to all clients in the chatroom
 			if (strcmp(usrInfo.type, "CHAT") == 0) {
-				insert_into_database(usrInfo.name, usrInfo.createTime, usrInfo.msg); // Insert the history into the database
+
+
+
+
+				// 还需要传入chatroom的名字
+				//insert_into_database(usrInfo.name, usrInfo.createTime, usrInfo.msg); // Insert the history into the database
+				
+				
+				
+				
 				printf("curr name: %s\n", usrInfo.name);
 				printf("curr time: %s\n", usrInfo.createTime);
 				printf("curr msg: %s\n", usrInfo.msg);

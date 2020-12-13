@@ -45,11 +45,18 @@ typedef struct _Client {
 Client clients[MAX_ALLOWED] = { 0 };
 
 typedef struct {
+	char search_name[100];
+	char search_content[1000];
+	char search_time[100];
+}search;
+
+typedef struct {
 	char name[100];
 	char type[100];
 	char msg[1000];
 	char createTime[100];
-	int room;
+	int room; // 当前所在的room
+	search* searchMsg;
 }usrData;
 
 usrData usr[MAX_ALLOWED] = { 0 };
