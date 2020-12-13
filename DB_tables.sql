@@ -19,7 +19,8 @@ create table group_history(
 drop table if exists users;	
 create table users(
 `user_name` varchar(100) primary key,
-`password` varchar(100)
+`password` varchar(100),
+`status` int
 )default charset=utf8;
 
 drop table if exists room_mem;	

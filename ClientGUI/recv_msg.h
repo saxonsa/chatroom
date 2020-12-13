@@ -39,7 +39,7 @@ class Reciever : public QThread
 
             if (strcmp(usr.type, "ENTER") == 0 || strcmp(usr.type, "QUIT") == 0) {
                 strcat(chatMsg, usr.msg);
-                emit enter_success(chatMsg,usr.onlineList);
+                emit enter_success(chatMsg);
             } else if (strcmp(usr.type, "CHAT") == 0) {
                 sprintf(chatMsg,"%s%s: %s",usr.createTime,usr.name,usr.msg);
                 emit recv_success(chatMsg);
@@ -59,7 +59,7 @@ class Reciever : public QThread
 
 signals:
     void recv_success(QString);
-    void enter_success(QString, nameList*);
+    void enter_success(QString);
     void search_success(QString);
     void login_success(char*);
     void login_failed(char*);

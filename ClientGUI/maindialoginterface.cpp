@@ -79,7 +79,7 @@ void MainDialogInterface::on_Send_clicked()
 
 }
 
-void MainDialogInterface::displayOnlineList(QString data,nameList* onlineList) {
+void MainDialogInterface::displayOnlineList(QString data) {
     receiveData(data);
     QStringList usrOnlineList;
     for (int i = 0; i < MAX_ALLOWED; i++) {
