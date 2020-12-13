@@ -6,6 +6,7 @@
 #include <QThread>
 #include <QtDebug>
 #include <string>
+#include <iostream>
 using namespace std;
 
 class Reciever : public QThread
@@ -14,10 +15,8 @@ class Reciever : public QThread
     void run() override{
         while (1) {
             char chatMsg[] = "";
-//            usrData recvData;
-//            qDebug()<< "I am inside the thread!";
-//            qDebug()<< connect_sock;
-            msg_len = recv(connect_sock, szBuff, sizeof(szBuff), 0);
+
+            msg_len = recv(connect_sock, szBuff, sizeof szBuff, 0);
 
             if (msg_len == SOCKET_ERROR) {
               fprintf(stderr, "recv() failed with error %d\n", WSAGetLastError());
@@ -37,23 +36,26 @@ class Reciever : public QThread
 
             memcpy(&usr, szBuff, sizeof szBuff);
 
-            if (strcmp(usr.type, "ENTER") == 0) {
+
+            if (strcmp(usr.type, "ENTER") == 0 || strcmp(usr.type, "QUIT") == 0) {
                 strcat(chatMsg, usr.msg);
+                emit enter_success(chatMsg,usr.onlineList);
             } else if (strcmp(usr.type, "CHAT") == 0) {
-                strcat(chatMsg, usr.createTime);
-                strcat(chatMsg, usr.name);
-                strcat(chatMsg, ":");
-                strcat(chatMsg, usr.msg);
+                sprintf(chatMsg,"%s%s: %s",usr.createTime,usr.name,usr.msg);
+                emit recv_success(chatMsg);
+            } else if (strcmp(usr.type, "SEARCH") == 0){
+                sprintf(chatMsg,"%s\n%s: %s",usr.searchMsg.search_time,usr.searchMsg.search_name,usr.searchMsg.search_content);
+                emit search_success(chatMsg);
             }
-
-
-            emit recv_success(chatMsg);
+//            emit recv_success(chatMsg);
         }
         return;
     }
 
 signals:
     void recv_success(QString);
+    void enter_success(QString, nameList*);
+    void search_success(QString);
 };
 
 #endif // TEST_CONNECTION_H

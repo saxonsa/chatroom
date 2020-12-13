@@ -9,6 +9,7 @@
 #include <process.h>
 
 #define DEFAULT_PORT	5019
+#define BufferSize 2820
 
 extern WSADATA wsaData;
 
@@ -22,12 +23,24 @@ extern char *server_name;// = (char*)"localhost";
 extern unsigned short port;// = DEFAULT_PORT;
 extern unsigned int addr;
 
-extern char szBuff[1500];
+extern char szBuff[BufferSize];
 extern int msg_len;
 extern struct hostent *hp;
 
+const int MAX_ALLOWED = 3; // the max number of clients supported by server
 
 extern char name[255];// = {};
+
+typedef struct _nameList {
+   int uid;
+   char name[100];
+}nameList;
+
+typedef struct {
+    char search_name[100];
+    char search_time[100];
+    char search_content[1000];
+}search;
 
 typedef struct {
    char name[100];
@@ -35,8 +48,12 @@ typedef struct {
    char msg[1000];
    char createTime[100];
    int room;
+   nameList onlineList[MAX_ALLOWED];
+   search searchMsg;
 }usrData;
+
 extern usrData usr;
+
 
 // call a thread to receive message from server
 //void recv_msg(void *client_socket);

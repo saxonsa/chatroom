@@ -1,4 +1,5 @@
 #define		DEFAULT_PORT		5019	// server Listening Port
+#define BufferSize 2820
 
 
 /*************************************************************/
@@ -15,7 +16,7 @@ struct sockaddr_in local = { 0 };		// server end address
 struct sockaddr_in client_addr = { 0 };	// client end address
 
 
-char szBuff[1000];
+char szBuff[BufferSize];
 int msg_len;
 int addr_len;
 
@@ -35,19 +36,23 @@ int ret = 0;
 // an array to store all the clients connecting with server
 typedef struct _Client {
 	int fd;
-	char buff[1000]; // Client buffer
-	char name[32]; // Client name
-	char IP[20]; // Client IP
-	struct sockaddr_in client_addr; // Client IP address
+	char name[100]; // Client name
 	SOCKET client_socket; // Client socket
 }Client;
 
 Client clients[MAX_ALLOWED] = { 0 };
 
+typedef struct _nameList {
+	int uid;
+	char name[100];
+}nameList;
+
+int onlineList_msg = 0;
+
 typedef struct {
 	char search_name[100];
-	char search_content[1000];
 	char search_time[100];
+	char search_content[1000];
 }search;
 
 typedef struct {
@@ -55,11 +60,17 @@ typedef struct {
 	char type[100];
 	char msg[1000];
 	char createTime[100];
-	int room; // 当前所在的room
-	search* searchMsg;
+	int room;
+	nameList onlineList[MAX_ALLOWED];
+	search searchMsg;
 }usrData;
 
-usrData usr[MAX_ALLOWED] = { 0 };
+/*typedef struct {
+	char name[100];
+	char time[32];
+	char content[1000];
+}historyRes;*/
+
 
 char normalMsg[1000] = { 0 }; // the normal msg sent to all... e.x: Saxon: msg
 

@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "maindialoginterface.h"
 #include <QDebug>
 #include <QString>
 #include <QMessageBox>
@@ -18,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     // Create a new scene
     mainDialog = new MainDialogInterface;
+
 
 //    connect(this,SIGNAL(sendData(QString)),mainDialog,SLOT(receiveData(QString)));
 }
@@ -51,12 +51,19 @@ void MainWindow::on_EnterBtn_clicked()
     if (client_connect(ip,portNum,userName) == 0){
         Reciever *recver = new Reciever();
         connect(recver, SIGNAL(recv_success(QString)),mainDialog,SLOT(receiveData(QString)));
+        connect(recver, SIGNAL(enter_success(QString, nameList*)),mainDialog,SLOT(displayOnlineList(QString, nameList*)));
+        connect(recver, SIGNAL(search_success(QString)),mainDialog,SLOT(recvSignalToSearch(QString)));
         recver->start(); // start the thread
 
 
         strcpy(usr.name, userName);
         strcpy(usr.type, "ENTER");
         memset(usr.msg, 0, sizeof usr.msg);
+        for (int i = 0; i < MAX_ALLOWED; i++) {
+            usr.onlineList[i].uid = -1;
+            memset(usr.onlineList[i].name, 0, sizeof usr.onlineList[i].name);
+        }
+
 
 //        char msg[1000];
 //        string userInfo = "type: 1, content: ";
@@ -64,7 +71,7 @@ void MainWindow::on_EnterBtn_clicked()
 //        userInfo = userInfo + content;
 //        strcpy(msg, userInfo.c_str());
 
-        msg_len = send(connect_sock, (char*)&usr, sizeof usr, 0);
+        msg_len = send(connect_sock, (char*)&usr, sizeof szBuff, 0);
         if (msg_len == SOCKET_ERROR) {
            fprintf(stderr, "send() failed with error %d\n", WSAGetLastError());
            WSACleanup();

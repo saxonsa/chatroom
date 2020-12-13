@@ -1,11 +1,13 @@
 #include "maindialoginterface.h"
 #include "ui_maindialoginterface.h"
 #include "mainwindow.h"
+
 #include "client.h"
 #include <QString>
 #include <QtDebug>
 #include <QTextCodec>
 #include <string>
+#include <QStringListModel>
 using namespace std;
 
 
@@ -14,6 +16,10 @@ MainDialogInterface::MainDialogInterface(QWidget *parent) :
     ui(new Ui::MainDialogInterface)
 {
     ui->setupUi(this);
+
+    searchHistory = new SearchHistory;
+
+    connect(this, SIGNAL(sendSignalToSearch(QString)),searchHistory,SLOT(recv_From_Main_Dialog(QString)));
 }
 
 
@@ -27,33 +33,17 @@ MainDialogInterface::~MainDialogInterface()
 
 void MainDialogInterface::receiveData(QString data)
 {
-    qDebug() << data;
-
-    // add clinet name to Online List
-//    string msg = data.toStdString();
-//    string welcome = "Welcome ";
-//    string enterMsg = " enters the chatroom!";
-//    string name;
-//    if (!msg.compare(0, welcome.length(), welcome, 0, welcome.length())) {
-//        name = msg.erase(0, welcome.length());
-//        addOnlineList(name);
-//    }
-//    if (msg.length() > enterMsg.length()
-//            && !msg.compare(msg.length() - enterMsg.length(), msg.length(), enterMsg, 0, enterMsg.length())
-//            && msg.find(":") == string::npos) {
-//        name = msg.substr(0, msg.length() - enterMsg.length());
-//        addOnlineList(name);
-//    }
-
     ui->historyBrowser->append(data);
 }
 
 void MainDialogInterface::on_Send_clicked()
 {
      // send message to server
+    QTextCodec *codec =QTextCodec::codecForName("UTF-8");
 
     QString buffer = ui->textEditor->toPlainText();
-    QByteArray transfered_buffer = buffer.toLocal8Bit();
+    QString transcoding_buffer = codec->toUnicode(buffer.toStdString().c_str());
+    QByteArray transfered_buffer = transcoding_buffer.toLocal8Bit();
 
     char *bufferToString = transfered_buffer.data();
 
@@ -68,7 +58,7 @@ void MainDialogInterface::on_Send_clicked()
 //    chatMsg = chatMsg + content;
 //    strcpy(msg, chatMsg.c_str());
 
-    msg_len = send(connect_sock, (char*)&usr, 1000, 0);
+    msg_len = send(connect_sock, (char*)&usr, sizeof szBuff, 0);
 
     if (msg_len == SOCKET_ERROR) {
       fprintf(stderr, "send() failed with error %d\n", WSAGetLastError());
@@ -89,14 +79,25 @@ void MainDialogInterface::on_Send_clicked()
 
 }
 
-//void MainDialogInterface::addOnlineList(string name) {
-//    QString addName = QString::fromStdString(name);
-//    QListWidgetItem* item = new QListWidgetItem;
-//    item->setText(addName);
-//    ui->onlineList->addItem(item);
-//}
+void MainDialogInterface::displayOnlineList(QString data,nameList* onlineList) {
+    receiveData(data);
+    QStringList usrOnlineList;
+    for (int i = 0; i < MAX_ALLOWED; i++) {
+        if (usr.onlineList[i].uid != -1) {
+            usrOnlineList << usr.onlineList[i].name;
+        }
+    }
+    QStringListModel *model = new QStringListModel(usrOnlineList);
+    ui->onlineList->setModel(model);
+}
 
-//void MainDialogInterface::deleteOnlineList(string name) {
-//    QString deleteName = QString::fromStdString(name);
+void MainDialogInterface::on_History_clicked()
+{
+    searchHistory->show();
 
-//}
+}
+
+
+void MainDialogInterface::recvSignalToSearch(QString data){
+    emit sendSignalToSearch(data);
+}

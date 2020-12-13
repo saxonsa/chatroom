@@ -8,6 +8,9 @@
 #include <mysql.h> // for database functions
 #include <time.h>
 #include "server.h"
+#include <iostream>
+
+using namespace std;
 
 #pragma comment(lib,"ws2_32.lib")
 #pragma comment(lib,"libmysql.lib")
@@ -55,7 +58,7 @@ void print_table(MYSQL_RES *res){
 	return;
 }
 
-// insert gourp info ¸øÈºÁÄÌí¼ÓÀúÊ·¼ÇÂ¼
+// insert gourp info ï¿½ï¿½Èºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê·ï¿½ï¿½Â¼
 void insert_into_group(char user_name[], char creat_time[], char content[], int rid){
 	char toInsertHistory[1000];
 	
@@ -81,7 +84,7 @@ void insert_into_group(char user_name[], char creat_time[], char content[], int 
 	return;
 }
 
-// insert private info ¸øË½ÁÄÌí¼ÓÀúÊ·¼ÇÂ¼
+// insert private info ï¿½ï¿½Ë½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê·ï¿½ï¿½Â¼
 void insert_into_private(char sender[], char creat_time[], char content[], char receiver[]){
 	char toInsertHistory[1000];
 
@@ -106,7 +109,7 @@ void insert_into_private(char sender[], char creat_time[], char content[], char 
 	return;
 }
 
-// Use name to search private ÓÃÈËÃû²éË½ÁÄ
+// Use name to search private ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë½ï¿½ï¿½
 void search_private_by_name(char sender[], char receiver[]){
 	char toSearchByName[250];
 	
@@ -126,7 +129,7 @@ void search_private_by_name(char sender[], char receiver[]){
 	return;
 }
 
-// Use name to search group ÓÃÈËÃû²éÈºÁÄ
+// Use name to search group ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Èºï¿½ï¿½
 void search_group_by_name(char user_name[], int rid){
 	char toSearchByName[250];
 	
@@ -146,7 +149,7 @@ void search_group_by_name(char user_name[], int rid){
 	return;
 }
 
-// Use content to search private ÓÃÄÚÈİ²éË½ÁÄ
+// Use content to search private ï¿½ï¿½ï¿½ï¿½ï¿½İ²ï¿½Ë½ï¿½ï¿½
 void search_private_by_content(char sender[], char receiver[], char content[]){
 	char toSearchByContent[250]; // vague query
 
@@ -169,7 +172,7 @@ void search_private_by_content(char sender[], char receiver[], char content[]){
 	return;
 }
 
-// Use content to search group ÓÃÄÚÈİ²éÈºÁÄ
+// Use content to search group ï¿½ï¿½ï¿½ï¿½ï¿½İ²ï¿½Èºï¿½ï¿½
 void search_group_by_content(char content[], int rid){
 	char toSearchByContent[250]; // vague query
 
@@ -189,7 +192,7 @@ void search_group_by_content(char content[], int rid){
 	return;
 }
 
-// Use date to search private ÓÃÊ±¼ä²éË½ÁÄ
+// Use date to search private ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ë½ï¿½ï¿½
 void search_private_by_date(char sender[], char receiver[], char date[]){
 	char toSearchByDate[250];
 
@@ -212,7 +215,7 @@ void search_private_by_date(char sender[], char receiver[], char date[]){
 	return;
 }
 
-// Use date to search group ÓÃÊ±¼ä²éÈºÁÄ
+// Use date to search group ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Èºï¿½ï¿½
 void search_group_by_date(char date[], int rid){
 	char toSearchByDate[250];
 
@@ -234,7 +237,7 @@ void search_group_by_date(char date[], int rid){
 	return;
 }
 
-// Get all private history ²éÈ«²¿Ë½ÁÄ¼ÇÂ¼
+// Get all private history ï¿½ï¿½È«ï¿½ï¿½Ë½ï¿½Ä¼ï¿½Â¼
 void search_private_history(){
 	// The selection query
 	ret = mysql_query(&mysqlConnect, "SELECT * FROM `private_history`;");
@@ -251,7 +254,7 @@ void search_private_history(){
 	return;
 }
 
-// Get all group history ²éÈ«²¿ÈºÁÄ¼ÇÂ¼
+// Get all group history ï¿½ï¿½È«ï¿½ï¿½Èºï¿½Ä¼ï¿½Â¼
 void search_gourp_history(){
 	// The selection query
 	ret = mysql_query(&mysqlConnect, "SELECT * FROM `group_history`;");
@@ -268,7 +271,7 @@ void search_gourp_history(){
 	return;
 }
 
-// for user to sign up ×¢²áº¯Êı
+// for user to sign up ×¢ï¿½áº¯ï¿½ï¿½
 void user_sign_up(char user_name[], char pwd[]){
 	char signUpInfo[250];
 
@@ -314,7 +317,7 @@ void add_room(char admin[], char room_name[]){
 	return;
 }
 
-// add a member to a chat room ÍùÌØ¶¨chatroomÀïÃæ¼ÓÈË
+// add a member to a chat room ï¿½ï¿½ï¿½Ø¶ï¿½chatroomï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void add_mem(int rid, char mem_name[]){
 	char addMemberInfo[250] = "INSERT INTO room_mem VALUES(";
 
@@ -336,7 +339,7 @@ void add_mem(int rid, char mem_name[]){
 	return;
 }
 
-// add a private chat Ë½ÁÄ
+// add a private chat Ë½ï¿½ï¿½
 void add_private_chat(char sender[], char creat_time[], char content[], char recevier[]){
 	char addPrivateInfo[250] = "INSERT INTO private_history VALUES('";
 
@@ -369,7 +372,14 @@ void accept_conn(void *dummy) {
 
 		usrData usrInfo;
 
+		// init onlineList
+		for (int i = 0; i < MAX_ALLOWED; i++) {
+			usrInfo.onlineList[i].uid = -1;
+		}
+
 		while (1) {
+
+			
 
 			msg_len = recv(sub_sock, szBuff, sizeof(szBuff), 0);
 			
@@ -395,7 +405,6 @@ void accept_conn(void *dummy) {
 						memset(clients[s].name, 0, sizeof(clients[s].name));
 					}
 				}
-				closesocket(sub_sock);
 				break;
 				//return -1;
 			}
@@ -408,10 +417,13 @@ void accept_conn(void *dummy) {
 						memset(clients[s].name, 0, sizeof(clients[s].name));
 					}
 				}
-				closesocket(sub_sock);
 				break;
 				//return -1;
 			}
+
+			// printf("Msg from search request --- name: %s\n", usrInfo.searchMsg->search_name);
+			// printf("Msg from search request --- content: %s\n", usrInfo.searchMsg->search_content);
+			// printf("Msg from search request --- time: %s\n", usrInfo.searchMsg->search_time);
 
 			// decompose szBuff to seperate type and content
 			// char *typeMsg = "type: ";
@@ -429,6 +441,8 @@ void accept_conn(void *dummy) {
 			/* Send message back to Client */
 
 			if (strcmp(usrInfo.type, "ENTER") == 0) {
+				
+				/* send enter room msg */
 				char enterMsgOther[100] = { 0 }; // the enter msg sent to others
 				char enterMsgSelf[100] = "Welcome "; // the enter msg sent to the client himhelf
 				for (int s = 0; s < MAX_ALLOWED; s++) {
@@ -444,12 +458,24 @@ void accept_conn(void *dummy) {
 					}
 				}
 
+				// online list logic
+				for (int i = 0; i < MAX_ALLOWED; i++) {
+					if (clients[i].client_socket != INVALID_SOCKET) {
+						usrInfo.onlineList[i].uid = i;
+						memcpy(usrInfo.onlineList[i].name, clients[i].name, sizeof(usrInfo.onlineList[i].name));
+					}
+				}
+
+				for (int i = 0; i < MAX_ALLOWED; i++) {
+					printf("---usrInfo.online.uid: %d\n", usrInfo.onlineList[i].uid);
+				}
+
 				// broadcast name msg depends on different clients
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (clients[i].client_socket != INVALID_SOCKET) {
 						if (clients[i].client_socket == sub_sock) {
 							strcpy_s(usrInfo.msg, sizeof usrInfo.msg, enterMsgSelf);
-							msg_len = send(clients[i].client_socket, (char*)&usrInfo, 1500, 0);
+							msg_len = send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
 
 							if (msg_len <= 0){
 								printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
@@ -462,7 +488,7 @@ void accept_conn(void *dummy) {
 
 						} else {
 							strcpy_s(usrInfo.msg, sizeof usrInfo.msg, enterMsgOther);
-							msg_len = send(clients[i].client_socket, (char*)&usrInfo, 1500, 0);
+							msg_len = send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
 
 							if (msg_len <= 0){
 								printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
@@ -479,19 +505,11 @@ void accept_conn(void *dummy) {
 
 			// broadcast normal chat msg to all clients in the chatroom
 			if (strcmp(usrInfo.type, "CHAT") == 0) {
-
-
-
-
-				// »¹ĞèÒª´«ÈëchatroomµÄÃû×Ö
-				//insert_into_database(usrInfo.name, usrInfo.createTime, usrInfo.msg); // Insert the history into the database
-				
-				
-				
-				
-				printf("curr name: %s\n", usrInfo.name);
-				printf("curr time: %s\n", usrInfo.createTime);
-				printf("curr msg: %s\n", usrInfo.msg);
+				insert_into_database(usrInfo.name, usrInfo.createTime, usrInfo.msg); // Insert the history into the database
+				// printf("curr name: %s\n", usrInfo.name);
+				// printf("curr time: %s\n", usrInfo.createTime);
+				// printf("curr msg: %s\n", usrInfo.msg);
+				// search_history();// Search history from database
 
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (clients[i].client_socket == sub_sock) {
@@ -501,7 +519,7 @@ void accept_conn(void *dummy) {
 				
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (clients[i].client_socket != INVALID_SOCKET) {
-						msg_len = send(clients[i].client_socket, (char*)&usrInfo, 1500, 0);
+						msg_len = send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
 
 						if (msg_len <= 0){
 							printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
@@ -514,7 +532,41 @@ void accept_conn(void *dummy) {
 					}
 				}
 			}
+
+			if (strcmp(usrInfo.type, "SEARCH") == 0) {
+				// Because time is always returned from client, there is only four cases to judge.
+
+				printf("Msg from search request --- name: %s\n", usrInfo.searchMsg.search_name);
+				printf("Msg from search request --- content: %s\n", usrInfo.searchMsg.search_content);
+				printf("Msg from search request --- time: %s\n", usrInfo.searchMsg.search_time);
+
+				if (strcmp(usrInfo.searchMsg.search_name,"") == 0){
+					// The case that only search by date
+					if(strcmp(usrInfo.searchMsg.search_content,"") == 0){
+						search_by_date(usrInfo.searchMsg.search_time,sub_sock,usrInfo);
+					}
+					// The case that only search by date and content
+					else{
+						
+					}
+				}else{
+					if(strcmp(usrInfo.searchMsg.search_content,"") == 0){
+	
+					}
+				}
+				// printf("Msg from search request --- name: %s\n", usrInfo.searchMsg.search_name);
+				// printf("Msg from search request --- content: %s\n", usrInfo.searchMsg.search_content);
+				// printf("Msg from search request --- time: %s\n", usrInfo.searchMsg.search_time);
+			}
+
+
+
 		}
+
+		for (int i = 0; i < MAX_ALLOWED; i++) {
+			printf("---usrInfo.online.uid: %d\n", usrInfo.onlineList[i].uid);
+		}
+
 		// if client closes socket, clear its information in client array
 		for (unsigned i = 0; i < MAX_ALLOWED; i++) {
 			if (clients[i].client_socket == sub_sock) {
@@ -523,6 +575,33 @@ void accept_conn(void *dummy) {
 				memset(clients[i].name, 0, sizeof clients[i].name);
 			}
 		}
+		
+		for (unsigned i = 0; i < MAX_ALLOWED; i++) {
+			if (clients[i].client_socket == INVALID_SOCKET) {
+				usrInfo.onlineList[i].uid = -1;
+				memset(usrInfo.onlineList[i].name, 0, sizeof usrInfo.onlineList[i].name);
+			}
+		}
+
+		memcpy(usrInfo.type, "QUIT", sizeof usrInfo.type);
+		for (int i = 0; i < MAX_ALLOWED; i++) {
+			printf("usrInfo.online.uid: %d\n", usrInfo.onlineList[i].uid);
+		}
+
+		for (unsigned i = 0; i < MAX_ALLOWED; i++) {
+			if (clients[i].client_socket != INVALID_SOCKET) {
+				msg_len = send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
+				if (msg_len <= 0){
+					printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+					closesocket(sub_sock);
+					connecting--;
+					printf("current number of clients: %d\n", connecting);
+					_endthread();
+					//return -1;
+				}	
+			}
+		}
+
 		connecting--;
 		printf("current number of clients: %d\n", connecting);
 		closesocket(sub_sock);
@@ -558,12 +637,13 @@ int main(int argc, char **argv){
 		return -1;
 	}
 
+	
 	for (int i = 0; i < MAX_ALLOWED; i++) {
+		// init clients
 		clients[i].fd = i;
 		clients[i].client_socket = INVALID_SOCKET;
 		memset(clients[i].name, 0, sizeof(clients[i].name));
 	}
-
 
 	/* Set the attributes of server address */
 	local.sin_family		= AF_INET; // The way of connection
