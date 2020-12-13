@@ -84,28 +84,16 @@ void MainDialogInterface::displayOnlineList(QString data,nameList* onlineList) {
     receiveData(data);
     QStringList usrOnlineList;
     for (int i = 0; i < MAX_ALLOWED; i++) {
-        if (onlineList[i].uid != -1) {
-            usrOnlineList << onlineList[i].name;
+        if (usr.onlineList[i].uid != -1) {
+            usrOnlineList << usr.onlineList[i].name;
         }
     }
     QStringListModel *model = new QStringListModel(usrOnlineList);
     ui->onlineList->setModel(model);
 }
 
-//void MainDialogInterface::addOnlineList(string name) {
-//    QString addName = QString::fromStdString(name);
-
-//    QListWidgetItem* item = new QListWidgetItem;
-//    item->setText(addName);
-//    ui->onlineList->addItem(item);
-
-//}
-
-//void MainDialogInterface::deleteOnlineList(string name) {
-//    QString deleteName = QString::fromStdString(name);
-//}
-
-void MainDialogInterface::on_History_clicked(){
+void MainDialogInterface::on_History_clicked()
+{
     searchHistory->show();
 
 }

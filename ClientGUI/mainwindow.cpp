@@ -59,6 +59,11 @@ void MainWindow::on_EnterBtn_clicked()
         strcpy(usr.name, userName);
         strcpy(usr.type, "ENTER");
         memset(usr.msg, 0, sizeof usr.msg);
+        for (int i = 0; i < MAX_ALLOWED; i++) {
+            usr.onlineList[i].uid = -1;
+            memset(usr.onlineList[i].name, 0, sizeof usr.onlineList[i].name);
+        }
+
 
 //        char msg[1000];
 //        string userInfo = "type: 1, content: ";
