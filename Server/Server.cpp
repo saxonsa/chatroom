@@ -24,7 +24,7 @@ void exit_clean(int arg) {
 	exit(0);
 }
 
-// insert gourp info ¸øÈºÁÄÌí¼ÓÀúÊ·¼ÇÂ¼
+// insert gourp info ç»™ç¾¤èŠæ·»åŠ å†å²è®°å½•
 void insert_into_group(char user_name[], char creat_time[], char content[], int rid){
 	char toInsertHistory[1000] = "Insert INTO group_history(user_name,create_time,content,room_name) VALUES('";
 	
@@ -42,6 +42,34 @@ void insert_into_group(char user_name[], char creat_time[], char content[], int 
 	strcat_s(toInsertHistory,sizeof toInsertHistory,");");
 
 	printf("%s \n",user_name);
+
+	ret = mysql_query(&mysqlConnect, toInsertHistory); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	// A hint that shows the insertion is complte
+	// printf("History record succeed! \n");
+
+	return;
+}
+
+// insert private info ç»™ç§èŠæ·»åŠ å†å²è®°å½•
+void insert_into_private(char sender[], char creat_time[], char content[], char receiver[]){
+	char toInsertHistory[1000] = "Insert INTO private_history VALUES('";
+
+	// Concat strings
+	strcat_s(toInsertHistory,sizeof toInsertHistory,sender);
+	strcat_s(toInsertHistory,sizeof toInsertHistory,"','");
+	strcat_s(toInsertHistory,sizeof toInsertHistory,creat_time);
+	strcat_s(toInsertHistory,sizeof toInsertHistory,"','");
+	strcat_s(toInsertHistory,sizeof toInsertHistory,content);
+	strcat_s(toInsertHistory,sizeof toInsertHistory,"','");
+	strcat_s(toInsertHistory,sizeof toInsertHistory,receiver);
+	strcat_s(toInsertHistory,sizeof toInsertHistory,"');");
 
 	ret = mysql_query(&mysqlConnect, toInsertHistory); // Pass the query to database
 
@@ -276,7 +304,7 @@ void search_by_date(char date[]){
 	return;
 }
 
-// Õâ¸öº¯ÊıÓĞÎÊÌâ£¬ÕÒµÄÕâ¸öhistoryÊÇÈºÁÄµÄ»¹ÊÇË½ÁÄµÄ£¿£¿£¿£¿
+// è¿™ä¸ªå‡½æ•°æœ‰é—®é¢˜ï¼Œæ‰¾çš„è¿™ä¸ªhistoryæ˜¯ç¾¤èŠçš„è¿˜æ˜¯ç§èŠçš„ï¼Ÿï¼Ÿï¼Ÿï¼Ÿ
 void search_history(){
 	// The selection query
 	ret = mysql_query(&mysqlConnect, "SELECT * FROM `history`");
@@ -319,7 +347,7 @@ void search_history(){
 	return;
 }
 
-// for user to sign up ×¢²áº¯Êı
+// for user to sign up æ³¨å†Œå‡½æ•°
 void user_sign_up(char user_name[], char pwd[]){
 	char signUpInfo[250] = "INSERT INTO users VALUES('";
 
@@ -419,7 +447,7 @@ void add_room(char admin[], char room_name[]){
 	return;
 }
 
-// add a member to a chat room ÍùÌØ¶¨chatroomÀïÃæ¼ÓÈË
+// add a member to a chat room å¾€ç‰¹å®šchatroomé‡Œé¢åŠ äºº
 void add_mem(int rid, char mem_name[]){
 	char addMemberInfo[250] = "INSERT INTO room_mem VALUES(";
 
@@ -472,7 +500,7 @@ void add_mem(int rid, char mem_name[]){
 	return;
 }
 
-// add a private chat Ë½ÁÄ
+// add a private chat ç§èŠ
 void add_private_chat(char sender[], char creat_time[], char content[], char recevier[]){
 	char addPrivateInfo[250] = "INSERT INTO private_history VALUES('";
 
@@ -649,7 +677,7 @@ void accept_conn(void *dummy) {
 
 
 
-				// »¹ĞèÒª´«ÈëchatroomµÄÃû×Ö
+				// è¿˜éœ€è¦ä¼ å…¥chatroomçš„åå­—
 				//insert_into_database(usrInfo.name, usrInfo.createTime, usrInfo.msg); // Insert the history into the database
 				
 				
