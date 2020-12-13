@@ -39,19 +39,23 @@ class Reciever : public QThread
 
             if (strcmp(usr.type, "ENTER") == 0) {
                 strcat(chatMsg, usr.msg);
+                emit enter_success(chatMsg,usr.onlineList);
             } else if (strcmp(usr.type, "CHAT") == 0) {
-                strcat(chatMsg, usr.createTime);
-                strcat(chatMsg, usr.name);
-                strcat(chatMsg, ":");
-                strcat(chatMsg, usr.msg);
+                sprintf(chatMsg,"%s%s: %s",usr.createTime,usr.name,usr.msg);
+                emit recv_success(chatMsg);
+            } else if (strcmp(usr.type, "SEARCH") == 0){
+                sprintf(chatMsg,"%s\n%s: %s",usr.searchMsg.search_time,usr.searchMsg.search_name,usr.searchMsg.search_content);
+                emit search_success(chatMsg);
             }
-            emit recv_success(chatMsg, usr.onlineList);
+//            emit recv_success(chatMsg);
         }
         return;
     }
 
 signals:
-    void recv_success(QString, nameList*);
+    void recv_success(QString);
+    void enter_success(QString, nameList*);
+    void search_success(QString);
 };
 
 #endif // TEST_CONNECTION_H

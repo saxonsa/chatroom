@@ -154,6 +154,7 @@ void search_by_name(char user_name[]){
 					printf("%25s", nextRow[j]);
 					printf(" |");
 				}
+
 				printf("\n");
 			}
 		}
@@ -223,20 +224,24 @@ void search_by_content(char content[]){
 }
 
 // Use date to search
-void search_by_date(int date){
-	char toSearchByDate[250] = "SELECT * FROM `history` WHERE DATE_FORMAT(create_time, '%Y%m%d') = ";
-	char searchDate[1000] = {0};
-	_itoa_s(date, searchDate, 10);
+void search_by_date(char* date, SOCKET socks, usrData usrInfo){
+	char toSearchByDate[250] = "SELECT * FROM `history` WHERE DATE_FORMAT(create_time, '%Y-%m-%d') = '";
+	// char searchDate[1000] = {0};
+	// _itoa_s(date, searchDate, 10);
 
 	// char userName[] = "'David'";
 
 	char finalString[300];
 	
 	// Concat strings
-	strcat_s(toSearchByDate,sizeof toSearchByDate,searchDate);
-	strcat_s(toSearchByDate,sizeof toSearchByDate,";");
+	strcat_s(toSearchByDate,sizeof toSearchByDate,date);
+	// strcat_s(toSearchByDate,sizeof toSearchByDate,searchDate);
+	strcat_s(toSearchByDate,sizeof toSearchByDate,"';");
 
 	strcpy_s(finalString, sizeof finalString, toSearchByDate);
+
+	cout << finalString << endl;
+
 	ret = mysql_query(&mysqlConnect, finalString); // Pass the query to database
 
 	// If the query failed, close the function
@@ -253,6 +258,7 @@ void search_by_date(int date){
 		if (fieldCount > 0) {
 			int column = mysql_num_fields(res);
 			int row = (int)mysql_num_rows(res);
+			usrData hisRes;
 			for (int i = 0; field = mysql_fetch_field(res); i++) { 
 				printf("%25s", field->name);
 				printf(" |");
@@ -262,7 +268,19 @@ void search_by_date(int date){
 				for (int j = 0; j < column; j++) {
 					printf("%25s", nextRow[j]);
 					printf(" |");
+					switch(j){
+						case 1: 
+							memcpy(usrInfo.searchMsg.search_name,nextRow[1],sizeof usrInfo.searchMsg.search_name);
+							break;
+						case 2: 
+							memcpy(usrInfo.searchMsg.search_time,nextRow[2],sizeof usrInfo.searchMsg.search_time);
+							break;
+						case 3: 
+							memcpy(usrInfo.searchMsg.search_content,nextRow[3],sizeof usrInfo.searchMsg.search_content);
+							break;
+					}
 				}
+				send(socks,(char*)&usrInfo,sizeof usrInfo,0);
 				printf("\n");
 			}
 		}
@@ -486,9 +504,29 @@ void accept_conn(void *dummy) {
 			}
 
 			if (strcmp(usrInfo.type, "SEARCH") == 0) {
+				// Because time is always returned from client, there is only four cases to judge.
+
 				printf("Msg from search request --- name: %s\n", usrInfo.searchMsg.search_name);
 				printf("Msg from search request --- content: %s\n", usrInfo.searchMsg.search_content);
 				printf("Msg from search request --- time: %s\n", usrInfo.searchMsg.search_time);
+
+				if (strcmp(usrInfo.searchMsg.search_name,"") == 0){
+					// The case that only search by date
+					if(strcmp(usrInfo.searchMsg.search_content,"") == 0){
+						search_by_date(usrInfo.searchMsg.search_time,sub_sock,usrInfo);
+					}
+					// The case that only search by date and content
+					else{
+						
+					}
+				}else{
+					if(strcmp(usrInfo.searchMsg.search_content,"") == 0){
+	
+					}
+				}
+				// printf("Msg from search request --- name: %s\n", usrInfo.searchMsg.search_name);
+				// printf("Msg from search request --- content: %s\n", usrInfo.searchMsg.search_content);
+				// printf("Msg from search request --- time: %s\n", usrInfo.searchMsg.search_time);
 			}
 
 

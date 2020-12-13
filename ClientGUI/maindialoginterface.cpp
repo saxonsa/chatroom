@@ -18,6 +18,8 @@ MainDialogInterface::MainDialogInterface(QWidget *parent) :
     ui->setupUi(this);
 
     searchHistory = new SearchHistory;
+
+    connect(this, SIGNAL(sendSignalToSearch(QString)),searchHistory,SLOT(recv_From_Main_Dialog(QString)));
 }
 
 
@@ -29,27 +31,8 @@ MainDialogInterface::~MainDialogInterface()
 }
 
 
-void MainDialogInterface::receiveData(QString data, nameList* onlineList)
+void MainDialogInterface::receiveData(QString data)
 {
-    displayOnlineList(onlineList);
-    //qDebug() << data;
-
-    // add clinet name to Online List
-//    string msg = data.toStdString();
-//    string welcome = "Welcome ";
-//    string enterMsg = " enters the chatroom!";
-//    string name;
-//    if (!msg.compare(0, welcome.length(), welcome, 0, welcome.length())) {
-//        name = msg.erase(0, welcome.length());
-//        addOnlineList(name);
-//    }
-//    if (msg.length() > enterMsg.length()
-//            && !msg.compare(msg.length() - enterMsg.length(), msg.length(), enterMsg, 0, enterMsg.length())
-//            && msg.find(":") == string::npos) {
-//        name = msg.substr(0, msg.length() - enterMsg.length());
-//        addOnlineList(name);
-//    }
-
     ui->historyBrowser->append(data);
 }
 
@@ -96,8 +79,9 @@ void MainDialogInterface::on_Send_clicked()
 
 }
 
-void MainDialogInterface::displayOnlineList(nameList* onlineList) {
+void MainDialogInterface::displayOnlineList(QString data,nameList* onlineList) {
     qDebug() << onlineList[0].name;
+    receiveData(data);
     QStringList usrOnlineList;
     for (int i = 0; i < MAX_ALLOWED; i++) {
         if (onlineList[i].uid != -1) {
@@ -119,10 +103,14 @@ void MainDialogInterface::displayOnlineList(nameList* onlineList) {
 
 //void MainDialogInterface::deleteOnlineList(string name) {
 //    QString deleteName = QString::fromStdString(name);
-
 //}
 
-void MainDialogInterface::on_History_clicked()
-{
+void MainDialogInterface::on_History_clicked(){
     searchHistory->show();
+
+}
+
+
+void MainDialogInterface::recvSignalToSearch(QString data){
+    emit sendSignalToSearch(data);
 }

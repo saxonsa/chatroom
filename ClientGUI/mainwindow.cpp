@@ -50,7 +50,9 @@ void MainWindow::on_EnterBtn_clicked()
 
     if (client_connect(ip,portNum,userName) == 0){
         Reciever *recver = new Reciever();
-        connect(recver, SIGNAL(recv_success(QString, nameList*)),mainDialog,SLOT(receiveData(QString, nameList*)));
+        connect(recver, SIGNAL(recv_success(QString)),mainDialog,SLOT(receiveData(QString)));
+        connect(recver, SIGNAL(enter_success(QString, nameList*)),mainDialog,SLOT(displayOnlineList(QString, nameList*)));
+        connect(recver, SIGNAL(search_success(QString)),mainDialog,SLOT(recvSignalToSearch(QString)));
         recver->start(); // start the thread
 
 

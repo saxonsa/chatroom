@@ -61,4 +61,11 @@ void SearchHistory::on_Search_clicked()
        WSACleanup();
     }
 
+    ui->historyBrowser->clear();
+
+    return;
+}
+
+void SearchHistory::recv_From_Main_Dialog(QString data){
+    ui->historyBrowser->append(data);
 }

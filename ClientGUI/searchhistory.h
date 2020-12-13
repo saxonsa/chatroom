@@ -20,6 +20,8 @@ private slots:
 
     void on_Search_clicked();
 
+    void recv_From_Main_Dialog(QString data);
+
 private:
     Ui::SearchHistory *ui;
 };

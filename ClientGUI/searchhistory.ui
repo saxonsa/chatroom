@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Search History</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/images/images/logo.png</normaloff>:/images/images/logo.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_6">
    <item>
@@ -83,7 +87,7 @@
             </size>
            </property>
            <property name="displayFormat">
-            <string>MM/dd/yyyy</string>
+            <string>yyyy-M-d</string>
            </property>
            <property name="calendarPopup">
             <bool>true</bool>
@@ -112,7 +116,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QTextBrowser" name="textBrowser"/>
+       <widget class="QTextBrowser" name="historyBrowser"/>
       </item>
      </layout>
     </widget>
@@ -155,6 +159,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
