@@ -784,7 +784,6 @@ void accept_conn(void *dummy) {
 				printf("curr name: %s\n", usrInfo.name);
 				printf("curr time: %s\n", usrInfo.createTime);
 				printf("curr msg: %s\n", usrInfo.msg);
-				search_history();// Search history from database
 
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (clients[i].client_socket == sub_sock) {
