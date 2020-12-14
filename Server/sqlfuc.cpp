@@ -397,12 +397,12 @@ char* check_login(char user_name[], char pwd[]){
 
 	// If the query failed, close the function
 	if (ret != 0) {
-		printf("Add member failed...Error: %s\n", mysql_error(&mysqlConnect));
+		printf("LOGIN message select failed...Error: %s\n", mysql_error(&mysqlConnect));
 		// return;
 	}
 
 	MYSQL_RES *res = mysql_store_result(&mysqlConnect);
-	MYSQL_FIELD *field; 
+	// MYSQL_FIELD *field; 
 	MYSQL_ROW nextRow;
 
 	if (res) {
@@ -420,14 +420,7 @@ char* check_login(char user_name[], char pwd[]){
 			// check pwd
 			if (strcmp(pwd, nextRow[1]) == 0){
 				// pwd right
-				char updateQuery[250];
-				sprintf_s(updateQuery,"UPDATE users SET status = 1 WHERE user_name = '%s';", nextRow[0]);
-				ret = mysql_query(&mysqlConnect, updateQuery);
-				if (ret != 0) {
-					printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
-					return "Failed";
-				}
-				return "Success";
+				return set_user_status(nextRow[0], 1);
 			} else {
 				// pwd wrong, send back an error message
 				return "wrongPwd";
@@ -445,3 +438,15 @@ char* check_login(char user_name[], char pwd[]){
 		return "sqlErr";
 	}
 }
+
+char* set_user_status(char user_name[], int status) {
+	char updateQuery[250];
+	sprintf_s(updateQuery,"UPDATE users SET status = '%d' WHERE user_name = '%s';", status, user_name);
+	ret = mysql_query(&mysqlConnect, updateQuery);
+	if (ret != 0) {
+		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		return "Failed";
+	}
+	return "Success";
+}
+
