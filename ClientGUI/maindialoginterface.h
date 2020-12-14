@@ -2,6 +2,7 @@
 #define MAINDIALOGINTERFACE_H
 
 #include <QMainWindow>
+#include <QModelIndex>
 #include <string>
 
 #include "client.h"
@@ -27,11 +28,12 @@ class MainDialogInterface : public QMainWindow {
  private slots:
   void receiveData(QString data);
   void on_Send_clicked();
-  void displayOnlineList(QString data,nameList *onlineList);
+  void displayOnlineList(QString data);
   //    void addOnlineList(std::string name);
   //    void deleteOnlineList(std::string name);
   void on_History_clicked();
   void recvSignalToSearch(QString data);
+  void showClickedPersonName(QModelIndex index);
 
  signals:
   void sendSignalToSearch(QString);

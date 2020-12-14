@@ -79,8 +79,10 @@ void MainDialogInterface::on_Send_clicked()
 
 }
 
-void MainDialogInterface::displayOnlineList(QString data,nameList* onlineList) {
-    receiveData(data);
+void MainDialogInterface::displayOnlineList(QString data) {
+    if (strcmp(usr.type, "ENTER") == 0) {
+        receiveData(data);
+    }
     QStringList usrOnlineList;
     for (int i = 0; i < MAX_ALLOWED; i++) {
         if (usr.onlineList[i].uid != -1) {
@@ -89,15 +91,24 @@ void MainDialogInterface::displayOnlineList(QString data,nameList* onlineList) {
     }
     QStringListModel *model = new QStringListModel(usrOnlineList);
     ui->onlineList->setModel(model);
+
+    connect(ui->onlineList,SIGNAL(clicked(QModelIndex)),this,SLOT(showClickedPersonName(QModelIndex)));
 }
 
 void MainDialogInterface::on_History_clicked()
 {
     searchHistory->show();
-
 }
 
 
 void MainDialogInterface::recvSignalToSearch(QString data){
     emit sendSignalToSearch(data);
+}
+
+void MainDialogInterface::showClickedPersonName(QModelIndex index){
+
+    QString strTemp;
+    strTemp = index.data().toString();
+    qDebug() << strTemp;
+
 }
