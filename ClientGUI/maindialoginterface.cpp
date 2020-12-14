@@ -91,15 +91,24 @@ void MainDialogInterface::displayOnlineList(QString data) {
     }
     QStringListModel *model = new QStringListModel(usrOnlineList);
     ui->onlineList->setModel(model);
+
+    connect(ui->onlineList,SIGNAL(clicked(QModelIndex)),this,SLOT(showClickedPersonName(QModelIndex)));
 }
 
 void MainDialogInterface::on_History_clicked()
 {
     searchHistory->show();
-
 }
 
 
 void MainDialogInterface::recvSignalToSearch(QString data){
     emit sendSignalToSearch(data);
+}
+
+void MainDialogInterface::showClickedPersonName(QModelIndex index){
+
+    QString strTemp;
+    strTemp = index.data().toString();
+    qDebug() << strTemp;
+
 }
