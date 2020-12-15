@@ -402,7 +402,6 @@ char* check_login(char user_name[], char pwd[]){
 	}
 
 	MYSQL_RES *res = mysql_store_result(&mysqlConnect);
-	// MYSQL_FIELD *field; 
 	MYSQL_ROW nextRow;
 
 	if (res) {
@@ -411,9 +410,10 @@ char* check_login(char user_name[], char pwd[]){
 		if (fieldCount > 0) {
 			nextRow = mysql_fetch_row(res);
 
-			// current status is online
-			if (nextRow[2] == "1"){
-				//send(clients[i].client_socket, (char*)&usrInfo, BufferSize, 0);
+			// check current user is online
+			if (strcmp("1", nextRow[2])){
+				// current user is already online, send back a message
+				char *errorMsg = "This user is already online ! ! !\n";
 				return "isOnline";
 			}
 
@@ -423,13 +423,13 @@ char* check_login(char user_name[], char pwd[]){
 				return set_user_status(nextRow[0], 1);
 			} else {
 				// pwd wrong, send back an error message
+				char *errorMsg = "Password or account is wrong ! ! !\n";
 				return "wrongPwd";
 			}
-
 		}
 		else {
 			// new user sign up 
-			//user_sign_up();
+			user_sign_up(user_name, pwd);
 			return "new";
 		}
 	}
@@ -439,9 +439,10 @@ char* check_login(char user_name[], char pwd[]){
 	}
 }
 
+
 char* set_user_status(char user_name[], int status) {
 	char updateQuery[250];
-	sprintf_s(updateQuery,"UPDATE users SET status = '%d' WHERE user_name = '%s';", status, user_name);
+	sprintf_s(updateQuery,"UPDATE users SET status = %d WHERE user_name = '%s';", status, user_name);
 	ret = mysql_query(&mysqlConnect, updateQuery);
 	if (ret != 0) {
 		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
@@ -449,4 +450,3 @@ char* set_user_status(char user_name[], int status) {
 	}
 	return "Success";
 }
-

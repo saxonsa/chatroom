@@ -25,7 +25,7 @@ SOCKET msg_sock = INVALID_SOCKET; // client socket
 struct sockaddr_in local = {0};       // server end address
 struct sockaddr_in client_addr = {0}; // client end address
 
-char szBuff[BufferSize];
+char szBuff[BUFFERSIZE];
 int msg_len;
 int addr_len;
 
@@ -142,13 +142,13 @@ void accept_conn(void *dummy)
 			if (strcmp(resStr, "Success") == 0 || strcmp(resStr, "new") == 0)
 			{
 				strcpy_s(usrInfo.type, sizeof usrInfo.type, "Login");
-				send(sub_sock, (char *)&usrInfo, BufferSize, 0);			
+				send(sub_sock, (char *)&usrInfo, BUFFERSIZE, 0);			
 			}
 			else
 			{
 				strcpy_s(usrInfo.type, sizeof usrInfo.type, "LoginF");
 				strcpy_s(usrInfo.msg, sizeof usrInfo.msg, resStr);
-				send(sub_sock, (char *)&usrInfo, BufferSize, 0);
+				send(sub_sock, (char *)&usrInfo, BUFFERSIZE, 0);
 				printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
 				closesocket(sub_sock);
 				connecting--;
@@ -200,7 +200,7 @@ void accept_conn(void *dummy)
 					else
 						strcpy_s(usrInfo.msg, sizeof usrInfo.msg, enterMsgOther);
 
-					msg_len = send(clients[i].client_socket, (char *)&usrInfo, BufferSize, 0);
+					msg_len = send(clients[i].client_socket, (char *)&usrInfo, BUFFERSIZE, 0);
 
 					if (msg_len <= 0)
 					{
@@ -235,7 +235,7 @@ void accept_conn(void *dummy)
 			{
 				if (clients[i].client_socket != INVALID_SOCKET)
 				{
-					msg_len = send(clients[i].client_socket, (char *)&usrInfo, BufferSize, 0);
+					msg_len = send(clients[i].client_socket, (char *)&usrInfo, BUFFERSIZE, 0);
 
 					if (msg_len <= 0)
 					{
@@ -322,7 +322,7 @@ void accept_conn(void *dummy)
 	{
 		if (clients[i].client_socket != INVALID_SOCKET)
 		{
-			msg_len = send(clients[i].client_socket, (char *)&usrInfo, BufferSize, 0);
+			msg_len = send(clients[i].client_socket, (char *)&usrInfo, BUFFERSIZE, 0);
 			if (msg_len <= 0)
 			{
 				printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));

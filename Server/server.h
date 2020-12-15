@@ -2,7 +2,7 @@
 #define SERVER_H_
 
 #define DEFAULT_PORT 5019	// server Listening Port
-#define BufferSize 2920
+#define BUFFERSIZE 2920
 #define MAX_ALLOWED 3 // the max number of clients supported by server 
 
 
@@ -21,7 +21,7 @@ extern struct sockaddr_in local;		// server end address
 extern struct sockaddr_in client_addr;	// client end address
 
 
-extern char szBuff[BufferSize];
+extern char szBuff[BUFFERSIZE];
 extern int msg_len;
 extern int addr_len;
 
