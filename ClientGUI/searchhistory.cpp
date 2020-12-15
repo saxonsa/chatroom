@@ -46,6 +46,8 @@ void SearchHistory::on_Search_clicked()
     memcpy(usr.searchMsg.search_name,search_name, sizeof usr.searchMsg.search_name);
     memcpy(usr.searchMsg.search_content, search_content, sizeof usr.searchMsg.search_content);
     memcpy(usr.searchMsg.search_time, search_time, sizeof usr.searchMsg.search_time);
+    usr.room = 0;
+
 
 
     msg_len = send(connect_sock, (char*)&usr, sizeof (szBuff), 0);

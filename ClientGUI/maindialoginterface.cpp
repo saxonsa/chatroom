@@ -51,14 +51,6 @@ void MainDialogInterface::on_Send_clicked()
     strcpy(usr.type, "CHAT");
     strcpy(usr.msg, bufferToString);
 
-
-    // normal msg: type: 0
-//    char msg[1000];
-//    string chatMsg = "type: 0, content: ";
-//    string content(bufferToString);
-//    chatMsg = chatMsg + content;
-//    strcpy(msg, chatMsg.c_str());
-
     msg_len = send(connect_sock, (char*)&usr, sizeof szBuff, 0);
 
     if (msg_len == SOCKET_ERROR) {
