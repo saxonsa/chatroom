@@ -27,7 +27,7 @@ void SearchHistory::on_Exit_clicked()
 
 void SearchHistory::on_Search_clicked()
 {
-    QString name_plain_text = curSelectUsrName;//ui->Name->text();
+    QString name_plain_text = curSelectUsrName;
     QString content_plain_text = ui->Content->text();
     QString time_plain_text = ui->Time->text();
 
