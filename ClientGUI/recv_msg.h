@@ -13,6 +13,11 @@ class Reciever : public QThread
 {
     Q_OBJECT
     void run() override{
+//        nameList groupList[MAX_ROOM];
+//        for (int i = 0; i < MAX_ROOM; i++) {
+//            memcpy(groupList[i].name, "", sizeof groupList[i].name);
+//            groupList[i].uid = -1;
+//        }
         while (1) {
             char chatMsg[] = "";
 
@@ -36,11 +41,16 @@ class Reciever : public QThread
             }
 
             memcpy(&usr, szBuff, sizeof szBuff);
-
+            if (strcmp(usr.name, name) == 0) {
+                for (int i = 0; i < MAX_ROOM; i++) {
+                    memcpy(groupList[i].name, usr.groupList[i].name, sizeof groupList[i].name);
+                    groupList[i].uid = usr.groupList[i].uid;
+                }
+            }
 
             if (strcmp(usr.type, "ENTER") == 0 || strcmp(usr.type, "QUIT") == 0) {
                 strcat(chatMsg, usr.msg);
-                emit enter_success(chatMsg);
+                emit enter_success(chatMsg, (nameList*)&groupList);
             } else if (strcmp(usr.type, "CHAT") == 0) {
                 sprintf(chatMsg,"%s%s: %s",usr.createTime,usr.name,usr.msg);
                 emit recv_success(chatMsg);
@@ -60,7 +70,7 @@ class Reciever : public QThread
 
 signals:
     void recv_success(QString);
-    void enter_success(QString);
+    void enter_success(QString, nameList*);
     void search_success(QString);
     void login_success(char*);
     void login_failed(char*);

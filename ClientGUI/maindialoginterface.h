@@ -8,35 +8,36 @@
 #include "client.h"
 #include "searchhistory.h"
 
-
-namespace Ui {
-class MainDialogInterface;
+namespace Ui
+{
+  class MainDialogInterface;
 }
 
-class MainDialogInterface : public QMainWindow {
+class MainDialogInterface : public QMainWindow
+{
   Q_OBJECT
 
- public:
+public:
   explicit MainDialogInterface(QWidget *parent = nullptr);
   ~MainDialogInterface();
 
   SearchHistory *searchHistory = NULL;
 
- private:
+private:
   // public:
   Ui::MainDialogInterface *ui;
- private slots:
+private slots:
   void receiveData(QString data);
   void on_Send_clicked();
-  void displayOnlineList(QString data);
+  void displayOnlineList(QString data, nameList *groupList);
   void on_History_clicked();
   void recvSignalToSearch(QString data);
   void showClickedPersonName(QModelIndex index);
   void changeChatRoomName(QString);
 
- signals:
+signals:
   void sendSignalToSearch(QString);
   void sendSignalToChangeName(QString);
 };
 
-#endif  // MAINDIALOGINTERFACE_H
+#endif // MAINDIALOGINTERFACE_H

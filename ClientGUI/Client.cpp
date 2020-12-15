@@ -21,6 +21,8 @@ struct hostent* hp;
 
 char name[255] = {0};
 
+nameList groupList[MAX_ROOM];
+
 usrData usr;
 
 int curSelectRmNum = 0;
