@@ -439,7 +439,6 @@ char* check_login(char user_name[], char pwd[]){
 	}
 }
 
-
 char* set_user_status(char user_name[], int status) {
 	char updateQuery[250];
 	sprintf_s(updateQuery,"UPDATE users SET status = %d WHERE user_name = '%s';", status, user_name);

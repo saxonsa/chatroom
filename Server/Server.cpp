@@ -168,7 +168,6 @@ void accept_conn(void *dummy)
 				}
 			}
 			break;
-			//return -1;
 		}
 
 		if (usrInfo.name)

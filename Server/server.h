@@ -73,11 +73,6 @@ typedef struct {
 	search searchMsg;
 }usrData;
 
-/*typedef struct {
-	char name[100];
-	char time[32];
-	char content[1000];
-}historyRes;*/
 
 
 extern char normalMsg[1000]; // the normal msg sent to all... e.x: Saxon: msg

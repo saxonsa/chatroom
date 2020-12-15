@@ -29,14 +29,14 @@ class MainDialogInterface : public QMainWindow {
   void receiveData(QString data);
   void on_Send_clicked();
   void displayOnlineList(QString data);
-  //    void addOnlineList(std::string name);
-  //    void deleteOnlineList(std::string name);
   void on_History_clicked();
   void recvSignalToSearch(QString data);
   void showClickedPersonName(QModelIndex index);
+  void changeChatRoomName(QString);
 
  signals:
   void sendSignalToSearch(QString);
+  void sendSignalToChangeName(QString);
 };
 
 #endif  // MAINDIALOGINTERFACE_H
