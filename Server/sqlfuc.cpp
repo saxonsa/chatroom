@@ -584,9 +584,11 @@ char** get_room_name(char user_name[]){
 		if (res->row_count > 0) {
 			// room is not empty
 			char** nameList = (char**)malloc((int)res->row_count * sizeof(char*));
-			nextRow = mysql_fetch_row(res);
-			for (int i = 0; i < res->row_count; i++, nextRow = mysql_fetch_row(res)){
+			// nextRow = mysql_fetch_row(res);
+			for (int i = 0; i < res->row_count; i++){
+				nextRow = mysql_fetch_row(res);
 				nameList[i] = nextRow[0];
+				row_num++;
 			}
 			return nameList;
 		} else {

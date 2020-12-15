@@ -39,6 +39,8 @@ MYSQL_FIELD *field;
 MYSQL_ROW nextRow;
 int ret = 0;
 
+int row_num = 0;
+
 Client clients[MAX_ALLOWED] = {0};
 
 int onlineList_msg = 0;
@@ -241,7 +243,7 @@ void accept_conn(void *dummy)
 							char **group_name = NULL;
 							memcpy(current_name, usrInfo.name, sizeof(current_name));
 							group_name = get_room_name(current_name);
-							for (int i = 0; i < sizeof(group_name)/sizeof(char*); i++) {
+							for (int i = 0; i < row_num; i++) {
 								if (group_name[i] && strcmp(group_name[i], "") != 0) {
 									memcpy(groupList[i].name, group_name[i], sizeof groupList[i].name);
 									groupList[i].uid = i;

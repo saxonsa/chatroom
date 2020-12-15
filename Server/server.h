@@ -35,6 +35,7 @@ extern MYSQL_RES *res;
 extern MYSQL_FIELD *field; 
 extern MYSQL_ROW nextRow;
 extern int ret;
+extern int row_num;
 
 
 // client structure
