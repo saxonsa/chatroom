@@ -79,7 +79,7 @@ void MainDialogInterface::displayOnlineList(QString data) {
     }
     QStringList usrOnlineList;
     for (int i = 0; i < MAX_ALLOWED; i++) {
-        if (usr.onlineList[i].uid != -1) {
+        if (usr.onlineList[i].uid != -1 && strcmp(usr.onlineList[i].name, name) != 0) {
             usrOnlineList << usr.onlineList[i].name;
         }
     }
