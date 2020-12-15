@@ -53,6 +53,8 @@ typedef struct _nameList {
 
 extern int onlineList_msg;
 
+extern nameList personOnlineList[MAX_ALLOWED];
+
 typedef struct {
 	char search_name[100];
 	char search_time[100];

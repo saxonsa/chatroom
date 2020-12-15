@@ -19,7 +19,7 @@ char szBuff[];
 int msg_len;
 struct hostent* hp;
 
-char name[255] = {};
+char name[255] = {0};
 
 usrData usr;
 
