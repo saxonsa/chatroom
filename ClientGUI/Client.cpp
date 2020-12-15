@@ -23,6 +23,8 @@ char name[255] = {0};
 
 usrData usr;
 
+int curSelectRmNum = 0;
+
 int client_connect(char* serverIP, char* server_port, char* name) {
   printf("%s %s %s", serverIP, server_port, name);
   port = atoi(server_port);
