@@ -11,6 +11,7 @@ SearchHistory::SearchHistory(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->Time->setDateTime(QDateTime::currentDateTime());
+
 }
 
 SearchHistory::~SearchHistory()
@@ -21,15 +22,16 @@ SearchHistory::~SearchHistory()
 void SearchHistory::on_Exit_clicked()
 {
     this->hide();
+    ui->historyBrowser->clear();
 }
 
 void SearchHistory::on_Search_clicked()
 {
-    QString name_plain_text = ui->Name->text();
+    QString name_plain_text = curSelectUsrName;
     QString content_plain_text = ui->Content->text();
     QString time_plain_text = ui->Time->text();
 
-    qDebug() << name_plain_text << content_plain_text << time_plain_text;
+//    qDebug() << name_plain_text << content_plain_text << time_plain_text;
 
     char *search_name, *search_content,*search_time;
 
@@ -46,9 +48,7 @@ void SearchHistory::on_Search_clicked()
     memcpy(usr.searchMsg.search_name,search_name, sizeof usr.searchMsg.search_name);
     memcpy(usr.searchMsg.search_content, search_content, sizeof usr.searchMsg.search_content);
     memcpy(usr.searchMsg.search_time, search_time, sizeof usr.searchMsg.search_time);
-    usr.room = 0;
-
-
+    //usr.room = 0;
 
     msg_len = send(connect_sock, (char*)&usr, sizeof (szBuff), 0);
 
@@ -70,4 +70,8 @@ void SearchHistory::on_Search_clicked()
 
 void SearchHistory::recv_From_Main_Dialog(QString data){
     ui->historyBrowser->append(data);
+}
+
+void SearchHistory::change_private_his_name(QString data){
+    curSelectUsrName = data;
 }

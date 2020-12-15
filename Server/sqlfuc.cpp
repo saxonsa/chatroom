@@ -128,16 +128,16 @@ void search_group_by_name(char user_name[], int rid) {
   return;
 }
 
-void search_private_by_content(char sender[], char receiver[], char content[]) {
+void search_private_by_content(char* sender, SOCKET socks, usrData usrInfo) {
   char toSearchByContent[250];  // vague query
 
-  sprintf_s(toSearchByContent,
-            "SELECT * FROM `private_history` WHERE user_name = '%s' AND "
-            "recevie_name = '%s' AND content LIKE '%s';",
-            sender, receiver, content);
+  sprintf_s(toSearchByContent,"SELECT * FROM `private_history` WHERE (user_name = '%s' AND "
+							  "recevie_name = '%s' OR user_name = '%s' AND recevie_name = '%s') AND "
+							  "DATE_FORMAT(create_time, '%%Y-%%m-%%d') = '%s' AND content LIKE '%%%s%%' ORDER BY create_time;",
+							   sender, usrInfo.searchMsg.search_name, usrInfo.searchMsg.search_name,
+							   sender, usrInfo.searchMsg.search_time,usrInfo.searchMsg.search_content);
 
-  ret = mysql_query(&mysqlConnect,
-                    toSearchByContent);  // Pass the query to database
+  ret = mysql_query(&mysqlConnect,toSearchByContent);  // Pass the query to database
 
   // If the query failed, close the function
   if (ret != 0) {
@@ -145,8 +145,45 @@ void search_private_by_content(char sender[], char receiver[], char content[]) {
     // return;
   }
 
-  // Check the res value
-  print_table(mysql_store_result(&mysqlConnect));
+  res = mysql_store_result(&mysqlConnect);  // Check the res value
+
+  if (res) {
+    int fieldCount = mysql_field_count(&mysqlConnect);
+    // Print the result table
+    if (fieldCount > 0) {
+      int column = mysql_num_fields(res);
+      int row = (int)mysql_num_rows(res);
+
+      printf("\n");
+      while (nextRow = mysql_fetch_row(res)) {
+        for (int j = 0; j < column; j++) {
+          printf("%25s", nextRow[j]);
+          printf(" |");
+          switch (j) {
+            case 0:
+              memcpy(usrInfo.searchMsg.search_name, nextRow[0],
+                     sizeof usrInfo.searchMsg.search_name);
+              break;
+            case 1:
+              memcpy(usrInfo.searchMsg.search_time, nextRow[1],
+                     sizeof usrInfo.searchMsg.search_time);
+              break;
+            case 2:
+              memcpy(usrInfo.searchMsg.search_content, nextRow[2],
+                     sizeof usrInfo.searchMsg.search_content);
+              break;
+          }
+        }
+        send(socks, (char*)&usrInfo, sizeof usrInfo, 0);
+        printf("\n");
+      }
+    } else {
+      printf(
+          "No result. This is the result of a character splitting query... \n");
+    }
+  } else {
+    printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+  }  
 
   return;
 }
@@ -174,17 +211,15 @@ void search_group_by_content(char content[], int rid) {
   return;
 }
 
-void search_private_by_date(char sender[], char receiver[], char date[]) {
+// void search_private_by_date(char sender[], char receiver[], char date[]) {
+void search_private_by_date(char* sender, SOCKET socks, usrData usrInfo) {
   char toSearchByDate[250];
 
-  sprintf_s(
-      toSearchByDate,
-      "SELECT * FROM `private_history` WHERE user_name = '%s' AND recevie_name "
-      "= '%s' AND DATE_FORMAT(create_time, '%Y%m%d') = '%s';",
-      sender, receiver, date);
+  sprintf_s(toSearchByDate, "SELECT * FROM `private_history` WHERE (user_name = '%s' AND recevie_name = '%s' "
+							"OR user_name = '%s' AND recevie_name = '%s') AND DATE_FORMAT(create_time, '%%Y-%%m-%%d') = '%s' ORDER BY create_time;",
+							sender, usrInfo.searchMsg.search_name, usrInfo.searchMsg.search_name, sender, usrInfo.searchMsg.search_time);
 
-  ret =
-      mysql_query(&mysqlConnect, toSearchByDate);  // Pass the query to database
+  ret = mysql_query(&mysqlConnect, toSearchByDate);  // Pass the query to database
 
   // If the query failed, close the function
   if (ret != 0) {
@@ -192,10 +227,50 @@ void search_private_by_date(char sender[], char receiver[], char date[]) {
     // return;
   }
 
-  // Check the res value
-  print_table(mysql_store_result(&mysqlConnect));
+
+  res = mysql_store_result(&mysqlConnect);  // Check the res value
+
+  if (res) {
+      int fieldCount = mysql_field_count(&mysqlConnect);
+      // Print the result table
+      if (fieldCount > 0) {
+          int column = mysql_num_fields(res);
+          int row = (int)mysql_num_rows(res);
+
+          printf("\n");
+          while (nextRow = mysql_fetch_row(res)) {
+              for (int j = 0; j < column; j++) {
+                  printf("%25s", nextRow[j]);
+                  printf(" |");
+                  switch (j) {
+                  case 0:
+                      memcpy(usrInfo.searchMsg.search_name, nextRow[0],
+                          sizeof usrInfo.searchMsg.search_name);
+                      break;
+                  case 1:
+                      memcpy(usrInfo.searchMsg.search_time, nextRow[1],
+                          sizeof usrInfo.searchMsg.search_time);
+                      break;
+                  case 2:
+                      memcpy(usrInfo.searchMsg.search_content, nextRow[2],
+                          sizeof usrInfo.searchMsg.search_content);
+                      break;
+                  }
+              }
+              send(socks, (char*)&usrInfo, sizeof usrInfo, 0);
+              printf("\n");
+          }
+      }
+      else {
+          printf("No result. This is the result of a character splitting query... \n");
+      }
+  }
+  else {
+      printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+  }
 
   return;
+
 }
 
 void search_group_by_date(char date[], int rid, SOCKET socks, usrData usrInfo) {
@@ -251,7 +326,7 @@ void search_group_by_date(char date[], int rid, SOCKET socks, usrData usrInfo) {
               break;
           }
         }
-        send(socks, (char *)&usrInfo, sizeof usrInfo, 0);
+        // send(socks, (char *)&usrInfo, sizeof usrInfo, 0);
         printf("\n");
       }
     } else {
@@ -469,7 +544,7 @@ char** get_room_mem(int rid){
 		// check if the room is empty
 		if (res->row_count > 0) {
 			// room is not empty
-			char** nameList = (char**)malloc(res->row_count * sizeof(char*));
+			char** nameList = (char**)malloc((int)res->row_count * sizeof(char*));
 			nextRow = mysql_fetch_row(res);
 			for (int i = 0; i < res->row_count; i++, nextRow = mysql_fetch_row(res)){
 				nameList[i] = nextRow[0];
@@ -508,7 +583,7 @@ char** get_room_name(char user_name[]){
 		// check if the room is empty
 		if (res->row_count > 0) {
 			// room is not empty
-			char** nameList = (char**)malloc(res->row_count * sizeof(char*));
+			char** nameList = (char**)malloc((int)res->row_count * sizeof(char*));
 			nextRow = mysql_fetch_row(res);
 			for (int i = 0; i < res->row_count; i++, nextRow = mysql_fetch_row(res)){
 				nameList[i] = nextRow[0];

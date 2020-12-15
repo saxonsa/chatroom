@@ -22,6 +22,8 @@ MainDialogInterface::MainDialogInterface(QWidget *parent) :
 
     connect(this, SIGNAL(sendSignalToSearch(QString)),searchHistory,SLOT(recv_From_Main_Dialog(QString)));
     connect(ui->onlineList,SIGNAL(clicked(QModelIndex)),this,SLOT(showClickedPersonName(QModelIndex)));
+    connect(this,SIGNAL(sendSignalToChangeName(QString)),this,SLOT(changeChatRoomName(QString)));
+    connect(this,SIGNAL(sendSignalToChangeName(QString)),searchHistory,SLOT(change_private_his_name(QString)));
 }
 
 
@@ -121,6 +123,10 @@ void MainDialogInterface::showClickedPersonName(QModelIndex index){
 
     QString strTemp; // click person in online list
     strTemp = index.data().toString();
+    usr.room = 0;
+
+    emit sendSignalToChangeName(strTemp);
+
 
     char* recv_name;
     QByteArray recv_name_byte = strTemp.toLocal8Bit();
@@ -128,7 +134,6 @@ void MainDialogInterface::showClickedPersonName(QModelIndex index){
 
     memcpy(usr.name, name, sizeof usr.name);
     memcpy(usr.recv_name, recv_name, sizeof szBuff);
-    usr.room = 0;
     memcpy(usr.type, "SWITCH_PRIVATE_CHAT", sizeof usr.type);
 
     msg_len = send(connect_sock, (char*)&usr, sizeof szBuff, 0);
@@ -146,4 +151,9 @@ void MainDialogInterface::showClickedPersonName(QModelIndex index){
       qDebug() << "msg_len = 0";
     }
 
+}
+
+void MainDialogInterface::changeChatRoomName(QString name){
+    this->setWindowTitle("UChat chatting with @ " + name);
+    curSelectRmNum =  0;
 }
