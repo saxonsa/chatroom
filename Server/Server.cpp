@@ -137,9 +137,6 @@ void accept_conn(void *dummy)
 
 		if (strcmp(usrInfo.type, "LOGIN") == 0)
 		{
-			char** re = get_room_name("Michael");
-
-			printf("%s\n", re[0]);
 
 			char *resStr = check_login(usrInfo.name, usrInfo.pwd);
 
