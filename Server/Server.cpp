@@ -276,6 +276,13 @@ void accept_conn(void *dummy)
 				}
 			}
 		}
+		if (strcmp(usrInfo.type, "SWITCH_PRIVATE_CHAT") == 0) {
+			printf("usrInfo.recv: %s\n", usrInfo.recv_name);
+
+			// load chat history chat to usrInfo.recv_name
+
+
+		}
 	}
 
 	// set status to 0 when usr quit the room

@@ -20,6 +20,7 @@ MainDialogInterface::MainDialogInterface(QWidget *parent) :
     searchHistory = new SearchHistory;
 
     connect(this, SIGNAL(sendSignalToSearch(QString)),searchHistory,SLOT(recv_From_Main_Dialog(QString)));
+    connect(ui->onlineList,SIGNAL(clicked(QModelIndex)),this,SLOT(showClickedPersonName(QModelIndex)));
 }
 
 
@@ -91,8 +92,6 @@ void MainDialogInterface::displayOnlineList(QString data) {
     }
     QStringListModel *model = new QStringListModel(usrOnlineList);
     ui->onlineList->setModel(model);
-
-    connect(ui->onlineList,SIGNAL(clicked(QModelIndex)),this,SLOT(showClickedPersonName(QModelIndex)));
 }
 
 void MainDialogInterface::on_History_clicked()
@@ -107,8 +106,29 @@ void MainDialogInterface::recvSignalToSearch(QString data){
 
 void MainDialogInterface::showClickedPersonName(QModelIndex index){
 
-    QString strTemp;
+    QString strTemp; // click person in online list
     strTemp = index.data().toString();
-    qDebug() << strTemp;
+
+    char* recv_name;
+    QByteArray recv_name_byte = strTemp.toLocal8Bit();
+    recv_name = recv_name_byte.data();
+    memcpy(usr.recv_name, recv_name, sizeof szBuff);
+    usr.room = 0;
+    memcpy(usr.type, "SWITCH_PRIVATE_CHAT", sizeof usr.type);
+
+    msg_len = send(connect_sock, (char*)&usr, sizeof szBuff, 0);
+
+    if (msg_len == SOCKET_ERROR) {
+      fprintf(stderr, "send() failed with error %d\n", WSAGetLastError());
+      WSACleanup();
+      qDebug() << "SOCKET_ERROR";
+    }
+
+    if (msg_len == 0) {
+      printf("server closed connection\n");
+      closesocket(connect_sock);
+      WSACleanup();
+      qDebug() << "msg_len = 0";
+    }
 
 }
