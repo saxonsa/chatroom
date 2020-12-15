@@ -149,7 +149,6 @@ void accept_conn(void *dummy)
 			printf("set status to 0 msg: %s\n", resMsg);
 
 			break;
-			//return -1;
 		}
 
 		if (msg_len == 0)
@@ -364,23 +363,19 @@ void accept_conn(void *dummy)
 			printf("Msg from search request --- content: %s\n", usrInfo.searchMsg.search_content);
 			printf("Msg from search request --- time: %s\n", usrInfo.searchMsg.search_time);
 
-			if (strcmp(usrInfo.searchMsg.search_name, "") == 0)
+			if (strcmp(usrInfo.searchMsg.search_content, "") == 0)
 			{
 				// The case that only search by date
-				if (strcmp(usrInfo.searchMsg.search_content, "") == 0)
-				{
-					search_group_by_date(usrInfo.searchMsg.search_time, usrInfo.room, sub_sock, usrInfo);
-				}
-				// The case that only search by date and content
-				else
-				{
-				}
+				cout << current_name << endl;
+
+				search_private_by_date(current_name, sub_sock, usrInfo);
+		
 			}
 			else
 			{
-				if (strcmp(usrInfo.searchMsg.search_content, "") == 0)
+				/*if (strcmp(usrInfo.searchMsg.search_content, "") == 0)
 				{
-				}
+				}*/
 			}
 		}
 		if (strcmp(usrInfo.type, "SWITCH_PRIVATE_CHAT") == 0) {

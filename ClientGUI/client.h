@@ -56,6 +56,8 @@ typedef struct {
 
 extern usrData usr;
 
+extern int curSelectRmNum;
+
 
 // call a thread to receive message from server
 //void recv_msg(void *client_socket);

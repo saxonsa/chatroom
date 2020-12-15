@@ -22,6 +22,7 @@ MainDialogInterface::MainDialogInterface(QWidget *parent) :
     connect(this, SIGNAL(sendSignalToSearch(QString)),searchHistory,SLOT(recv_From_Main_Dialog(QString)));
     connect(ui->onlineList,SIGNAL(clicked(QModelIndex)),this,SLOT(showClickedPersonName(QModelIndex)));
     connect(this,SIGNAL(sendSignalToChangeName(QString)),this,SLOT(changeChatRoomName(QString)));
+    connect(this,SIGNAL(sendSignalToChangeName(QString)),searchHistory,SLOT(change_private_his_name(QString)));
 }
 
 
@@ -133,4 +134,5 @@ void MainDialogInterface::showClickedPersonName(QModelIndex index){
 
 void MainDialogInterface::changeChatRoomName(QString name){
     this->setWindowTitle("UChat chatting with @ " + name);
+    curSelectRmNum =  0;
 }

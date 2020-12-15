@@ -22,8 +22,11 @@ private slots:
 
     void recv_From_Main_Dialog(QString data);
 
+    void change_private_his_name(QString data);
+
 private:
     Ui::SearchHistory *ui;
+    QString curSelectUsrName;
 };
 
 #endif // SEARCHHISTORY_H
