@@ -395,8 +395,16 @@ void accept_conn(void *dummy)
 		if (strcmp(usrInfo.type, "SWITCH_PRIVATE_CHAT") == 0) {
 			printf("usr: %s, usrInfo.recv: %s\n", usrInfo.name, usrInfo.recv_name);
 			// load chat history chat to usrInfo.recv_name
-
-
+		}
+		if (strcmp(usrInfo.type, "SWITCH_GROUP_CHAT") == 0) {
+			printf("usr: %s, usrInfo.room_name: %s\n", usrInfo.name, usrInfo.room_name);
+			// load room id by room name
+			int rid = get_room_id(usrInfo.room_name);
+			if (rid != -1) {
+				usrInfo.room = rid;
+			} else {
+				printf("switch to group chat error!\n");
+			}
 		}
 	}
 

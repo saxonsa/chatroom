@@ -35,6 +35,8 @@ private slots:
   void showClickedPersonName(QModelIndex index);
   void changeChatRoomName(QString);
 
+  void showClickedGroupName(QModelIndex index);
+
 signals:
   void sendSignalToSearch(QString);
   void sendSignalToChangeName(QString);

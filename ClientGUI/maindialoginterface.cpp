@@ -24,8 +24,8 @@ MainDialogInterface::MainDialogInterface(QWidget *parent) :
     connect(ui->onlineList,SIGNAL(clicked(QModelIndex)),this,SLOT(showClickedPersonName(QModelIndex)));
     connect(this,SIGNAL(sendSignalToChangeName(QString)),this,SLOT(changeChatRoomName(QString)));
     connect(this,SIGNAL(sendSignalToChangeName(QString)),searchHistory,SLOT(change_private_his_name(QString)));
+    connect(ui->groupList, SIGNAL(clicked(QModelIndex)), this, SLOT(showClickedGroupName(QModelIndex)));
 }
-
 
 MainDialogInterface::~MainDialogInterface()
 {
@@ -133,7 +133,7 @@ void MainDialogInterface::showClickedPersonName(QModelIndex index){
     recv_name = recv_name_byte.data();
 
     memcpy(usr.name, name, sizeof usr.name);
-    memcpy(usr.recv_name, recv_name, sizeof szBuff);
+    memcpy(usr.recv_name, recv_name, sizeof usr.recv_name);
     memcpy(usr.type, "SWITCH_PRIVATE_CHAT", sizeof usr.type);
 
     msg_len = send(connect_sock, (char*)&usr, sizeof szBuff, 0);
@@ -156,4 +156,33 @@ void MainDialogInterface::showClickedPersonName(QModelIndex index){
 void MainDialogInterface::changeChatRoomName(QString name){
     this->setWindowTitle("UChat chatting with @ " + name);
     curSelectRmNum =  0;
+}
+
+void MainDialogInterface::showClickedGroupName(QModelIndex index)
+{
+    QString clickedRoomName;
+    clickedRoomName = index.data().toString();
+
+    char* room_name;
+    QByteArray room_name_byte = clickedRoomName.toLocal8Bit();
+    room_name = room_name_byte.data();
+
+    memcpy(usr.name, name, sizeof usr.name);
+    memset(usr.recv_name, 0, sizeof usr.recv_name);
+    memcpy(usr.room_name, room_name, sizeof usr.room_name);
+    memcpy(usr.type, "SWITCH_GROUP_CHAT", sizeof usr.type);
+
+    msg_len = send(connect_sock, (char*)&usr, sizeof szBuff, 0);
+    if (msg_len == SOCKET_ERROR) {
+      fprintf(stderr, "send() failed with error %d\n", WSAGetLastError());
+      WSACleanup();
+      qDebug() << "SOCKET_ERROR";
+    }
+
+    if (msg_len == 0) {
+      printf("server closed connection\n");
+      closesocket(connect_sock);
+      WSACleanup();
+      qDebug() << "msg_len = 0";
+    }
 }

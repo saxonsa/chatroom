@@ -603,3 +603,32 @@ char** get_room_name(char user_name[]){
 
 	return NULL;
 }
+
+int get_room_id(char room_name[]) {
+	char roomIdInfo[300];
+	sprintf_s(roomIdInfo,"SELECT `rid` FROM `room_info` WHERE room_name = '%s';",room_name);
+	ret = mysql_query(&mysqlConnect, roomIdInfo); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("get_room_id failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+	MYSQL_RES *res = mysql_store_result(&mysqlConnect);
+	MYSQL_ROW nextRow = NULL;
+	int rid;
+	if (res) {
+		if (res->row_count > 0) {
+			nextRow = mysql_fetch_row(res);
+			rid = atoi(nextRow[0]);
+			return rid;
+		} else {
+			printf("room_name does not exist!\n");
+			return -1;
+		}
+	} else {
+		printf("get_room_id mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+	return -1;
+
+}
