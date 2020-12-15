@@ -291,6 +291,7 @@ void accept_conn(void *dummy)
 						break;
 					}
 				}
+				/*
 				// find sender socket
 				SOCKET sender_socket = INVALID_SOCKET;
 				for (int i = 0; i < MAX_ALLOWED; i++) {
@@ -299,7 +300,8 @@ void accept_conn(void *dummy)
 						break;
 					}
 				}
-				// send msg to receiver
+				*/
+				// send msg to sender
 				msg_len = send(sub_sock, (char*)&usrInfo, BUFFERSIZE, 0);
 				if (msg_len <= 0)
 				{
@@ -309,7 +311,8 @@ void accept_conn(void *dummy)
 					printf("current number of clients: %d\n", connecting);
 					_endthread();
 				}
-				msg_len = send(sender_socket, (char*)&usrInfo, BUFFERSIZE, 0);
+				
+				msg_len = send(recv_socket, (char*)&usrInfo, BUFFERSIZE, 0);
 				if (msg_len <= 0)
 				{
 					printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
@@ -318,6 +321,7 @@ void accept_conn(void *dummy)
 					printf("current number of clients: %d\n", connecting);
 					_endthread();
 				}
+				
 
 			} else { // group CHAT
 				insert_into_group(usrInfo.name, usrInfo.createTime, usrInfo.msg, usrInfo.room); // Insert the history into the database
