@@ -287,9 +287,38 @@ void accept_conn(void *dummy)
 				SOCKET recv_socket = INVALID_SOCKET;
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					if (strcmp(clients[i].name, usrInfo.recv_name) == 0) {
-						// recv_socket = clients[i].client_socket
+						recv_socket = clients[i].client_socket;
+						break;
 					}
 				}
+				// find sender socket
+				SOCKET sender_socket = INVALID_SOCKET;
+				for (int i = 0; i < MAX_ALLOWED; i++) {
+					if (strcmp(clients[i].name, current_name) == 0) {
+						recv_socket = clients[i].client_socket;
+						break;
+					}
+				}
+				// send msg to receiver
+				msg_len = send(sub_sock, (char*)&usrInfo, BUFFERSIZE, 0);
+				if (msg_len <= 0)
+				{
+					printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+					closesocket(sub_sock);
+					connecting--;
+					printf("current number of clients: %d\n", connecting);
+					_endthread();
+				}
+				msg_len = send(sender_socket, (char*)&usrInfo, BUFFERSIZE, 0);
+				if (msg_len <= 0)
+				{
+					printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+					closesocket(sub_sock);
+					connecting--;
+					printf("current number of clients: %d\n", connecting);
+					_endthread();
+				}
+
 			} else { // group CHAT
 				insert_into_group(usrInfo.name, usrInfo.createTime, usrInfo.msg, usrInfo.room); // Insert the history into the database
 				// printf("curr name: %s\n", usrInfo.name);
