@@ -411,7 +411,7 @@ char* check_login(char user_name[], char pwd[]){
 			nextRow = mysql_fetch_row(res);
 
 			// check current user is online
-			if (strcmp("1", nextRow[2])){
+			if (strcmp(nextRow[2],"1") == 0){
 				// current user is already online, send back a message
 				char *errorMsg = "This user is already online ! ! !\n";
 				return "isOnline";
