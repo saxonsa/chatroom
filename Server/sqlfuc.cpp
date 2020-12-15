@@ -180,8 +180,9 @@ void search_private_by_date(char* sender, SOCKET socks, usrData usrInfo) {
 
   int i = 1;
 
-  sprintf_s(toSearchByDate, "SELECT * FROM `private_history` WHERE user_name = '%s' AND recevie_name = '%s' AND DATE_FORMAT(create_time, '%%Y-%%m-%%d') = '%s';",
-							sender, usrInfo.searchMsg.search_name, usrInfo.searchMsg.search_time);
+  sprintf_s(toSearchByDate, "SELECT * FROM `private_history` WHERE (user_name = '%s' AND recevie_name = '%s' "
+							"OR user_name = '%s' AND recevie_name = '%s') AND DATE_FORMAT(create_time, '%%Y-%%m-%%d') = '%s' ORDER BY create_time;",
+							sender, usrInfo.searchMsg.search_name, usrInfo.searchMsg.search_name, sender, usrInfo.searchMsg.search_time);
 
   ret = mysql_query(&mysqlConnect, toSearchByDate);  // Pass the query to database
 
