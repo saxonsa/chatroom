@@ -24,3 +24,4 @@ void add_private_chat(char sender[], char creat_time[], char content[], char rec
 char* check_login(char user_name[], char pwd[]);
 char* set_user_status(char user_name[], int status);
 char** get_room_mem(int rid);
+char** get_room_name(char user_name[]);

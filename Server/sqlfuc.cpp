@@ -487,3 +487,42 @@ char** get_room_mem(int rid){
 
 	return NULL;
 }
+
+char** get_room_name(char user_name[]){
+	char roomNameInfo[300];
+
+	sprintf_s(roomNameInfo,"SELECT `room_name` FROM room_info NATURAL JOIN room_mem WHERE user_name = '%s';",user_name);
+
+	ret = mysql_query(&mysqlConnect, roomNameInfo); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("get_room_name failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	MYSQL_RES *res = mysql_store_result(&mysqlConnect);
+	MYSQL_ROW nextRow = NULL;
+
+	if (res) {
+		// check if the room is empty
+		if (res->row_count > 0) {
+			// room is not empty
+			char** nameList = (char**)malloc(res->row_count * sizeof(char*));
+			nextRow = mysql_fetch_row(res);
+			for (int i = 0; i < res->row_count; i++, nextRow = mysql_fetch_row(res)){
+				nameList[i] = nextRow[0];
+			}
+			return nameList;
+		} else {
+			// room is empty
+			printf("room is empty.\n");
+			return NULL;
+		}
+	}
+	else {
+		printf("get_room_mem mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return NULL;
+}
