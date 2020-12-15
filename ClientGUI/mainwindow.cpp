@@ -105,6 +105,10 @@ void MainWindow::recv_Login_signal(char* usr_name){
         usr.onlineList[i].uid = -1;
         memset(usr.onlineList[i].name, 0, sizeof usr.onlineList[i].name);
     }
+    for (int i = 0; i < MAX_ROOM; i++) {
+        usr.groupList[i].uid = -1;
+        memset(usr.groupList[i].name, 0, sizeof usr.groupList[i].name);
+    }
 
     msg_len = send(connect_sock, (char*)&usr, sizeof szBuff, 0);
 

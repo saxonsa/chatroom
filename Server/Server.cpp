@@ -72,6 +72,8 @@ void accept_conn(void *dummy)
 
 	char current_name[100] = { 0 };
 
+	nameList groupList[MAX_ROOM] = { 0 };
+
 	// init onlineList
 	for (int i = 0; i < MAX_ALLOWED; i++)
 	{
@@ -210,6 +212,7 @@ void accept_conn(void *dummy)
 			char enterMsgSelf[100] = "Welcome "; // the enter msg sent to the client himhelf
 
 			// initialize online list on server end
+
 			for (int i = 0; i < MAX_ALLOWED; i++) {
 				if (personOnlineList[i].uid == -1) {
 					strcpy_s(personOnlineList[i].name, sizeof personOnlineList[i].name, usrInfo.name);
@@ -222,7 +225,21 @@ void accept_conn(void *dummy)
 				printf("onlineList[i]: %s\n", personOnlineList[i].name);
 			}
 
+			// initialize group list on server end when the first enter the room
+			char **group_name = NULL;
+			if (current_name) {
+				group_name = get_room_name(usrInfo.name);
+				for (int i = 0; i < sizeof(group_name)/sizeof(char*); i++) {
+					if (group_name[i] && strcmp(group_name[i], "") != 0) {
+						memcpy(groupList[i].name, group_name[i], sizeof groupList[i].name);
+						groupList[i].uid = i;
+					}
+				}
+			}
 
+			for (int i = 0; i < MAX_ROOM; i++) {
+				printf("%d: group member: %s\n", i, groupList[i].name);
+			}
 			
 
 			for (int s = 0; s < MAX_ALLOWED; s++)
@@ -249,6 +266,11 @@ void accept_conn(void *dummy)
 			for (int i = 0; i < MAX_ALLOWED; i++) {
 				memcpy(usrInfo.onlineList[i].name, personOnlineList[i].name, sizeof usrInfo.onlineList[i].name);
 				usrInfo.onlineList[i].uid = personOnlineList[i].uid;
+			}
+
+			for (int i = 0; i < MAX_ROOM; i++) {
+				memcpy(usrInfo.groupList[i].name, groupList[i].name, sizeof usrInfo.groupList[i].name);
+				usrInfo.groupList[i].uid = groupList[i].uid;
 			}
 			
 

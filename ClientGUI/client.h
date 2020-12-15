@@ -9,7 +9,7 @@
 #include <process.h>
 
 #define DEFAULT_PORT	5019
-#define BufferSize 2920
+#define BufferSize 8952
 
 extern WSADATA wsaData;
 
@@ -27,7 +27,8 @@ extern char szBuff[BufferSize];
 extern int msg_len;
 extern struct hostent *hp;
 
-const int MAX_ALLOWED = 3; // the max number of clients supported by server
+const int MAX_ALLOWED = 10; // the max number of clients supported by server
+const int MAX_ROOM = 50; // the max room number can be created
 
 extern char name[255];// = {};
 
@@ -50,8 +51,9 @@ typedef struct {
    char createTime[100];
    int room;
    char recv_name[100];
-   nameList onlineList[MAX_ALLOWED];
    search searchMsg;
+   nameList groupList[MAX_ROOM];
+   nameList onlineList[MAX_ALLOWED];
 }usrData;
 
 extern usrData usr;

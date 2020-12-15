@@ -185,7 +185,7 @@
              <string notr="true"/>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="Person">
              <property name="sizePolicy">
@@ -240,7 +240,7 @@
                <number>0</number>
               </property>
               <item>
-               <widget class="QTreeView" name="treeView">
+               <widget class="QTreeView" name="groupList">
                 <property name="styleSheet">
                  <string notr="true">border:none;</string>
                 </property>
