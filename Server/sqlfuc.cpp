@@ -49,7 +49,7 @@ void insert_into_group(char user_name[], char creat_time[], char content[], int 
 
   // If the query failed, close the function
   if (ret != 0) {
-    printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+    printf("insert_into_group failed...Error: %s\n", mysql_error(&mysqlConnect));
     // return;
   }
 
@@ -72,7 +72,7 @@ void insert_into_private(char sender[], char creat_time[], char content[], char 
 
   // If the query failed, close the function
   if (ret != 0) {
-    printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+    printf("insert_into_private failed...Error: %s\n", mysql_error(&mysqlConnect));
     // return;
   }
 
@@ -95,7 +95,7 @@ void search_private_by_name(char sender[], char receiver[]) {
 
   // If the query failed, close the function
   if (ret != 0) {
-    printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+    printf("search_private_by_name failed...Error: %s\n", mysql_error(&mysqlConnect));
     // return;
   }
 
@@ -118,7 +118,7 @@ void search_group_by_name(char user_name[], int rid) {
 
   // If the query failed, close the function
   if (ret != 0) {
-    printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+    printf("search_group_by_name failed...Error: %s\n", mysql_error(&mysqlConnect));
     // return;
   }
 
@@ -141,7 +141,7 @@ void search_private_by_content(char sender[], char receiver[], char content[]) {
 
   // If the query failed, close the function
   if (ret != 0) {
-    printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+    printf("search_private_by_content failed...Error: %s\n", mysql_error(&mysqlConnect));
     // return;
   }
 
@@ -164,7 +164,7 @@ void search_group_by_content(char content[], int rid) {
 
   // If the query failed, close the function
   if (ret != 0) {
-    printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+    printf("search_group_by_content failed...Error: %s\n", mysql_error(&mysqlConnect));
     // return;
   }
 
@@ -188,7 +188,7 @@ void search_private_by_date(char sender[], char receiver[], char date[]) {
 
   // If the query failed, close the function
   if (ret != 0) {
-    printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+    printf("search_private_by_date failed...Error: %s\n", mysql_error(&mysqlConnect));
     // return;
   }
 
@@ -211,7 +211,7 @@ void search_group_by_date(char date[], int rid, SOCKET socks, usrData usrInfo) {
 
   // If the query failed, close the function
   if (ret != 0) {
-    printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+    printf("search_group_by_date failed...Error: %s\n", mysql_error(&mysqlConnect));
     // return;
   }
 
@@ -272,7 +272,7 @@ void search_private_history(){
 
 	// If the query failed, close the function
 	if (ret != 0) {
-		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		printf("search_private_history failed...Error: %s\n", mysql_error(&mysqlConnect));
 		return;
 	}
 
@@ -288,7 +288,7 @@ void search_gourp_history(){
 
 	// If the query failed, close the function
 	if (ret != 0) {
-		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		printf("search_gourp_history failed...Error: %s\n", mysql_error(&mysqlConnect));
 		return;
 	}
 
@@ -301,10 +301,12 @@ void search_gourp_history(){
 void user_sign_up(char user_name[], char pwd[]){
 	char signUpInfo[250];
 
-	// connect sql
-	sprintf_s(signUpInfo,"INSERT INTO users VALUES('%s','%s');"
+	// connect sql, when user signs up, he/her logins in immediately
+	// set status 1
+	sprintf_s(signUpInfo,"INSERT INTO users VALUES('%s','%s',%d);"
 			,user_name
-			,pwd);
+			,pwd
+			,1);
 
 	ret = mysql_query(&mysqlConnect, signUpInfo); // Pass the query to database
 
@@ -332,7 +334,7 @@ void add_room(char admin[], char room_name[]){
 
 	// If the query failed, close the function
 	if (ret != 0) {
-		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		printf("add_room failed...Error: %s\n", mysql_error(&mysqlConnect));
 		// return;
 	}
 
@@ -376,7 +378,7 @@ void add_private_chat(char sender[], char creat_time[], char content[], char rec
 
 	// If the query failed, close the function
 	if (ret != 0) {
-		printf("Query failed...Error: %s\n", mysql_error(&mysqlConnect));
+		printf("add_private_chat failed...Error: %s\n", mysql_error(&mysqlConnect));
 		// return;
 	}
 
@@ -405,15 +407,13 @@ char* check_login(char user_name[], char pwd[]){
 	MYSQL_ROW nextRow;
 
 	if (res) {
-		int fieldCount = mysql_field_count(&mysqlConnect);
 		//Print the result table
-		if (fieldCount > 0) {
+		if (res->row_count > 0) {
 			nextRow = mysql_fetch_row(res);
-
+			cout << nextRow[2] << endl;
 			// check current user is online
 			if (strcmp(nextRow[2],"1") == 0){
-				// current user is already online, send back a message
-				char *errorMsg = "This user is already online ! ! !\n";
+				// current user is already online
 				return "isOnline";
 			}
 
@@ -422,8 +422,7 @@ char* check_login(char user_name[], char pwd[]){
 				// pwd right
 				return set_user_status(nextRow[0], 1);
 			} else {
-				// pwd wrong, send back an error message
-				char *errorMsg = "Password or account is wrong ! ! !\n";
+				// pwd wrong
 				return "wrongPwd";
 			}
 		}
@@ -439,7 +438,6 @@ char* check_login(char user_name[], char pwd[]){
 	}
 }
 
-
 char* set_user_status(char user_name[], int status) {
 	char updateQuery[250];
 	sprintf_s(updateQuery,"UPDATE users SET status = %d WHERE user_name = '%s';", status, user_name);
@@ -449,4 +447,82 @@ char* set_user_status(char user_name[], int status) {
 		return "Failed";
 	}
 	return "Success";
+}
+
+char** get_room_mem(int rid){
+	char roomMemInfo[250];
+
+	sprintf_s(roomMemInfo,"SELECT `user_name` FROM room_mem WHERE rid = %d;",rid);
+
+	ret = mysql_query(&mysqlConnect, roomMemInfo); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("get_room_mem failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	MYSQL_RES *res = mysql_store_result(&mysqlConnect);
+	MYSQL_ROW nextRow = NULL;
+
+	if (res) {
+		// check if the room is empty
+		if (res->row_count > 0) {
+			// room is not empty
+			char** nameList = (char**)malloc(res->row_count * sizeof(char*));
+			nextRow = mysql_fetch_row(res);
+			for (int i = 0; i < res->row_count; i++, nextRow = mysql_fetch_row(res)){
+				nameList[i] = nextRow[0];
+			}
+			return nameList;
+		} else {
+			// room is empty
+			printf("room is empty.\n");
+			return NULL;
+		}
+	}
+	else {
+		printf("get_room_mem mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return NULL;
+}
+
+char** get_room_name(char user_name[]){
+	char roomNameInfo[300];
+
+	sprintf_s(roomNameInfo,"SELECT `room_name` FROM room_info NATURAL JOIN room_mem WHERE user_name = '%s';",user_name);
+
+	ret = mysql_query(&mysqlConnect, roomNameInfo); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0) {
+		printf("get_room_name failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	MYSQL_RES *res = mysql_store_result(&mysqlConnect);
+	MYSQL_ROW nextRow = NULL;
+
+	if (res) {
+		// check if the room is empty
+		if (res->row_count > 0) {
+			// room is not empty
+			char** nameList = (char**)malloc(res->row_count * sizeof(char*));
+			nextRow = mysql_fetch_row(res);
+			for (int i = 0; i < res->row_count; i++, nextRow = mysql_fetch_row(res)){
+				nameList[i] = nextRow[0];
+			}
+			return nameList;
+		} else {
+			// room is empty
+			printf("room is empty.\n");
+			return NULL;
+		}
+	}
+	else {
+		printf("get_room_mem mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+	}
+
+	return NULL;
 }

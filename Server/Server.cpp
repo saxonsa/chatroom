@@ -222,6 +222,7 @@ void accept_conn(void *dummy)
 
 		if (strcmp(usrInfo.type, "LOGIN") == 0)
 		{
+
 			char *resStr = check_login(usrInfo.name, usrInfo.pwd);
 
 			if (strcmp(resStr, "Success") == 0 || strcmp(resStr, "new") == 0)
