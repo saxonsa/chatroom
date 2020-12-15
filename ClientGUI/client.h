@@ -57,7 +57,7 @@ typedef struct {
 }usrData;
 
 extern usrData usr;
-
+extern nameList groupList[MAX_ROOM];
 
 // call a thread to receive message from server
 //void recv_msg(void *client_socket);

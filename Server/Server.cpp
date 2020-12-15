@@ -226,22 +226,6 @@ void accept_conn(void *dummy)
 			for (int i = 0; i < MAX_ALLOWED; i++) {
 				printf("onlineList[i]: %s\n", personOnlineList[i].name);
 			}
-
-			// initialize group list on server end when the first enter the room
-			char **group_name = NULL;
-			if (current_name) {
-				group_name = get_room_name(usrInfo.name);
-				for (int i = 0; i < sizeof(group_name)/sizeof(char*); i++) {
-					if (group_name[i] && strcmp(group_name[i], "") != 0) {
-						memcpy(groupList[i].name, group_name[i], sizeof groupList[i].name);
-						groupList[i].uid = i;
-					}
-				}
-			}
-
-			for (int i = 0; i < MAX_ROOM; i++) {
-				printf("%d: group member: %s\n", i, groupList[i].name);
-			}
 			
 
 			for (int s = 0; s < MAX_ALLOWED; s++)
@@ -255,7 +239,21 @@ void accept_conn(void *dummy)
 						clients[s].fd = s;
 						memcpy(enterMsgOther, clients[s].name, sizeof(clients[s].name));
 						if (current_name) {
+							// initialize group list on server end when the first enter the room
+							char **group_name = NULL;
 							memcpy(current_name, usrInfo.name, sizeof(current_name));
+							group_name = get_room_name(current_name);
+							for (int i = 0; i < sizeof(group_name)/sizeof(char*); i++) {
+								if (group_name[i] && strcmp(group_name[i], "") != 0) {
+									memcpy(groupList[i].name, group_name[i], sizeof groupList[i].name);
+									groupList[i].uid = i;
+								}
+							}
+
+							for (int i = 0; i < MAX_ROOM; i++) {
+								printf("%d: group member: %s\n", i, groupList[i].name);
+							}
+							
 						}
 						strcat_s(enterMsgSelf, sizeof(clients[s].name), clients[s].name);
 						strcat_s(enterMsgOther, sizeof(enterMsgOther), " enters the chatroom!");
@@ -270,6 +268,7 @@ void accept_conn(void *dummy)
 				usrInfo.onlineList[i].uid = personOnlineList[i].uid;
 			}
 
+			// *usrInfo.groupList = *groupList;
 			for (int i = 0; i < MAX_ROOM; i++) {
 				memcpy(usrInfo.groupList[i].name, groupList[i].name, sizeof usrInfo.groupList[i].name);
 				usrInfo.groupList[i].uid = groupList[i].uid;
@@ -313,16 +312,7 @@ void accept_conn(void *dummy)
 						break;
 					}
 				}
-				/*
-				// find sender socket
-				SOCKET sender_socket = INVALID_SOCKET;
-				for (int i = 0; i < MAX_ALLOWED; i++) {
-					if (strcmp(clients[i].name, current_name) == 0) {
-						recv_socket = clients[i].client_socket;
-						break;
-					}
-				}
-				*/
+
 				// send msg to sender
 				msg_len = send(sub_sock, (char*)&usrInfo, BUFFERSIZE, 0);
 				if (msg_len <= 0)

@@ -73,7 +73,12 @@ void MainDialogInterface::on_Send_clicked()
 
 }
 
-void MainDialogInterface::displayOnlineList(QString data) {
+void MainDialogInterface::displayOnlineList(QString data, nameList *groupList) {
+
+    for (int i = 0; i < MAX_ROOM; i++) {
+        qDebug() << groupList[i].name;
+    }
+
     if (strcmp(usr.type, "ENTER") == 0) {
         receiveData(data);
     }
@@ -87,16 +92,20 @@ void MainDialogInterface::displayOnlineList(QString data) {
     ui->onlineList->setModel(model);
 
     QStandardItemModel *treeItemModel = new QStandardItemModel(ui->groupList);
-    treeItemModel->setHorizontalHeaderLabels(QStringList() << QStringLiteral("Group name"));
+    treeItemModel->setHorizontalHeaderLabels(QStringList() << QStringLiteral("Group Name"));
+
+
 
     for (int i = 0; i < MAX_ROOM; i++) {
-        if (usr.groupList[i].uid != -1 && strcmp(usr.groupList[i].name, "") != 0) {
-            QStandardItem *treeItem = new QStandardItem(usr.groupList[i].name);
+        if (groupList[i].uid != -1 && strcmp(groupList[i].name, "") != 0) {
+            QStandardItem *treeItem = new QStandardItem(groupList[i].name);
             treeItemModel->appendRow(treeItem);
         }
     }
+
     ui->groupList->setModel(treeItemModel);
 }
+
 
 void MainDialogInterface::on_History_clicked()
 {
