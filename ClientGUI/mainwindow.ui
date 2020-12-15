@@ -377,6 +377,14 @@
    </layout>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>ip_address</tabstop>
+  <tabstop>port_number</tabstop>
+  <tabstop>name</tabstop>
+  <tabstop>pw</tabstop>
+  <tabstop>EnterBtn</tabstop>
+  <tabstop>ExitBtn</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>
