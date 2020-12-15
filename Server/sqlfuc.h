@@ -11,7 +11,7 @@ void insert_into_group(char user_name[], char creat_time[], char content[], int 
 void insert_into_private(char sender[], char creat_time[], char content[], char receiver[]);
 void search_private_by_name(char sender[], char receiver[]);
 void search_group_by_name(char user_name[], int rid);
-void search_private_by_content(char sender[], char receiver[], char content[]);
+void search_private_by_content(char* sender, SOCKET socks, usrData usrInfo);
 void search_group_by_content(char content[], int rid);
 void search_private_by_date(char* sender, SOCKET socks, usrData usrInfo);
 void search_group_by_date(char date[], int rid, SOCKET socks, usrData usrInfo);

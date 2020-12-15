@@ -388,16 +388,16 @@ void accept_conn(void *dummy)
 			if (strcmp(usrInfo.searchMsg.search_content, "") == 0)
 			{
 				// The case that only search by date
-				cout << current_name << endl;
 
 				search_private_by_date(current_name, sub_sock, usrInfo);
 		
 			}
 			else
 			{
-				/*if (strcmp(usrInfo.searchMsg.search_content, "") == 0)
-				{
-				}*/
+				// The case that search both keywords and date
+
+				search_private_by_content(current_name, sub_sock, usrInfo);
+
 			}
 		}
 		if (strcmp(usrInfo.type, "SWITCH_PRIVATE_CHAT") == 0) {
