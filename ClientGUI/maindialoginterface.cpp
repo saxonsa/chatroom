@@ -8,6 +8,7 @@
 #include <QTextCodec>
 #include <string>
 #include <QStringListModel>
+#include <QStandardItemModel>
 using namespace std;
 
 
@@ -84,6 +85,17 @@ void MainDialogInterface::displayOnlineList(QString data) {
     }
     QStringListModel *model = new QStringListModel(usrOnlineList);
     ui->onlineList->setModel(model);
+
+    QStandardItemModel *treeItemModel = new QStandardItemModel(ui->groupList);
+    treeItemModel->setHorizontalHeaderLabels(QStringList() << QStringLiteral("Group name"));
+
+    for (int i = 0; i < MAX_ROOM; i++) {
+        if (usr.groupList[i].uid != -1 && strcmp(usr.groupList[i].name, "") != 0) {
+            QStandardItem *treeItem = new QStandardItem(usr.groupList[i].name);
+            treeItemModel->appendRow(treeItem);
+        }
+    }
+    ui->groupList->setModel(treeItemModel);
 }
 
 void MainDialogInterface::on_History_clicked()

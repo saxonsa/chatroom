@@ -46,7 +46,6 @@ int onlineList_msg = 0;
 char normalMsg[1000];
 
 nameList personOnlineList[MAX_ALLOWED];
-nameList groupList[MAX_ROOM];
 
 /*
 exit_clean: (safe exit function)
@@ -61,7 +60,6 @@ void exit_clean(int arg)
 	exit(0);
 }
 
-
 // function to accept a connection
 void accept_conn(void *dummy)
 {
@@ -73,6 +71,8 @@ void accept_conn(void *dummy)
 	usrData usrInfo;
 
 	char current_name[100] = { 0 };
+
+	nameList groupList[MAX_ROOM] = { 0 };
 
 	// init onlineList
 	for (int i = 0; i < MAX_ALLOWED; i++)
@@ -157,54 +157,18 @@ void accept_conn(void *dummy)
 		if (msg_len == 0)
 		{
 			printf("Client closed connection\n");
-			memcpy(usrInfo.type, "QUIT", sizeof usrInfo.type);
-
-			// clear client info in clients array
-			for (int s = 0; s < MAX_ALLOWED; s++)
-			{
-				if (clients[s].client_socket == sub_sock)
-				{
-					for (int i = 0; i < MAX_ALLOWED; i++) {
-						if (strcmp(personOnlineList[i].name, clients[s].name) == 0) {
-							personOnlineList[i].uid = -1;
-							memcpy(personOnlineList[i].name, "", sizeof personOnlineList[i].name);
-						}
-					}
-					clients[s].fd = -1;
-					clients[s].client_socket = INVALID_SOCKET;
-					memset(clients[s].name, 0, sizeof(clients[s].name));
-				}
-			}
-
-			for (int i = 0; i < MAX_ALLOWED; i++) {
-				memcpy(usrInfo.onlineList[i].name, personOnlineList[i].name, sizeof usrInfo.onlineList[i].name);
-				usrInfo.onlineList[i].uid = personOnlineList[i].uid;
-			}
-			
-
-			for (unsigned i = 0; i < MAX_ALLOWED; i++)
-			{
-				if (clients[i].client_socket != INVALID_SOCKET)
-				{
-					msg_len = send(clients[i].client_socket, (char *)&usrInfo, BUFFERSIZE, 0);
-					if (msg_len <= 0)
-					{
-						printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
-						closesocket(sub_sock);
-						connecting--;
-						printf("current number of clients: %d\n", connecting);
-						_endthread();
-					}
-				}
-			}
-
-			// set status to 0 when usr quit the room
 			char* resMsg;
 			// set status to 0
 			resMsg = set_user_status(current_name, 0);
 			printf("set status to 0 msg: %s\n", resMsg);
-
-
+			for (int s = 0; s < MAX_ALLOWED; s++)
+			{
+				if (clients[s].client_socket == sub_sock)
+				{
+					clients[s].client_socket = INVALID_SOCKET;
+					memset(clients[s].name, 0, sizeof(clients[s].name));
+				}
+			}
 			break;
 			//return -1;
 		}
@@ -222,7 +186,6 @@ void accept_conn(void *dummy)
 
 		if (strcmp(usrInfo.type, "LOGIN") == 0)
 		{
-
 			char *resStr = check_login(usrInfo.name, usrInfo.pwd);
 
 			if (strcmp(resStr, "Success") == 0 || strcmp(resStr, "new") == 0)
@@ -251,6 +214,7 @@ void accept_conn(void *dummy)
 			char enterMsgSelf[100] = "Welcome "; // the enter msg sent to the client himhelf
 
 			// initialize online list on server end
+
 			for (int i = 0; i < MAX_ALLOWED; i++) {
 				if (personOnlineList[i].uid == -1) {
 					strcpy_s(personOnlineList[i].name, sizeof personOnlineList[i].name, usrInfo.name);
@@ -258,6 +222,27 @@ void accept_conn(void *dummy)
 					break;
 				}
 			}
+
+			for (int i = 0; i < MAX_ALLOWED; i++) {
+				printf("onlineList[i]: %s\n", personOnlineList[i].name);
+			}
+
+			// initialize group list on server end when the first enter the room
+			char **group_name = NULL;
+			if (current_name) {
+				group_name = get_room_name(usrInfo.name);
+				for (int i = 0; i < sizeof(group_name)/sizeof(char*); i++) {
+					if (group_name[i] && strcmp(group_name[i], "") != 0) {
+						memcpy(groupList[i].name, group_name[i], sizeof groupList[i].name);
+						groupList[i].uid = i;
+					}
+				}
+			}
+
+			for (int i = 0; i < MAX_ROOM; i++) {
+				printf("%d: group member: %s\n", i, groupList[i].name);
+			}
+			
 
 			for (int s = 0; s < MAX_ALLOWED; s++)
 			{
@@ -283,6 +268,11 @@ void accept_conn(void *dummy)
 			for (int i = 0; i < MAX_ALLOWED; i++) {
 				memcpy(usrInfo.onlineList[i].name, personOnlineList[i].name, sizeof usrInfo.onlineList[i].name);
 				usrInfo.onlineList[i].uid = personOnlineList[i].uid;
+			}
+
+			for (int i = 0; i < MAX_ROOM; i++) {
+				memcpy(usrInfo.groupList[i].name, groupList[i].name, sizeof usrInfo.groupList[i].name);
+				usrInfo.groupList[i].uid = groupList[i].uid;
 			}
 			
 
