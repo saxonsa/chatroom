@@ -24,7 +24,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>UChat</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
