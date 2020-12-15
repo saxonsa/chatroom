@@ -104,6 +104,8 @@ void MainDialogInterface::showClickedPersonName(QModelIndex index){
     char* recv_name;
     QByteArray recv_name_byte = strTemp.toLocal8Bit();
     recv_name = recv_name_byte.data();
+
+    memcpy(usr.name, name, sizeof usr.name);
     memcpy(usr.recv_name, recv_name, sizeof szBuff);
     usr.room = 0;
     memcpy(usr.type, "SWITCH_PRIVATE_CHAT", sizeof usr.type);

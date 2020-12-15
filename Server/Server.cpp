@@ -45,6 +45,8 @@ int onlineList_msg = 0;
 
 char normalMsg[1000];
 
+nameList personOnlineList[MAX_ALLOWED];
+
 /*
 exit_clean: (safe exit function)
 description: Signal callback function, when unknown exit Ctrl-c, will clear the process
@@ -67,6 +69,8 @@ void accept_conn(void *dummy)
 	printf("current number of clients: %d\n", connecting);
 
 	usrData usrInfo;
+
+	char current_name[100] = { 0 };
 
 	// init onlineList
 	for (int i = 0; i < MAX_ALLOWED; i++)
@@ -97,14 +101,53 @@ void accept_conn(void *dummy)
 		if (msg_len == SOCKET_ERROR)
 		{
 			fprintf(stderr, "recv() failed with error %d\n", WSAGetLastError());
+			memcpy(usrInfo.type, "QUIT", sizeof usrInfo.type);
+
+			// clear client info in clients array
 			for (int s = 0; s < MAX_ALLOWED; s++)
 			{
 				if (clients[s].client_socket == sub_sock)
 				{
+					for (int i = 0; i < MAX_ALLOWED; i++) {
+						if (strcmp(personOnlineList[i].name, clients[s].name) == 0) {
+							personOnlineList[i].uid = -1;
+							memcpy(personOnlineList[i].name, "", sizeof personOnlineList[i].name);
+						}
+					}
+					clients[s].fd = -1;
 					clients[s].client_socket = INVALID_SOCKET;
 					memset(clients[s].name, 0, sizeof(clients[s].name));
 				}
 			}
+
+			for (int i = 0; i < MAX_ALLOWED; i++) {
+				memcpy(usrInfo.onlineList[i].name, personOnlineList[i].name, sizeof usrInfo.onlineList[i].name);
+				usrInfo.onlineList[i].uid = personOnlineList[i].uid;
+			}
+			
+
+			for (unsigned i = 0; i < MAX_ALLOWED; i++)
+			{
+				if (clients[i].client_socket != INVALID_SOCKET)
+				{
+					msg_len = send(clients[i].client_socket, (char *)&usrInfo, BUFFERSIZE, 0);
+					if (msg_len <= 0)
+					{
+						printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+						closesocket(sub_sock);
+						connecting--;
+						printf("current number of clients: %d\n", connecting);
+						_endthread();
+					}
+				}
+			}
+
+			// set status to 0 when usr quit the room
+			char* resMsg;
+			// set status to 0
+			resMsg = set_user_status(current_name, 0);
+			printf("set status to 0 msg: %s\n", resMsg);
+
 			break;
 			//return -1;
 		}
@@ -112,6 +155,10 @@ void accept_conn(void *dummy)
 		if (msg_len == 0)
 		{
 			printf("Client closed connection\n");
+			char* resMsg;
+			// set status to 0
+			resMsg = set_user_status(current_name, 0);
+			printf("set status to 0 msg: %s\n", resMsg);
 			for (int s = 0; s < MAX_ALLOWED; s++)
 			{
 				if (clients[s].client_socket == sub_sock)
@@ -163,6 +210,23 @@ void accept_conn(void *dummy)
 			/* send enter room msg */
 			char enterMsgOther[100] = {0};       // the enter msg sent to others
 			char enterMsgSelf[100] = "Welcome "; // the enter msg sent to the client himhelf
+
+			// initialize online list on server end
+			for (int i = 0; i < MAX_ALLOWED; i++) {
+				if (personOnlineList[i].uid == -1) {
+					strcpy_s(personOnlineList[i].name, sizeof personOnlineList[i].name, usrInfo.name);
+					personOnlineList[i].uid = i;
+					break;
+				}
+			}
+
+			for (int i = 0; i < MAX_ALLOWED; i++) {
+				printf("onlineList[i]: %s\n", personOnlineList[i].name);
+			}
+
+
+			
+
 			for (int s = 0; s < MAX_ALLOWED; s++)
 			{
 				if (clients[s].client_socket == sub_sock)
@@ -173,6 +237,9 @@ void accept_conn(void *dummy)
 						memcpy(clients[s].name, usrInfo.name, sizeof(clients[s].name));
 						clients[s].fd = s;
 						memcpy(enterMsgOther, clients[s].name, sizeof(clients[s].name));
+						if (current_name) {
+							memcpy(current_name, usrInfo.name, sizeof(current_name));
+						}
 						strcat_s(enterMsgSelf, sizeof(clients[s].name), clients[s].name);
 						strcat_s(enterMsgOther, sizeof(enterMsgOther), " enters the chatroom!");
 					}
@@ -180,15 +247,12 @@ void accept_conn(void *dummy)
 				}
 			}
 
-			// online list logic
-			for (int i = 0; i < MAX_ALLOWED; i++)
-			{
-				if (clients[i].client_socket != INVALID_SOCKET)
-				{
-					usrInfo.onlineList[i].uid = i;
-					memcpy(usrInfo.onlineList[i].name, clients[i].name, sizeof(usrInfo.onlineList[i].name));
-				}
+			// *usrInfo.onlineList = *personOnlineList;
+			for (int i = 0; i < MAX_ALLOWED; i++) {
+				memcpy(usrInfo.onlineList[i].name, personOnlineList[i].name, sizeof usrInfo.onlineList[i].name);
+				usrInfo.onlineList[i].uid = personOnlineList[i].uid;
 			}
+			
 
 			// broadcast name msg depends on different clients
 			for (int i = 0; i < MAX_ALLOWED; i++)
@@ -217,33 +281,44 @@ void accept_conn(void *dummy)
 		// broadcast normal chat msg to all clients in the chatroom
 		if (strcmp(usrInfo.type, "CHAT") == 0)
 		{
-			insert_into_group(usrInfo.name, usrInfo.createTime, usrInfo.msg, usrInfo.room); // Insert the history into the database
-			// printf("curr name: %s\n", usrInfo.name);
-			// printf("curr time: %s\n", usrInfo.createTime);
-			// printf("curr msg: %s\n", usrInfo.msg);
-			// search_history();// Search history from database
-
-			for (int i = 0; i < MAX_ALLOWED; i++)
-			{
-				if (clients[i].client_socket == sub_sock)
-				{
-					strcpy_s(usrInfo.name, sizeof usrInfo.name, clients[i].name);
+			if (usrInfo.room == 0) { // private CHAT
+				insert_into_private(current_name, usrInfo.createTime, usrInfo.msg, usrInfo.recv_name);
+				// find recv socket
+				SOCKET recv_socket = INVALID_SOCKET;
+				for (int i = 0; i < MAX_ALLOWED; i++) {
+					if (strcmp(clients[i].name, usrInfo.recv_name) == 0) {
+						// recv_socket = clients[i].client_socket
+					}
 				}
-			}
+			} else { // group CHAT
+				insert_into_group(usrInfo.name, usrInfo.createTime, usrInfo.msg, usrInfo.room); // Insert the history into the database
+				// printf("curr name: %s\n", usrInfo.name);
+				// printf("curr time: %s\n", usrInfo.createTime);
+				// printf("curr msg: %s\n", usrInfo.msg);
+				// search_history();// Search history from database
 
-			for (int i = 0; i < MAX_ALLOWED; i++)
-			{
-				if (clients[i].client_socket != INVALID_SOCKET)
+				for (int i = 0; i < MAX_ALLOWED; i++)
 				{
-					msg_len = send(clients[i].client_socket, (char *)&usrInfo, BUFFERSIZE, 0);
-
-					if (msg_len <= 0)
+					if (clients[i].client_socket == sub_sock)
 					{
-						printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
-						closesocket(sub_sock);
-						connecting--;
-						printf("current number of clients: %d\n", connecting);
-						_endthread();
+						strcpy_s(usrInfo.name, sizeof usrInfo.name, clients[i].name);
+					}
+				}
+
+				for (int i = 0; i < MAX_ALLOWED; i++)
+				{
+					if (clients[i].client_socket != INVALID_SOCKET)
+					{
+						msg_len = send(clients[i].client_socket, (char *)&usrInfo, BUFFERSIZE, 0);
+
+						if (msg_len <= 0)
+						{
+							printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+							closesocket(sub_sock);
+							connecting--;
+							printf("current number of clients: %d\n", connecting);
+							_endthread();
+						}
 					}
 				}
 			}
@@ -277,60 +352,10 @@ void accept_conn(void *dummy)
 			}
 		}
 		if (strcmp(usrInfo.type, "SWITCH_PRIVATE_CHAT") == 0) {
-			printf("usrInfo.recv: %s\n", usrInfo.recv_name);
-
+			printf("usr: %s, usrInfo.recv: %s\n", usrInfo.name, usrInfo.recv_name);
 			// load chat history chat to usrInfo.recv_name
 
 
-		}
-	}
-
-	// set status to 0 when usr quit the room
-	char* resMsg;
-	// set status to 0
-	resMsg = set_user_status(usrInfo.name, 0);
-	printf("set status to 0 msg: %s\n", resMsg);
-
-	for (int i = 0; i < MAX_ALLOWED; i++) {
-		if (strcmp(usrInfo.onlineList[i].name, usrInfo.name) == 0) {
-			usrInfo.onlineList[i].uid = -1;
-			memset(usrInfo.onlineList[i].name, 0, sizeof usrInfo.onlineList[0].name);
-		}
-	}
-
-	// if client closes socket, clear its information in client array
-	for (unsigned i = 0; i < MAX_ALLOWED; i++)
-	{
-		if (clients[i].client_socket == sub_sock)
-		{
-			clients[i].fd = -1;
-			clients[i].client_socket = INVALID_SOCKET;
-			memset(clients[i].name, 0, sizeof clients[i].name);
-		}
-	}
-
-	memcpy(usrInfo.type, "QUIT", sizeof usrInfo.type);
-
-	for (int i = 0; i < MAX_ALLOWED; i++) {
-		if (clients[i].client_socket != INVALID_SOCKET) {
-			usrInfo.onlineList[i].uid = clients[i].fd;
-			memcpy(usrInfo.onlineList[i].name, clients[i].name, sizeof usrInfo.onlineList[i].name);
-		}
-	}
-
-	for (unsigned i = 0; i < MAX_ALLOWED; i++)
-	{
-		if (clients[i].client_socket != INVALID_SOCKET)
-		{
-			msg_len = send(clients[i].client_socket, (char *)&usrInfo, BUFFERSIZE, 0);
-			if (msg_len <= 0)
-			{
-				printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
-				closesocket(sub_sock);
-				connecting--;
-				printf("current number of clients: %d\n", connecting);
-				_endthread();
-			}
 		}
 	}
 
@@ -378,6 +403,8 @@ int main(int argc, char **argv)
 		clients[i].fd = -1;
 		clients[i].client_socket = INVALID_SOCKET;
 		memset(clients[i].name, 0, sizeof(clients[i].name));
+		personOnlineList[i].uid = -1;
+		memset(personOnlineList[i].name, 0, sizeof personOnlineList[i].name);
 	}
 
 	/* Set the attributes of server address */

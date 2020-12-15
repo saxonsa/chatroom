@@ -91,6 +91,10 @@ void MainWindow::on_EnterBtn_clicked()
 
 void MainWindow::recv_Login_signal(char* usr_name){
 
+    if (strcmp(name, "") == 0) {
+        strcpy(name, usr.name);
+    }
+
     strcpy(usr.name, usr_name);
 
     strcpy(usr.type, "ENTER");
