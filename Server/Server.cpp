@@ -104,6 +104,13 @@ void accept_conn(void *dummy)
 		memset(roomNameList[i].name, 0, sizeof roomNameList[i].name);
 	}
 
+	// init groupList
+	for (int i = 0; i < MAX_ROOM; i++)
+	{
+		groupList[i].uid = -1;
+		memset(groupList[i].name, 0, sizeof groupList[i].name);
+	}
+
 	while (1)
 	{
 
@@ -462,12 +469,14 @@ void accept_conn(void *dummy)
 				search_private_by_content(current_name, sub_sock, usrInfo);
 			}
 		}
+
 		if (strcmp(usrInfo.type, "SWITCH_PRIVATE_CHAT") == 0)
 		{
 			printf("usr: %s, usrInfo.recv: %s\n", usrInfo.name, usrInfo.recv_name);
 			current_room = -1;
 			// load chat history chat to usrInfo.recv_name
 		}
+
 		if (strcmp(usrInfo.type, "SWITCH_GROUP_CHAT") == 0)
 		{
 
@@ -540,7 +549,68 @@ void accept_conn(void *dummy)
 				printf("get_room_mem mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
 			}
 		}
+	
+		if (strcmp(usrInfo.type, "INVITE") == 0)
+		{
+			if (!is_person_exist(usrInfo.invite_name))
+				continue; // the person invited doesn't exist
+
+			// get the admin of target room
+			// if it doesn't exist, return No
+			char* admin = is_room_exist(usrInfo.msg);
+
+			if (strcmp(admin, "No") == 0)
+			{
+				// the room doesn't exist
+				// create a new room
+				add_room(usrInfo.name,usrInfo.msg);
+
+				// add the new room to group list
+				for (int i = 0; i < MAX_ROOM; i++)
+				{
+					if (groupList[i].uid == -1)
+					{
+						groupList[i].uid = i;
+						memcpy(groupList[i].name, usrInfo.msg, sizeof groupList[i].name);
+						break;
+					}
+				}
+
+				// add the new member
+				add_mem(get_room_id(usrInfo.msg), usrInfo.invite_name);
+				// add admin itself
+				add_mem(get_room_id(usrInfo.msg), usrInfo.name);
+
+				// send back msg to client
+				strcpy_s(usrInfo.type, sizeof usrInfo.type, "ENTER");
+				msg_len = send(sub_sock, (char *)&usrInfo, BUFFERSIZE, 0);
+
+				if (msg_len <= 0)
+					break; // jump out big loop
+			}
+			else
+			{
+				// the room exists
+				if (strcmp(usrInfo.name, admin) == 0)
+				{
+					// current user is the admin of the group
+					// add new member to the group
+					add_mem(get_room_id(usrInfo.msg), usrInfo.invite_name);
+				}
+				else
+				{
+					// current user is not the admin of the group
+					// send back error message
+					strcpy_s(usrInfo.msg, sizeof usrInfo.msg, "The name already exists\n");
+					msg_len = send(sub_sock, (char *)&usrInfo, BUFFERSIZE, 0);
+					if (msg_len <= 0)
+						break; // jump out big loop
+				}
+			}
+		}
+
 	}
+
 	connecting--;
 	printf("current number of clients: %d\n", connecting);
 	closesocket(sub_sock);

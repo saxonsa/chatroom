@@ -67,8 +67,7 @@ void insert_into_private(char sender[], char creat_time[], char content[], char 
 		"Insert INTO private_history VALUES('%s','%s','%s','%s');", sender,
 		creat_time, content, receiver);
 
-	ret = mysql_query(&mysqlConnect,
-		toInsertHistory);  // Pass the query to database
+	ret = mysql_query(&mysqlConnect, toInsertHistory);  // Pass the query to database
 
 	// If the query failed, close the function
 	if (ret != 0) {
@@ -90,8 +89,7 @@ void search_private_by_name(char sender[], char receiver[]) {
 		"recevie_name = '%s';",
 		sender, receiver);
 
-	ret =
-		mysql_query(&mysqlConnect, toSearchByName);  // Pass the query to database
+	ret = mysql_query(&mysqlConnect, toSearchByName);  // Pass the query to database
 
 	// If the query failed, close the function
 	if (ret != 0) {
@@ -422,7 +420,7 @@ void add_room(char admin[], char room_name[]){
 void add_mem(int rid, char mem_name[]){
 	char addMemberInfo[250];
 
-	sprintf_s(addMemberInfo,"INSERT INTO room_mem VALUES VALUES(%d,'%s');"
+	sprintf_s(addMemberInfo,"INSERT INTO room_mem VALUES (%d,'%s');"
 		,rid
 		,mem_name);
 
@@ -441,7 +439,7 @@ void add_mem(int rid, char mem_name[]){
 }
 
 void add_private_chat(char sender[], char creat_time[], char content[], char recevier[]){
-	char addPrivateInfo[250] = "INSERT INTO private_history VALUES('";
+	char addPrivateInfo[250];
 
 	sprintf_s(addPrivateInfo,"INSERT INTO private_history VALUES('%s','%s','%s','%s');"
 		,sender
@@ -557,7 +555,7 @@ char** get_room_name(char user_name[]){
 		}
 	}
 	else {
-		printf("get_room_mem mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+		printf("get_room_name mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
 	}
 
 	return NULL;
@@ -569,25 +567,100 @@ int get_room_id(char room_name[]) {
 	ret = mysql_query(&mysqlConnect, roomIdInfo); // Pass the query to database
 
 	// If the query failed, close the function
-	if (ret != 0) {
+	if (ret != 0) 
+	{
 		printf("get_room_id failed...Error: %s\n", mysql_error(&mysqlConnect));
 		// return;
 	}
+
 	MYSQL_RES *res = mysql_store_result(&mysqlConnect);
 	MYSQL_ROW nextRow = NULL;
 	int rid;
-	if (res) {
-		if (res->row_count > 0) {
+
+	if (res) 
+	{
+		if (res->row_count > 0) 
+		{
 			nextRow = mysql_fetch_row(res);
 			rid = atoi(nextRow[0]);
 			return rid;
-		} else {
+		} 
+		else 
+		{
 			printf("room_name does not exist!\n");
 			return -1;
 		}
-	} else {
+	} 
+	else 
+	{
 		printf("get_room_id mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
 	}
-	return -1;
 
+	return -1;
+}
+
+char* is_room_exist(char room_name[]){
+	char roomExistInfo[200];
+
+	sprintf_s(roomExistInfo,"SELECT `administrator` FROM `room_info` WHERE room_name = '%s';", room_name);
+	
+	ret = mysql_query(&mysqlConnect, roomExistInfo); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0)
+	{
+		printf("is_room_exist failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	MYSQL_RES *res = mysql_store_result(&mysqlConnect);
+	MYSQL_ROW nextRow = NULL;
+
+	if (res) 
+	{
+		if (res->row_count > 0)
+		{
+			nextRow = mysql_fetch_row(res);
+			return nextRow[0]; // the room exists, return admin name
+		}
+		else 
+		{
+			return "No"; // the room doesn't exist
+		}
+	} 
+	else 
+	{
+		printf("is_room_exist mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+		return NULL;
+	}
+}
+
+int is_person_exist(char user_name[]){
+	char personExistInfo[200];
+
+	sprintf_s(personExistInfo,"SELECT * FROM `users` WHERE user_name = '%s';", user_name);
+
+	ret = mysql_query(&mysqlConnect, personExistInfo); // Pass the query to database
+
+	// If the query failed, close the function
+	if (ret != 0)
+	{
+		printf("is_room_exist failed...Error: %s\n", mysql_error(&mysqlConnect));
+		// return;
+	}
+
+	MYSQL_RES *res = mysql_store_result(&mysqlConnect);
+
+	if (res) 
+	{
+		if (res->row_count > 0)
+			return 1; // the person exists
+		else
+			return 0; // the person doesn't exist
+	} 
+	else 
+	{
+		printf("is_person_exist mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));	
+	}
+	return -1;
 }
