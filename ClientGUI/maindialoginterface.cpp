@@ -180,6 +180,8 @@ void MainDialogInterface::showClickedPersonName(QModelIndex index){
     QByteArray recv_name_byte = strTemp.toLocal8Bit();
     recv_name = recv_name_byte.data();
 
+    qDebug() << "我被调用了";
+
     memcpy(usr.name, name, sizeof usr.name);
     memcpy(usr.recv_name, recv_name, sizeof szBuff);
     memcpy(usr.type, "SWITCH_PRIVATE_CHAT", sizeof usr.type);
@@ -224,6 +226,8 @@ void MainDialogInterface::changeChatRoomName(QString name_select){
         stream.flush();
 
         ui->historyBrowser->setText(strAll);
+
+        ui->historyBrowser->moveCursor(QTextCursor::End);
     }
     file.close();
 }
