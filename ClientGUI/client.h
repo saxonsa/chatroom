@@ -31,6 +31,7 @@ const int MAX_ALLOWED = 10; // the max number of clients supported by server
 const int MAX_ROOM = 50;    // the max room number can be created
 
 extern char name[255]; // = {};
+extern char g_recv_name[100];
 
 typedef struct _nameList
 {
