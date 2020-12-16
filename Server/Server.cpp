@@ -566,6 +566,7 @@ void accept_conn(void *dummy)
         printf("get_room_mem mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
       }
     }
+	}
     connecting--;
     printf("current number of clients: %d\n", connecting);
     closesocket(sub_sock);
