@@ -123,7 +123,7 @@ void MainDialogInterface::showClickedPersonName(QModelIndex index){
 
     QString strTemp; // click person in online list
     strTemp = index.data().toString();
-    usr.room = 0;
+    usr.room = -1;
 
     emit sendSignalToChangeName(strTemp);
 

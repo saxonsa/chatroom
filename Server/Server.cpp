@@ -75,12 +75,17 @@ void accept_conn(void *dummy)
 	char current_name[100] = { 0 };
 
 	nameList groupList[MAX_ROOM] = { 0 };
+	nameList roomNameList[MAX_ALLOWED] = { 0 };
 
-	// init onlineList
+	int room_mem = 0;
+
+	// init onlineList and roomNameList
 	for (int i = 0; i < MAX_ALLOWED; i++)
 	{
 		usrInfo.onlineList[i].uid = -1;
 		memset(usrInfo.onlineList[i].name, 0, sizeof usrInfo.onlineList[i].name);
+		roomNameList[i].uid = -1;
+		memset(roomNameList[i].name, 0, sizeof roomNameList[i].name);
 	}
 
 	while (1)
@@ -239,6 +244,7 @@ void accept_conn(void *dummy)
 						clients[s].fd = s;
 						memcpy(enterMsgOther, clients[s].name, sizeof(clients[s].name));
 						if (current_name) {
+							row_num = 0;
 							// initialize group list on server end when the first enter the room
 							char **group_name = NULL;
 							memcpy(current_name, usrInfo.name, sizeof(current_name));
@@ -302,7 +308,7 @@ void accept_conn(void *dummy)
 		// broadcast normal chat msg to all clients in the chatroom
 		if (strcmp(usrInfo.type, "CHAT") == 0)
 		{
-			if (usrInfo.room == 0) { // private CHAT
+			if (usrInfo.room == -1) { // private CHAT
 				insert_into_private(current_name, usrInfo.createTime, usrInfo.msg, usrInfo.recv_name);
 				// find recv socket
 				SOCKET recv_socket = INVALID_SOCKET;
@@ -397,6 +403,9 @@ void accept_conn(void *dummy)
 			// load chat history chat to usrInfo.recv_name
 		}
 		if (strcmp(usrInfo.type, "SWITCH_GROUP_CHAT") == 0) {
+
+			int room_mem = 0;
+
 			printf("usr: %s, usrInfo.room_name: %s\n", usrInfo.name, usrInfo.room_name);
 			// load room id by room name
 			int rid = get_room_id(usrInfo.room_name);
@@ -405,6 +414,48 @@ void accept_conn(void *dummy)
 			} else {
 				printf("switch to group chat error!\n");
 			}
+
+			char roomMemInfo[250];
+
+			sprintf_s(roomMemInfo,"SELECT `user_name` FROM room_mem WHERE rid = %d;",rid);
+
+			ret = mysql_query(&mysqlConnect, roomMemInfo); // Pass the query to database
+
+			// If the query failed, close the function
+			if (ret != 0) {
+				printf("get_room_mem failed...Error: %s\n", mysql_error(&mysqlConnect));
+				// return;
+			}
+
+			MYSQL_RES *res = mysql_store_result(&mysqlConnect);
+			MYSQL_ROW nextRow = NULL;
+
+			if (res) {
+			// check if the room is empty
+				if (res->row_count > 0) {
+					// room is not empty
+					char** nameList = (char**)malloc((int)res->row_count * sizeof(char*));
+					// nextRow = mysql_fetch_row(res);
+					for (int i = 0; i < res->row_count; i++){
+						nextRow = mysql_fetch_row(res);
+						nameList[i] = nextRow[0];
+						printf("name: %s\n", nextRow[0]);
+						room_mem++;
+					}
+					for (int i = 0; i < room_mem; i++) {
+						memcpy(roomNameList[i].name, nameList[i], sizeof roomNameList[i].name);
+						roomNameList[i].uid = i;
+					}
+
+				} else {
+					// room is empty
+					printf("room is empty.\n");
+				}
+			}
+			else {
+				printf("get_room_mem mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+			}
+
 		}
 	}
 

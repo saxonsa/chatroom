@@ -524,6 +524,7 @@ char* set_user_status(char user_name[], int status) {
 	return "Success";
 }
 
+/*
 char** get_room_mem(int rid){
 	char roomMemInfo[250];
 
@@ -545,8 +546,9 @@ char** get_room_mem(int rid){
 		if (res->row_count > 0) {
 			// room is not empty
 			char** nameList = (char**)malloc((int)res->row_count * sizeof(char*));
-			nextRow = mysql_fetch_row(res);
-			for (int i = 0; i < res->row_count; i++, nextRow = mysql_fetch_row(res)){
+			// nextRow = mysql_fetch_row(res);
+			for (int i = 0; i < res->row_count; i++){
+				nextRow = mysql_fetch_row(res);
 				nameList[i] = nextRow[0];
 			}
 			return nameList;
@@ -562,6 +564,7 @@ char** get_room_mem(int rid){
 
 	return NULL;
 }
+*/
 
 char** get_room_name(char user_name[]){
 	char roomNameInfo[300];
