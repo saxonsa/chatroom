@@ -7,6 +7,7 @@
 
 #include "client.h"
 #include "searchhistory.h"
+#include "invitegroup.h"
 
 namespace Ui
 {
@@ -22,6 +23,7 @@ public:
   ~MainDialogInterface();
 
   SearchHistory *searchHistory = NULL;
+  InviteGroup *inviteGroup = NULL;
 
   char* str_handle(char raw[]);
 
@@ -34,13 +36,15 @@ private slots:
   void receiveData(QString data,QString sname,QString rname);
   void receiveRoomData(QString data,QString room_name);
   void on_Send_clicked();
-  void displayOnlineList(QString data, nameList *groupList);
+  void displayOnlineList(nameList *groupList);
   void on_History_clicked();
   void recvSignalToSearch(QString data);
   void showClickedPersonName(QModelIndex index);
   void changeChatRoomName(QString);
 
   void showClickedGroupName(QModelIndex index);
+
+  void on_Invite_clicked();
 
 signals:
   void sendSignalToSearch(QString);

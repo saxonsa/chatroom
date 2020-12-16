@@ -22,6 +22,7 @@ MainDialogInterface::MainDialogInterface(QWidget *parent) : QMainWindow(parent),
   ui->widget_4->hide();
 
   searchHistory = new SearchHistory;
+  inviteGroup = new InviteGroup;
 
   connect(this, SIGNAL(sendSignalToSearch(QString)), searchHistory, SLOT(recv_From_Main_Dialog(QString)));
   connect(ui->onlineList, SIGNAL(clicked(QModelIndex)), this, SLOT(showClickedPersonName(QModelIndex)));
@@ -132,9 +133,8 @@ void MainDialogInterface::receiveRoomData(QString data, QString room_name)
           stream << data;
         else
         {
-          stream << previous_content;
-          stream << endl
-                 << data;
+          stream << previous_content << endl;
+          stream << data;
         }
         stream.flush();
       }
@@ -192,7 +192,7 @@ void MainDialogInterface::on_Send_clicked()
   ui->textEditor->setFocus();
 }
 
-void MainDialogInterface::displayOnlineList(QString data, nameList *groupList)
+void MainDialogInterface::displayOnlineList(nameList *groupList)
 {
 
   for (int i = 0; i < MAX_ROOM; i++)
@@ -200,10 +200,6 @@ void MainDialogInterface::displayOnlineList(QString data, nameList *groupList)
     qDebug() << groupList[i].name;
   }
 
-  if (strcmp(usr.type, "ENTER") == 0)
-  {
-    receiveData(data, "1", "0");
-  }
   QStringList usrOnlineList;
   for (int i = 0; i < MAX_ALLOWED; i++)
   {
@@ -367,4 +363,9 @@ char* MainDialogInterface::str_handle(char* raw)
     }
     result[j] = '\0';
     return result;
+}
+
+void MainDialogInterface::on_Invite_clicked()
+{
+    inviteGroup->show();
 }

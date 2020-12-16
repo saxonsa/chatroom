@@ -20,6 +20,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     client.cpp \
+    invitegroup.cpp \
     main.cpp \
     maindialoginterface.cpp \
     mainwindow.cpp \
@@ -29,6 +30,7 @@ SOURCES += \
 
 HEADERS += \
     client.h \
+    invitegroup.h \
     maindialoginterface.h \
     mainwindow.h \
     recv_msg.h \
@@ -37,6 +39,7 @@ HEADERS += \
  #    targetver.h
 
 FORMS += \
+    invitegroup.ui \
     maindialoginterface.ui \
     mainwindow.ui \
     searchhistory.ui

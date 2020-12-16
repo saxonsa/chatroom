@@ -2,7 +2,7 @@
 #define SERVER_H_
 
 #define DEFAULT_PORT 5019	// server Listening Port
-#define BUFFERSIZE 9052
+#define BUFFERSIZE 9152
 #define MAX_ALLOWED 10 // the max number of clients supported by server 
 #define MAX_ROOM 50 // the max room number can be created
 
@@ -73,6 +73,7 @@ typedef struct {
 	int room;
 	char recv_name[100];
 	char room_name[100];
+    char invite_name[100];
 	search searchMsg;
 	nameList groupList[MAX_ROOM];
 	nameList onlineList[MAX_ALLOWED];
