@@ -46,10 +46,16 @@ class Reciever : public QThread
             if (strcmp(usr.type, "ENTER") == 0 || strcmp(usr.type, "QUIT") == 0) {
                 strcat(chatMsg, usr.msg);
                 emit enter_success(chatMsg, (nameList*)&groupList);
-            } else if (strcmp(usr.type, "CHAT") == 0) {
-                sprintf(chatMsg,"%s%s: %s",usr.createTime,usr.name,usr.msg);
-
-                emit recv_success(chatMsg,usr.name,usr.recv_name);
+            } else if (strcmp(usr.type, "CHAT") == 0) {                
+                if(usr.room == -1){
+                    sprintf(chatMsg,"%s%s: %s",usr.createTime,usr.name,usr.msg);
+                    qDebug() << "private:" << chatMsg;
+                    emit recv_success(chatMsg,usr.name,usr.recv_name);
+                }else{
+                    sprintf(chatMsg,"%s%s: %s",usr.createTime,usr.name,usr.msg);
+                    qDebug() << "room:" << chatMsg << usr.room_name;
+                    emit recv_room_success(chatMsg,usr.room_name);
+                }
             } else if (strcmp(usr.type, "SEARCH") == 0){
                 sprintf(chatMsg,"%s\n%s: %s",usr.searchMsg.search_time,usr.searchMsg.search_name,usr.searchMsg.search_content);
                 qDebug() << chatMsg;
@@ -66,6 +72,7 @@ class Reciever : public QThread
 
 signals:
     void recv_success(QString,QString,QString);
+    void recv_room_success(QString,QString);
     void enter_success(QString, nameList*);
     void search_success(QString);
     void login_success(char*);

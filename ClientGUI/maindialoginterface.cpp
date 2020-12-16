@@ -88,6 +88,52 @@ void MainDialogInterface::receiveData(QString data,QString sname,QString rname)
     }
 }
 
+void MainDialogInterface::receiveRoomData(QString data,QString room_name)
+{
+    QString name_str(name);
+    qDebug() << "now in room:" << name_str << data << room_name;
+    QDir dir;
+    QString path("./history/"+ name_str+"/");
+    if(!dir.exists(path)){
+       dir.mkpath(path);
+    }
+    else{
+        if(CurrentSelectName != ""){
+            QFile file_r(path+ room_name +".txt");
+            bool isOKr = file_r.open(QIODevice::ReadOnly);
+            QString previous_content;
+
+            if (isOKr == true){
+                QTextStream stream_r(&file_r);
+
+                previous_content = stream_r.readAll();
+
+                stream_r.flush();
+            }
+
+            file_r.close();
+
+            QFile file(path+ room_name +".txt");
+            bool isOKw = file.open(QIODevice::WriteOnly);
+
+            if (isOKw == true){
+                QTextStream stream(&file);
+                if(ui->historyBrowser->toPlainText() == "")
+                    stream << data;
+                else{
+                    stream << previous_content;
+                    stream << endl << data;
+                }
+                stream.flush();
+            }
+            file.close();
+            if (room_name == CurrentSelectName){
+                changeChatRoomName(CurrentSelectName);
+            }
+        }
+    }
+}
+
 void MainDialogInterface::on_Send_clicked()
 {
      // send message to server
@@ -180,8 +226,6 @@ void MainDialogInterface::showClickedPersonName(QModelIndex index){
     QByteArray recv_name_byte = strTemp.toLocal8Bit();
     recv_name = recv_name_byte.data();
 
-    qDebug() << "我被调用了";
-
     memcpy(usr.name, name, sizeof usr.name);
     memcpy(usr.recv_name, recv_name, sizeof usr.recv_name);
     memcpy(usr.type, "SWITCH_PRIVATE_CHAT", sizeof usr.type);
@@ -206,7 +250,7 @@ void MainDialogInterface::showClickedPersonName(QModelIndex index){
 void MainDialogInterface::changeChatRoomName(QString name_select){
     this->setWindowTitle("UChat @ " + QString(name) + " chatting with " + name_select);
     CurrentSelectName = name_select;
-    curSelectRmNum =  0;
+    curSelectRmNum =  -1;
 
     ui->historyBrowser->clear();
 
@@ -237,9 +281,14 @@ void MainDialogInterface::showClickedGroupName(QModelIndex index)
     QString clickedRoomName;
     clickedRoomName = index.data().toString();
 
+    usr.room = 0;
+
     char* room_name;
     QByteArray room_name_byte = clickedRoomName.toLocal8Bit();
     room_name = room_name_byte.data();
+
+
+    emit sendSignalToChangeName(room_name);
 
     memcpy(usr.name, name, sizeof usr.name);
     memset(usr.recv_name, 0, sizeof usr.recv_name);

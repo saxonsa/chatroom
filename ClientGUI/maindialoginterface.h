@@ -29,6 +29,7 @@ private:
   QString CurrentSelectName;
 private slots:
   void receiveData(QString data,QString sname,QString rname);
+  void receiveRoomData(QString data,QString room_name);
   void on_Send_clicked();
   void displayOnlineList(QString data, nameList *groupList);
   void on_History_clicked();

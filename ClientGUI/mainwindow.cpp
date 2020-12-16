@@ -52,6 +52,7 @@ void MainWindow::on_EnterBtn_clicked()
 
         Reciever *recver = new Reciever();
         connect(recver, SIGNAL(recv_success(QString,QString,QString)),mainDialog,SLOT(receiveData(QString,QString,QString)));
+        connect(recver, SIGNAL(recv_room_success(QString,QString)),mainDialog,SLOT(receiveRoomData(QString,QString)));
         connect(recver, SIGNAL(enter_success(QString, nameList*)),mainDialog,SLOT(displayOnlineList(QString, nameList*)));
         connect(recver, SIGNAL(search_success(QString)),mainDialog,SLOT(recvSignalToSearch(QString)));
         connect(recver, SIGNAL(login_success(char*)),this,SLOT(recv_Login_signal(char*)));
