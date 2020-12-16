@@ -9,6 +9,7 @@
 #include <string>
 #include <QStringListModel>
 #include <QStandardItemModel>
+#include <QMessageBox>
 using namespace std;
 
 
@@ -63,8 +64,17 @@ void MainDialogInterface::on_Send_clicked()
     QString transcoding_buffer = codec->toUnicode(buffer.toStdString().c_str());
     QByteArray transfered_buffer = transcoding_buffer.toLocal8Bit();
 
+    char* transfer = str_handle(transfered_buffer.data());
+
+    if(strlen(transfer) == 0){
+        QString dlgTitle="Warning!!!";
+        QString strInfo="Input can not be empty";
+        QMessageBox::warning(this, dlgTitle, strInfo);
+        return;
+    }
+
     strcpy(usr.type, "CHAT");
-    strcpy(usr.msg, str_handle(transfered_buffer.data()));
+    strcpy(usr.msg, transfer);
 
     msg_len = send(connect_sock, (char*)&usr, sizeof szBuff, 0);
 

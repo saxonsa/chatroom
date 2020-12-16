@@ -4,6 +4,7 @@
 #include <QByteArray>
 #include <QDateTime>
 #include <QDebug>
+#include <QMessageBox>
 
 SearchHistory::SearchHistory(QWidget *parent) :
     QWidget(parent),
@@ -57,6 +58,13 @@ void SearchHistory::on_Search_clicked()
     search_name = nameByte.data();
     search_content = contentByte.data();
     search_time = timeByte.data();
+
+    if(strlen(search_name) == 0){
+        QString dlgTitle="Warning!!!";
+        QString strInfo="You have to chose a group or a person";
+        QMessageBox::warning(this, dlgTitle, strInfo);
+        return;
+    }
 
     strcpy(usr.type, "SEARCH");
     search_name = str_handle(search_name);

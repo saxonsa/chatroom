@@ -66,6 +66,13 @@ void MainWindow::on_EnterBtn_clicked()
     userName = userNameByte.data();
     pwd = pwdByte.data();
 
+    if(strlen(ip) == 0 || strlen(portNum) == 0 || strlen(userName) == 0 || strlen(pwd) == 0){
+        QString dlgTitle="Warning!!!";
+        QString strInfo="Input can not be empty";
+        QMessageBox::warning(this, dlgTitle, strInfo);
+        return;
+    }
+
     if (client_connect(ip,portNum,userName) == 0){
         Reciever *recver = new Reciever();
         connect(recver, SIGNAL(recv_success(QString)),mainDialog,SLOT(receiveData(QString)));
