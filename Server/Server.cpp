@@ -204,6 +204,25 @@ void accept_conn(void *dummy)
 				strcpy_s(usrInfo.type, sizeof usrInfo.type, "Login");
 				send(sub_sock, (char *)&usrInfo, BUFFERSIZE, 0);			
 			}
+			else if (strcmp(resStr, "isOnline") == 0)
+			{
+				// send error back to client
+				strcpy_s(usrInfo.type, sizeof usrInfo.type, "LoginF");
+				strcpy_s(usrInfo.msg, sizeof usrInfo.msg, resStr);
+				send(sub_sock, (char *)&usrInfo, BUFFERSIZE, 0);
+
+				// display error on server
+				printf("login has problem\n");
+				printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+
+				// clear current socket
+				clear_client(sub_sock);
+				
+				closesocket(sub_sock);
+				connecting--;
+				printf("current number of clients: %d\n", connecting);
+				_endthread();
+			}
 			else
 			{
 				// login fail, set user status to 0
