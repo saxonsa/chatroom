@@ -27,6 +27,7 @@ private:
   // public:
   Ui::MainDialogInterface *ui;
   QString CurrentSelectName;
+  int showTextEditor = 0;
 private slots:
   void receiveData(QString data,QString sname,QString rname);
   void receiveRoomData(QString data,QString room_name);

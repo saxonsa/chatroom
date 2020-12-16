@@ -20,6 +20,7 @@ MainDialogInterface::MainDialogInterface(QWidget *parent) :
     ui(new Ui::MainDialogInterface)
 {
     ui->setupUi(this);
+    ui->widget_4->hide();
 
     searchHistory = new SearchHistory;
 
@@ -47,43 +48,41 @@ void MainDialogInterface::receiveData(QString data,QString sname,QString rname)
        dir.mkpath(path);
     }
     else{
-        if(CurrentSelectName != ""){
-            if (rname == CurrentSelectName||sname == CurrentSelectName){
-                //ui->historyBrowser->append(data);
-                fileName = CurrentSelectName;
-            }else
-                fileName = sname;
+        if (rname == CurrentSelectName||sname == CurrentSelectName){
+            //ui->historyBrowser->append(data);
+            fileName = CurrentSelectName;
+        }else
+            fileName = sname;
 
-            QFile file_r(path+ fileName +".txt");
-            bool isOKr = file_r.open(QIODevice::ReadOnly);
-            QString previous_content;
+        QFile file_r(path+ fileName +".txt");
+        bool isOKr = file_r.open(QIODevice::ReadOnly);
+        QString previous_content;
 
-            if (isOKr == true){
-                QTextStream stream_r(&file_r);
+        if (isOKr == true){
+            QTextStream stream_r(&file_r);
 
-                previous_content = stream_r.readAll();
+            previous_content = stream_r.readAll();
 
-                stream_r.flush();
+            stream_r.flush();
+        }
+        file_r.close();
+
+        QFile file(path+ fileName +".txt");
+        bool isOKw = file.open(QIODevice::WriteOnly);
+
+        if (isOKw == true){
+            QTextStream stream(&file);
+            if(ui->historyBrowser->toPlainText() == "")
+                stream << data;
+            else{
+                stream << previous_content;
+                stream << endl << data;
             }
-            file_r.close();
-
-            QFile file(path+ fileName +".txt");
-            bool isOKw = file.open(QIODevice::WriteOnly);
-
-            if (isOKw == true){
-                QTextStream stream(&file);
-                if(ui->historyBrowser->toPlainText() == "")
-                    stream << data;
-                else{
-                    stream << previous_content;
-                    stream << endl << data;
-                }
-                stream.flush();
-            }
-            file.close();
-            if (rname == CurrentSelectName||sname == CurrentSelectName){
-                changeChatRoomName(CurrentSelectName);
-            }
+            stream.flush();
+        }
+        file.close();
+        if (rname == CurrentSelectName||sname == CurrentSelectName){
+            changeChatRoomName(CurrentSelectName);
         }
     }
 }
@@ -215,6 +214,10 @@ void MainDialogInterface::recvSignalToSearch(QString data){
 
 void MainDialogInterface::showClickedPersonName(QModelIndex index){
 
+    if (!showTextEditor) {
+        ui->widget_4->show();
+    }
+
     QString strTemp; // click person in online list
     strTemp = index.data().toString();
     usr.room = -1;
@@ -278,6 +281,10 @@ void MainDialogInterface::changeChatRoomName(QString name_select){
 
 void MainDialogInterface::showClickedGroupName(QModelIndex index)
 {
+    if (!showTextEditor) {
+        ui->widget_4->show();
+    }
+
     QString clickedRoomName;
     clickedRoomName = index.data().toString();
 
