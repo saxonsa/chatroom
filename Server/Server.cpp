@@ -73,12 +73,13 @@ void accept_conn(void *dummy)
 	usrData usrInfo;
 
 	char current_name[100] = { 0 };
-	int current_room = 0;
+	int current_room = -1;
 
 	nameList groupList[MAX_ROOM] = { 0 };
 	nameList roomNameList[MAX_ALLOWED] = { 0 };
 
 	int room_mem = 0;
+	int rid = -1;
 
 	// init onlineList and roomNameList
 	for (int i = 0; i < MAX_ALLOWED; i++)
@@ -309,7 +310,7 @@ void accept_conn(void *dummy)
 		// broadcast normal chat msg to all clients in the chatroom
 		if (strcmp(usrInfo.type, "CHAT") == 0)
 		{
-			if (usrInfo.room == -1) { // private CHAT
+			if (current_room == -1) { // private CHAT
 				insert_into_private(current_name, usrInfo.createTime, usrInfo.msg, usrInfo.recv_name);
 				// find recv socket
 				SOCKET recv_socket = INVALID_SOCKET;
@@ -348,24 +349,30 @@ void accept_conn(void *dummy)
 				// printf("curr time: %s\n", usrInfo.createTime);
 				// printf("curr msg: %s\n", usrInfo.msg);
 				// search_history();// Search history from database
+				memcpy(usrInfo.name, current_name, sizeof usrInfo.name);
+				memset(usrInfo.recv_name, 0, sizeof usrInfo.recv_name);
 
 				// find the client socket in the usrInfo.room and broadcast to them
 				for (int i = 0; i < MAX_ALLOWED; i++) { // for all member in roomNameList
-					for (int j = 0; j < MAX_ALLOWED; j++) { // if we can find a clients name is the same as it
-						if (strcmp(clients[j].name, roomNameList[i].name) == 0 && clients[i].client_socket != INVALID_SOCKET) {
-							// broadcast to group
-							msg_len = send(clients[j].client_socket, (char*)&usrInfo, BUFFERSIZE, 0);
-							if (msg_len <= 0)
-							{
-								printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
-								closesocket(sub_sock);
-								connecting--;
-								printf("current number of clients: %d\n", connecting);
-								_endthread();
+					if (roomNameList[i].uid != -1) {
+						for (int j = 0; j < MAX_ALLOWED; j++) { // if we can find a clients name is the same as it
+							if (strcmp(clients[j].name, roomNameList[i].name) == 0 && clients[j].client_socket != INVALID_SOCKET) {
+								printf("clients %d name: %s\n", j, clients[j].name);
+								// broadcast to group
+								msg_len = send(clients[j].client_socket, (char*)&usrInfo, BUFFERSIZE, 0);
+								if (msg_len <= 0)
+								{
+									printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+									closesocket(sub_sock);
+									connecting--;
+									printf("current number of clients: %d\n", connecting);
+									_endthread();
+								}
+								break;
 							}
-							break;
 						}
 					}
+					
 				}
 
 				/*
@@ -422,6 +429,7 @@ void accept_conn(void *dummy)
 		}
 		if (strcmp(usrInfo.type, "SWITCH_PRIVATE_CHAT") == 0) {
 			printf("usr: %s, usrInfo.recv: %s\n", usrInfo.name, usrInfo.recv_name);
+			current_room = -1;
 			// load chat history chat to usrInfo.recv_name
 		}
 		if (strcmp(usrInfo.type, "SWITCH_GROUP_CHAT") == 0) {
@@ -434,16 +442,16 @@ void accept_conn(void *dummy)
 
 			int room_mem = 0;
 
-			printf("usr: %s, usrInfo.room_name: %s\n", usrInfo.name, usrInfo.room_name);
+			
 			// load room id by room name
-			int rid = get_room_id(usrInfo.room_name);
+			rid = get_room_id(usrInfo.room_name);
 			if (rid != -1) {
 				usrInfo.room = rid;
 				current_room = rid;
 			} else {
 				printf("switch to group chat error!\n");
 			}
-
+			printf("usr: %s, usrInfo.room_name: %s rid: %d\n", usrInfo.name, usrInfo.room_name, rid);
 			char roomMemInfo[250];
 
 			sprintf_s(roomMemInfo,"SELECT `user_name` FROM room_mem WHERE rid = %d;",rid);
