@@ -34,6 +34,20 @@ MainDialogInterface::~MainDialogInterface()
     WSACleanup();
 }
 
+char* MainDialogInterface::str_handle(char* raw)
+{
+    char* result = (char*)malloc(2*strlen(raw)*sizeof(char));
+    int i = 0, j = 0;
+    for(; i < (int)strlen(raw); i++, j++){
+        if(raw[i] == '\'' || raw[i]=='"' || raw[i]=='\\'){
+            result[j] = '\\';
+            j++;
+        }
+        result[j] = raw[i];
+    }
+    result[j] = '\0';
+    return result;
+}
 
 void MainDialogInterface::receiveData(QString data)
 {
@@ -49,10 +63,8 @@ void MainDialogInterface::on_Send_clicked()
     QString transcoding_buffer = codec->toUnicode(buffer.toStdString().c_str());
     QByteArray transfered_buffer = transcoding_buffer.toLocal8Bit();
 
-    char *bufferToString = transfered_buffer.data();
-
     strcpy(usr.type, "CHAT");
-    strcpy(usr.msg, bufferToString);
+    strcpy(usr.msg, str_handle(transfered_buffer.data()));
 
     msg_len = send(connect_sock, (char*)&usr, sizeof szBuff, 0);
 

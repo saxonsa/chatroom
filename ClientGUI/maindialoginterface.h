@@ -23,6 +23,8 @@ public:
 
   SearchHistory *searchHistory = NULL;
 
+  char* str_handle(char raw[]);
+
 private:
   // public:
   Ui::MainDialogInterface *ui;

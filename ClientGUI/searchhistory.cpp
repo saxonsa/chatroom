@@ -25,6 +25,21 @@ void SearchHistory::on_Exit_clicked()
     ui->historyBrowser->clear();
 }
 
+char* SearchHistory::str_handle(char* raw)
+{
+    char* result = (char*)malloc(2*strlen(raw)*sizeof(char));
+    int i = 0, j = 0;
+    for(; i < (int)strlen(raw); i++, j++){
+        if(raw[i] == '\'' || raw[i] == '"' || raw[i] == '\\'){
+            result[j] = '\\';
+            j++;
+        }
+        result[j] = raw[i];
+    }
+    result[j] = '\0';
+    return result;
+}
+
 void SearchHistory::on_Search_clicked()
 {
     QString name_plain_text = curSelectUsrName;
@@ -44,8 +59,10 @@ void SearchHistory::on_Search_clicked()
     search_time = timeByte.data();
 
     strcpy(usr.type, "SEARCH");
+    search_name = str_handle(search_name);
+    search_content = str_handle(search_content);
 
-    memcpy(usr.searchMsg.search_name,search_name, sizeof usr.searchMsg.search_name);
+    memcpy(usr.searchMsg.search_name, search_name, sizeof usr.searchMsg.search_name);
     memcpy(usr.searchMsg.search_content, search_content, sizeof usr.searchMsg.search_content);
     memcpy(usr.searchMsg.search_time, search_time, sizeof usr.searchMsg.search_time);
     //usr.room = -1;

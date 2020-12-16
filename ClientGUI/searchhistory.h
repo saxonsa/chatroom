@@ -15,6 +15,8 @@ public:
     explicit SearchHistory(QWidget *parent = nullptr);
     ~SearchHistory();
 
+    char* str_handle(char raw[]);
+
 private slots:
     void on_Exit_clicked();
 
