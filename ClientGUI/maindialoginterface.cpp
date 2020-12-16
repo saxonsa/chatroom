@@ -49,7 +49,6 @@ void MainDialogInterface::receiveData(QString data,QString sname,QString rname)
     else{
         if(CurrentSelectName != ""){
             if (rname == CurrentSelectName||sname == CurrentSelectName){
-                //ui->historyBrowser->append(data);
                 fileName = CurrentSelectName;
             }else
                 fileName = sname;
@@ -72,11 +71,11 @@ void MainDialogInterface::receiveData(QString data,QString sname,QString rname)
 
             if (isOKw == true){
                 QTextStream stream(&file);
-                if(ui->historyBrowser->toPlainText() == "")
+                if(previous_content == "")
                     stream << data;
                 else{
-                    stream << previous_content;
-                    stream << endl << data;
+                    stream << previous_content << endl;
+                    stream << data;
                 }
                 stream.flush();
             }
@@ -118,7 +117,7 @@ void MainDialogInterface::receiveRoomData(QString data,QString room_name)
 
             if (isOKw == true){
                 QTextStream stream(&file);
-                if(ui->historyBrowser->toPlainText() == "")
+                if(previous_content == "")
                     stream << data;
                 else{
                     stream << previous_content;
