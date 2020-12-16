@@ -73,6 +73,7 @@ void accept_conn(void *dummy)
 	usrData usrInfo;
 
 	char current_name[100] = { 0 };
+	int current_room = 0;
 
 	nameList groupList[MAX_ROOM] = { 0 };
 	nameList roomNameList[MAX_ALLOWED] = { 0 };
@@ -342,12 +343,32 @@ void accept_conn(void *dummy)
 				
 
 			} else { // group CHAT
-				insert_into_group(usrInfo.name, usrInfo.createTime, usrInfo.msg, usrInfo.room); // Insert the history into the database
+				insert_into_group(current_name, usrInfo.createTime, usrInfo.msg, current_room); // Insert the history into the database
 				// printf("curr name: %s\n", usrInfo.name);
 				// printf("curr time: %s\n", usrInfo.createTime);
 				// printf("curr msg: %s\n", usrInfo.msg);
 				// search_history();// Search history from database
 
+				// find the client socket in the usrInfo.room and broadcast to them
+				for (int i = 0; i < MAX_ALLOWED; i++) { // for all member in roomNameList
+					for (int j = 0; j < MAX_ALLOWED; j++) { // if we can find a clients name is the same as it
+						if (strcmp(clients[j].name, roomNameList[i].name) == 0 && clients[i].client_socket != INVALID_SOCKET) {
+							// broadcast to group
+							msg_len = send(clients[j].client_socket, (char*)&usrInfo, BUFFERSIZE, 0);
+							if (msg_len <= 0)
+							{
+								printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+								closesocket(sub_sock);
+								connecting--;
+								printf("current number of clients: %d\n", connecting);
+								_endthread();
+							}
+							break;
+						}
+					}
+				}
+
+				/*
 				for (int i = 0; i < MAX_ALLOWED; i++)
 				{
 					if (clients[i].client_socket == sub_sock)
@@ -372,6 +393,7 @@ void accept_conn(void *dummy)
 						}
 					}
 				}
+				*/
 			}
 		}
 
@@ -403,6 +425,12 @@ void accept_conn(void *dummy)
 			// load chat history chat to usrInfo.recv_name
 		}
 		if (strcmp(usrInfo.type, "SWITCH_GROUP_CHAT") == 0) {
+			
+			// clear room List info
+			for (int i = 0; i < MAX_ALLOWED; i++) {
+				memset(roomNameList[i].name, 0, sizeof roomNameList[i].name);
+				roomNameList[i].uid = -1;
+			}
 
 			int room_mem = 0;
 
@@ -411,6 +439,7 @@ void accept_conn(void *dummy)
 			int rid = get_room_id(usrInfo.room_name);
 			if (rid != -1) {
 				usrInfo.room = rid;
+				current_room = rid;
 			} else {
 				printf("switch to group chat error!\n");
 			}
@@ -431,7 +460,7 @@ void accept_conn(void *dummy)
 			MYSQL_ROW nextRow = NULL;
 
 			if (res) {
-			// check if the room is empty
+				// check if the room is empty
 				if (res->row_count > 0) {
 					// room is not empty
 					char** nameList = (char**)malloc((int)res->row_count * sizeof(char*));

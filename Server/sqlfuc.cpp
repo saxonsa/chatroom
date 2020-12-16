@@ -38,7 +38,7 @@ void insert_into_group(char user_name[], char creat_time[], char content[], int 
   char toInsertHistory[1000];
 
   sprintf_s(toInsertHistory,
-      "Insert INTO group_history(user_name,create_time,content,room_name) "
+      "Insert INTO group_history(user_name,create_time,content,rid) "
       "VALUES('%s','%s','%s',%d);",
       user_name, creat_time, content, rid);
 
