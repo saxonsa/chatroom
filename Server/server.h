@@ -35,7 +35,7 @@ extern MYSQL_RES *res;
 extern MYSQL_FIELD *field; 
 extern MYSQL_ROW nextRow;
 extern int ret;
-extern int row_num;
+extern int row_num; // number of group in DB
 
 
 // client structure
@@ -56,6 +56,7 @@ typedef struct _nameList {
 extern int onlineList_msg;
 
 extern nameList personOnlineList[MAX_ALLOWED];
+extern nameList roomNameList[MAX_ALLOWED];
 
 typedef struct {
 	char search_name[100];
@@ -80,5 +81,7 @@ typedef struct {
 
 
 extern char normalMsg[1000]; // the normal msg sent to all... e.x: Saxon: msg
+
+char** get_room_mem(int rid);
 
 #endif

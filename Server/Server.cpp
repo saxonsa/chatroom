@@ -62,6 +62,17 @@ void exit_clean(int arg)
 	exit(0);
 }
 
+// set current client socket INVALID
+void clear_client(SOCKET sub_sock){
+	for (int i = 0; i < MAX_ALLOWED; i++) {
+		if (clients[i].client_socket == sub_sock) {
+			clients[i].client_socket = INVALID_SOCKET;
+			memset(clients[i].name, 0, sizeof clients[i].name);
+			break;
+		}
+	}
+}
+
 // function to accept a connection
 void accept_conn(void *dummy)
 {
@@ -73,14 +84,20 @@ void accept_conn(void *dummy)
 	usrData usrInfo;
 
 	char current_name[100] = { 0 };
+	int current_room = 0;
 
 	nameList groupList[MAX_ROOM] = { 0 };
+	nameList roomNameList[MAX_ALLOWED] = { 0 };
 
-	// init onlineList
+	int room_mem = 0;
+
+	// init onlineList and roomNameList
 	for (int i = 0; i < MAX_ALLOWED; i++)
 	{
 		usrInfo.onlineList[i].uid = -1;
 		memset(usrInfo.onlineList[i].name, 0, sizeof usrInfo.onlineList[i].name);
+		roomNameList[i].uid = -1;
+		memset(roomNameList[i].name, 0, sizeof roomNameList[i].name);
 	}
 
 	while (1)
@@ -97,9 +114,6 @@ void accept_conn(void *dummy)
 		time(&timep);            // get how many seconds pass sence 1900
 		localtime_s(&p, &timep); // use local time to transform from second to stucture tm
 		sprintf_s(usrInfo.createTime, "%d/%d/%d %02d:%02d:%02d\n", 1900 + p.tm_year, 1 + p.tm_mon, p.tm_mday, p.tm_hour, p.tm_min, p.tm_sec);
-		printf("create time: %s\n", usrInfo.createTime);
-
-		printf("msg_len: %d\n", msg_len);
 
 		// recv fails, destroy the socket
 		if (msg_len == SOCKET_ERROR)
@@ -158,10 +172,7 @@ void accept_conn(void *dummy)
 		if (msg_len == 0)
 		{
 			printf("Client closed connection\n");
-			char* resMsg;
-			// set status to 0
-			resMsg = set_user_status(current_name, 0);
-			printf("set status to 0 msg: %s\n", resMsg);
+			printf("set status to 0 msg: %s\n", set_user_status(current_name, 0));
 			for (int s = 0; s < MAX_ALLOWED; s++)
 			{
 				if (clients[s].client_socket == sub_sock)
@@ -195,10 +206,21 @@ void accept_conn(void *dummy)
 			}
 			else
 			{
+				// login fail, set user status to 0
+				set_user_status(usrInfo.name, 0);
+
+				// send error back to client
 				strcpy_s(usrInfo.type, sizeof usrInfo.type, "LoginF");
 				strcpy_s(usrInfo.msg, sizeof usrInfo.msg, resStr);
 				send(sub_sock, (char *)&usrInfo, BUFFERSIZE, 0);
+
+				// display error on server
+				printf("login has problem\n");
 				printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+
+				// clear current socket
+				clear_client(sub_sock);
+				
 				closesocket(sub_sock);
 				connecting--;
 				printf("current number of clients: %d\n", connecting);
@@ -214,7 +236,6 @@ void accept_conn(void *dummy)
 			char enterMsgSelf[100] = "Welcome "; // the enter msg sent to the client himhelf
 
 			// initialize online list on server end
-
 			for (int i = 0; i < MAX_ALLOWED; i++) {
 				if (personOnlineList[i].uid == -1) {
 					strcpy_s(personOnlineList[i].name, sizeof personOnlineList[i].name, usrInfo.name);
@@ -226,8 +247,8 @@ void accept_conn(void *dummy)
 			for (int i = 0; i < MAX_ALLOWED; i++) {
 				printf("onlineList[i]: %s\n", personOnlineList[i].name);
 			}
-			
 
+			// ini client personal info
 			for (int s = 0; s < MAX_ALLOWED; s++)
 			{
 				if (clients[s].client_socket == sub_sock)
@@ -239,6 +260,7 @@ void accept_conn(void *dummy)
 						clients[s].fd = s;
 						memcpy(enterMsgOther, clients[s].name, sizeof(clients[s].name));
 						if (current_name) {
+							row_num = 0;
 							// initialize group list on server end when the first enter the room
 							char **group_name = NULL;
 							memcpy(current_name, usrInfo.name, sizeof(current_name));
@@ -289,7 +311,16 @@ void accept_conn(void *dummy)
 
 					if (msg_len <= 0)
 					{
+						// login fail, set user status to 0
+						set_user_status(usrInfo.name, 0);
+
+						// display error on server
+						printf("enter has problem\n");
 						printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+
+						// clear current socket
+						clear_client(sub_sock);
+
 						closesocket(sub_sock);
 						connecting--;
 						printf("current number of clients: %d\n", connecting);
@@ -302,7 +333,7 @@ void accept_conn(void *dummy)
 		// broadcast normal chat msg to all clients in the chatroom
 		if (strcmp(usrInfo.type, "CHAT") == 0)
 		{
-			if (usrInfo.room == 0) { // private CHAT
+			if (usrInfo.room == -1) { // private CHAT
 				insert_into_private(current_name, usrInfo.createTime, usrInfo.msg, usrInfo.recv_name);
 				// find recv socket
 				SOCKET recv_socket = INVALID_SOCKET;
@@ -317,6 +348,7 @@ void accept_conn(void *dummy)
 				msg_len = send(sub_sock, (char*)&usrInfo, BUFFERSIZE, 0);
 				if (msg_len <= 0)
 				{
+					printf("chat has problem\n");
 					printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
 					closesocket(sub_sock);
 					connecting--;
@@ -327,21 +359,45 @@ void accept_conn(void *dummy)
 				msg_len = send(recv_socket, (char*)&usrInfo, BUFFERSIZE, 0);
 				if (msg_len <= 0)
 				{
+					printf("chat has problem\n");
 					printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
 					closesocket(sub_sock);
 					connecting--;
 					printf("current number of clients: %d\n", connecting);
 					_endthread();
 				}
-				
-
-			} else { // group CHAT
-				insert_into_group(usrInfo.name, usrInfo.createTime, usrInfo.msg, usrInfo.room); // Insert the history into the database
+			} 
+			else 
+			{ // group CHAT
+				insert_into_group(current_name, usrInfo.createTime, usrInfo.msg, current_room); // Insert the history into the database
 				// printf("curr name: %s\n", usrInfo.name);
 				// printf("curr time: %s\n", usrInfo.createTime);
 				// printf("curr msg: %s\n", usrInfo.msg);
 				// search_history();// Search history from database
 
+				// find the client socket in the usrInfo.room and broadcast to them
+				for (int i = 0; i < MAX_ALLOWED; i++) 
+				{ // for all member in roomNameList
+					for (int j = 0; j < MAX_ALLOWED; j++) 
+					{ // if we can find a clients name is the same as it
+						if (strcmp(clients[j].name, roomNameList[i].name) == 0 && clients[i].client_socket != INVALID_SOCKET) 
+						{
+							// broadcast to group
+							msg_len = send(clients[j].client_socket, (char*)&usrInfo, BUFFERSIZE, 0);
+							if (msg_len <= 0)
+							{
+								printf("Client IP: %s closed connection\n", inet_ntoa(client_addr.sin_addr));
+								closesocket(sub_sock);
+								connecting--;
+								printf("current number of clients: %d\n", connecting);
+								_endthread();
+							}
+							break;
+						}
+					}
+				}
+
+				/*
 				for (int i = 0; i < MAX_ALLOWED; i++)
 				{
 					if (clients[i].client_socket == sub_sock)
@@ -366,6 +422,7 @@ void accept_conn(void *dummy)
 						}
 					}
 				}
+				*/
 			}
 		}
 
@@ -392,22 +449,87 @@ void accept_conn(void *dummy)
 
 			}
 		}
-		if (strcmp(usrInfo.type, "SWITCH_PRIVATE_CHAT") == 0) {
+		if (strcmp(usrInfo.type, "SWITCH_PRIVATE_CHAT") == 0) 
+		{
 			printf("usr: %s, usrInfo.recv: %s\n", usrInfo.name, usrInfo.recv_name);
 			// load chat history chat to usrInfo.recv_name
 		}
-		if (strcmp(usrInfo.type, "SWITCH_GROUP_CHAT") == 0) {
+		if (strcmp(usrInfo.type, "SWITCH_GROUP_CHAT") == 0) 
+		{
+			
+			// clear room List info
+			for (int i = 0; i < MAX_ALLOWED; i++) 
+			{
+				memset(roomNameList[i].name, 0, sizeof roomNameList[i].name);
+				roomNameList[i].uid = -1;
+			}
+
+			int room_mem = 0;
+
 			printf("usr: %s, usrInfo.room_name: %s\n", usrInfo.name, usrInfo.room_name);
 			// load room id by room name
 			int rid = get_room_id(usrInfo.room_name);
-			if (rid != -1) {
+			if (rid != -1) 
+			{
 				usrInfo.room = rid;
-			} else {
+				current_room = rid;
+			} 
+			else 
+			{
 				printf("switch to group chat error!\n");
 			}
+
+			char roomMemInfo[250];
+
+			sprintf_s(roomMemInfo,"SELECT `user_name` FROM room_mem WHERE rid = %d;",rid);
+
+			ret = mysql_query(&mysqlConnect, roomMemInfo); // Pass the query to database
+
+			// If the query failed, close the function
+			if (ret != 0) 
+			{
+				printf("get_room_mem failed...Error: %s\n", mysql_error(&mysqlConnect));
+				// return;
+			}
+
+			MYSQL_RES *res = mysql_store_result(&mysqlConnect);
+			MYSQL_ROW nextRow = NULL;
+
+			if (res) 
+			{
+				// check if the room is empty
+				if (res->row_count > 0) 
+				{
+					// room is not empty
+					char** nameList = (char**)malloc((int)res->row_count * sizeof(char*));
+					// nextRow = mysql_fetch_row(res);
+					for (int i = 0; i < res->row_count; i++)
+					{
+						nextRow = mysql_fetch_row(res);
+						nameList[i] = nextRow[0];
+						printf("name: %s\n", nextRow[0]);
+						room_mem++;
+					}
+					for (int i = 0; i < room_mem; i++)
+					{
+						memcpy(roomNameList[i].name, nameList[i], sizeof roomNameList[i].name);
+						roomNameList[i].uid = i;
+					}
+
+				}
+				else 
+				{
+					// room is empty
+					printf("room is empty.\n");
+				}
+			}
+			else 
+			{
+				printf("get_room_mem mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+			}
+
 		}
 	}
-
 	connecting--;
 	printf("current number of clients: %d\n", connecting);
 	closesocket(sub_sock);

@@ -38,7 +38,7 @@ void insert_into_group(char user_name[], char creat_time[], char content[], int 
   char toInsertHistory[1000];
 
   sprintf_s(toInsertHistory,
-      "Insert INTO group_history(user_name,create_time,content,room_name) "
+      "Insert INTO group_history(user_name,create_time,content,rid) "
       "VALUES('%s','%s','%s',%d);",
       user_name, creat_time, content, rid);
 
@@ -468,8 +468,6 @@ char* check_login(char user_name[], char pwd[]){
 
 	sprintf_s(loginInfo,"SELECT * FROM users WHERE user_name = '%s';",user_name);
 
-	cout << loginInfo << endl;
-
 	ret = mysql_query(&mysqlConnect, loginInfo); // Pass the query to database
 
 	// If the query failed, close the function
@@ -485,7 +483,7 @@ char* check_login(char user_name[], char pwd[]){
 		//Print the result table
 		if (res->row_count > 0) {
 			nextRow = mysql_fetch_row(res);
-			cout << nextRow[2] << endl;
+
 			// check current user is online
 			if (strcmp(nextRow[2],"1") == 0){
 				// current user is already online
@@ -524,6 +522,7 @@ char* set_user_status(char user_name[], int status) {
 	return "Success";
 }
 
+/*
 char** get_room_mem(int rid){
 	char roomMemInfo[250];
 
@@ -545,8 +544,9 @@ char** get_room_mem(int rid){
 		if (res->row_count > 0) {
 			// room is not empty
 			char** nameList = (char**)malloc((int)res->row_count * sizeof(char*));
-			nextRow = mysql_fetch_row(res);
-			for (int i = 0; i < res->row_count; i++, nextRow = mysql_fetch_row(res)){
+			// nextRow = mysql_fetch_row(res);
+			for (int i = 0; i < res->row_count; i++){
+				nextRow = mysql_fetch_row(res);
 				nameList[i] = nextRow[0];
 			}
 			return nameList;
@@ -562,6 +562,7 @@ char** get_room_mem(int rid){
 
 	return NULL;
 }
+*/
 
 char** get_room_name(char user_name[]){
 	char roomNameInfo[300];
