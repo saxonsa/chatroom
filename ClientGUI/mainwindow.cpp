@@ -51,7 +51,7 @@ void MainWindow::on_EnterBtn_clicked()
     if (client_connect(ip,portNum,userName) == 0){
 
         Reciever *recver = new Reciever();
-        connect(recver, SIGNAL(recv_success(QString)),mainDialog,SLOT(receiveData(QString)));
+        connect(recver, SIGNAL(recv_success(QString,QString,QString)),mainDialog,SLOT(receiveData(QString,QString,QString)));
         connect(recver, SIGNAL(enter_success(QString, nameList*)),mainDialog,SLOT(displayOnlineList(QString, nameList*)));
         connect(recver, SIGNAL(search_success(QString)),mainDialog,SLOT(recvSignalToSearch(QString)));
         connect(recver, SIGNAL(login_success(char*)),this,SLOT(recv_Login_signal(char*)));
@@ -125,6 +125,8 @@ void MainWindow::recv_Login_signal(char* usr_name){
     this->hide();
     // Show the dialog interface
     mainDialog->show();
+
+    mainDialog->setWindowTitle("UChat @ " + QString(name));
 }
 
 void MainWindow::reject_Login_signal(char* msg){

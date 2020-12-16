@@ -6,6 +6,9 @@
 #include <QString>
 #include <QtDebug>
 #include <QTextCodec>
+#include <QDir>
+#include <QFile>
+#include <QTextStream>
 #include <string>
 #include <QStringListModel>
 #include <QStandardItemModel>
@@ -35,9 +38,54 @@ MainDialogInterface::~MainDialogInterface()
 }
 
 
-void MainDialogInterface::receiveData(QString data)
+void MainDialogInterface::receiveData(QString data,QString sname,QString rname)
 {
-    ui->historyBrowser->append(data);
+    QString name_str(name),fileName;
+    QDir dir;
+    QString path("./history/"+ name_str+"/");
+    if(!dir.exists(path)){
+       dir.mkpath(path);
+    }
+    else{
+        if(CurrentSelectName != ""){
+            if (rname == CurrentSelectName||sname == CurrentSelectName){
+                //ui->historyBrowser->append(data);
+                fileName = CurrentSelectName;
+            }else
+                fileName = sname;
+
+            QFile file_r(path+ fileName +".txt");
+            bool isOKr = file_r.open(QIODevice::ReadOnly);
+            QString previous_content;
+
+            if (isOKr == true){
+                QTextStream stream_r(&file_r);
+
+                previous_content = stream_r.readAll();
+
+                stream_r.flush();
+            }
+            file_r.close();
+
+            QFile file(path+ fileName +".txt");
+            bool isOKw = file.open(QIODevice::WriteOnly);
+
+            if (isOKw == true){
+                QTextStream stream(&file);
+                if(ui->historyBrowser->toPlainText() == "")
+                    stream << data;
+                else{
+                    stream << previous_content;
+                    stream << endl << data;
+                }
+                stream.flush();
+            }
+            file.close();
+            if (rname == CurrentSelectName||sname == CurrentSelectName){
+                changeChatRoomName(CurrentSelectName);
+            }
+        }
+    }
 }
 
 void MainDialogInterface::on_Send_clicked()
@@ -82,7 +130,7 @@ void MainDialogInterface::displayOnlineList(QString data, nameList *groupList) {
     }
 
     if (strcmp(usr.type, "ENTER") == 0) {
-        receiveData(data);
+        receiveData(data,"1","0");
     }
     QStringList usrOnlineList;
     for (int i = 0; i < MAX_ALLOWED; i++) {
@@ -153,7 +201,31 @@ void MainDialogInterface::showClickedPersonName(QModelIndex index){
 
 }
 
-void MainDialogInterface::changeChatRoomName(QString name){
-    this->setWindowTitle("UChat chatting with @ " + name);
+void MainDialogInterface::changeChatRoomName(QString name_select){
+    this->setWindowTitle("UChat @ " + QString(name) + " chatting with " + name_select);
+    CurrentSelectName = name_select;
     curSelectRmNum =  0;
+
+    ui->historyBrowser->clear();
+
+    QString name_str(name);
+
+    QString path("./history/"+ name_str+"/");
+
+    QFile file(path+ CurrentSelectName +".txt");
+
+    bool isOK = file.open(QIODevice::ReadOnly);
+
+    if (isOK == true){
+        QTextStream stream(&file);
+
+        QString strAll = stream.readAll();
+
+        stream.flush();
+
+        ui->historyBrowser->setText(strAll);
+    }
+    file.close();
 }
+
+
