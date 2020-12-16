@@ -401,9 +401,7 @@ void add_room(char admin[], char room_name[]){
 	char addRoomInfo[250];
 
 	// connect sql
-	sprintf_s(addRoomInfo,"INSERT INTO room_info(administrator,room_name) VALUES('%s','%s');"
-		,admin
-		,room_name);
+	sprintf_s(addRoomInfo,"INSERT INTO room_info(administrator,room_name) VALUES('%s','%s');",admin ,room_name);
 
 	ret = mysql_query(&mysqlConnect, addRoomInfo); // Pass the query to database
 
@@ -422,9 +420,7 @@ void add_room(char admin[], char room_name[]){
 void add_mem(int rid, char mem_name[]){
 	char addMemberInfo[250];
 
-	sprintf_s(addMemberInfo,"INSERT INTO room_mem VALUES VALUES(%d,'%s');"
-		,rid
-		,mem_name);
+	sprintf_s(addMemberInfo,"INSERT INTO room_mem VALUES(%d,'%s');",rid,mem_name);
 
 	ret = mysql_query(&mysqlConnect, addMemberInfo); // Pass the query to database
 
