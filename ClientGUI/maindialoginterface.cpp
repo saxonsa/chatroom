@@ -12,6 +12,7 @@
 #include <string>
 #include <QStringListModel>
 #include <QStandardItemModel>
+#include <QMessageBox>
 using namespace std;
 
 MainDialogInterface::MainDialogInterface(QWidget *parent) : QMainWindow(parent),
@@ -53,6 +54,7 @@ void MainDialogInterface::receiveData(QString data, QString sname, QString rname
     }
     else
       fileName = sname;
+
 
     QFile file_r(path + fileName + ".txt");
     bool isOKr = file_r.open(QIODevice::ReadOnly);
@@ -153,10 +155,17 @@ void MainDialogInterface::on_Send_clicked()
   QString transcoding_buffer = codec->toUnicode(buffer.toStdString().c_str());
   QByteArray transfered_buffer = transcoding_buffer.toLocal8Bit();
 
-  char *bufferToString = transfered_buffer.data();
+    char* transfer = str_handle(transfered_buffer.data());
 
-  strcpy(usr.type, "CHAT");
-  strcpy(usr.msg, bufferToString);
+    if(strlen(transfer) == 0){
+        QString dlgTitle="Warning!!!";
+        QString strInfo="Input can not be empty";
+        QMessageBox::warning(this, dlgTitle, strInfo);
+        return;
+    }
+
+    strcpy(usr.type, "CHAT");
+    strcpy(usr.msg, transfer);
 
   msg_len = send(connect_sock, (char *)&usr, sizeof szBuff, 0);
 
@@ -339,4 +348,19 @@ void MainDialogInterface::showClickedGroupName(QModelIndex index)
     WSACleanup();
     qDebug() << "msg_len = 0";
   }
+}
+
+char* MainDialogInterface::str_handle(char* raw)
+{
+    char* result = (char*)malloc(2*strlen(raw)*sizeof(char));
+    int i = 0, j = 0;
+    for(; i < (int)strlen(raw); i++, j++){
+        if(raw[i] == '\'' || raw[i]=='"' || raw[i]=='\\'){
+            result[j] = '\\';
+            j++;
+        }
+        result[j] = raw[i];
+    }
+    result[j] = '\0';
+    return result;
 }

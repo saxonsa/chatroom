@@ -1,0 +1,21 @@
+﻿Build started 2020/12/16 星期三 21:06:48.
+     1>Project "C:\Users\Michael\documents\visual studio 2010\Projects\Server\Server\Server.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\Server.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         All outputs are up-to-date.
+         All outputs are up-to-date.
+       ManifestResourceCompile:
+         All outputs are up-to-date.
+       Link:
+         All outputs are up-to-date.
+       Manifest:
+         All outputs are up-to-date.
+       FinalizeBuildStatus:
+         Deleting file "Debug\Server.unsuccessfulbuild".
+         Touching "Debug\Server.lastbuildstate".
+     1>Done Building Project "C:\Users\Michael\documents\visual studio 2010\Projects\Server\Server\Server.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.04

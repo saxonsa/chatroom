@@ -70,6 +70,8 @@ extern int curSelectRmNum;
 
 int client_connect(char serverIP[], char server_port[], char *name);
 
+char* str_handle(char raw[]);
+
 //char* recv_msg_dialog();
 
 #endif // CLIENT_H
