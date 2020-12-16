@@ -48,7 +48,8 @@ class Reciever : public QThread
                 emit enter_success(chatMsg, (nameList*)&groupList);
             } else if (strcmp(usr.type, "CHAT") == 0) {
                 sprintf(chatMsg,"%s%s: %s",usr.createTime,usr.name,usr.msg);
-                emit recv_success(chatMsg);
+
+                emit recv_success(chatMsg,usr.name,usr.recv_name);
             } else if (strcmp(usr.type, "SEARCH") == 0){
                 sprintf(chatMsg,"%s\n%s: %s",usr.searchMsg.search_time,usr.searchMsg.search_name,usr.searchMsg.search_content);
                 qDebug() << chatMsg;
@@ -64,7 +65,7 @@ class Reciever : public QThread
     }
 
 signals:
-    void recv_success(QString);
+    void recv_success(QString,QString,QString);
     void enter_success(QString, nameList*);
     void search_success(QString);
     void login_success(char*);

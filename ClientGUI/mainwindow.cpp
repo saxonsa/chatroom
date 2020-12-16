@@ -17,9 +17,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     // Create a new scene
     mainDialog = new MainDialogInterface;
-
-
-//    connect(this,SIGNAL(sendData(QString)),mainDialog,SLOT(receiveData(QString)));
 }
 
 MainWindow::~MainWindow()
@@ -52,14 +49,14 @@ void MainWindow::on_EnterBtn_clicked()
     pwd = pwdByte.data();
 
     if (client_connect(ip,portNum,userName) == 0){
+
         Reciever *recver = new Reciever();
-        connect(recver, SIGNAL(recv_success(QString)),mainDialog,SLOT(receiveData(QString)));
+        connect(recver, SIGNAL(recv_success(QString,QString,QString)),mainDialog,SLOT(receiveData(QString,QString,QString)));
         connect(recver, SIGNAL(enter_success(QString, nameList*)),mainDialog,SLOT(displayOnlineList(QString, nameList*)));
         connect(recver, SIGNAL(search_success(QString)),mainDialog,SLOT(recvSignalToSearch(QString)));
         connect(recver, SIGNAL(login_success(char*)),this,SLOT(recv_Login_signal(char*)));
         connect(recver, SIGNAL(login_failed(char*)),this,SLOT(reject_Login_signal(char*)));
         recver->start(); // start the thread
-
 
         strcpy(usr.name, userName);
         strcpy(usr.pwd, pwd);
@@ -91,9 +88,7 @@ void MainWindow::on_EnterBtn_clicked()
 
 void MainWindow::recv_Login_signal(char* usr_name){
 
-    if (strcmp(name, "") == 0) {
-        strcpy(name, usr.name);
-    }
+    if (strcmp(name, "") == 0) strcpy(name, usr.name);
 
     strcpy(usr.name, usr_name);
 
@@ -117,17 +112,21 @@ void MainWindow::recv_Login_signal(char* usr_name){
     if (msg_len == SOCKET_ERROR) {
        fprintf(stderr, "send() failed with error %d\n", WSAGetLastError());
        WSACleanup();
+       return;
     }
 
     if (msg_len == 0) {
        printf("server closed connection\n");
        closesocket(connect_sock);
        WSACleanup();
+       return;
     }
     // Hide the login window
     this->hide();
     // Show the dialog interface
     mainDialog->show();
+
+    mainDialog->setWindowTitle("UChat @ " + QString(name));
 }
 
 void MainWindow::reject_Login_signal(char* msg){

@@ -26,8 +26,9 @@ public:
 private:
   // public:
   Ui::MainDialogInterface *ui;
+  QString CurrentSelectName;
 private slots:
-  void receiveData(QString data);
+  void receiveData(QString data,QString sname,QString rname);
   void on_Send_clicked();
   void displayOnlineList(QString data, nameList *groupList);
   void on_History_clicked();
