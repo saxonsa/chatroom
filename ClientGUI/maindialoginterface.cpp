@@ -74,13 +74,11 @@ void MainDialogInterface::receiveData(QString data, QString sname, QString rname
     if (isOKw == true)
     {
       QTextStream stream(&file);
-      if (ui->historyBrowser->toPlainText() == "")
+      if (previous_content == "")
         stream << data;
-      else
-      {
-        stream << previous_content;
-        stream << endl
-               << data;
+      else {
+        stream << previous_content<< endl;
+        stream << data;
       }
       stream.flush();
     }
