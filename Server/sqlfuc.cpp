@@ -420,7 +420,7 @@ void add_room(char admin[], char room_name[]){
 }
 
 void add_mem(int rid, char mem_name[]){
-	char addMemberInfo[250] = "INSERT INTO room_mem VALUES(";
+	char addMemberInfo[250];
 
 	sprintf_s(addMemberInfo,"INSERT INTO room_mem VALUES VALUES(%d,'%s');"
 		,rid

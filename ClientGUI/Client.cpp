@@ -27,6 +27,21 @@ usrData usr;
 
 int curSelectRmNum = 0;
 
+char* str_handle(char* raw)
+{
+    char* result = (char*)malloc(2*strlen(raw)*sizeof(char));
+    int i = 0, j = 0;
+    for(; i < (int)strlen(raw); i++, j++){
+        if(raw[i]=='\'' || raw[i]=='"' || raw[i]=='\\'){
+            result[j] = '\\';
+            j++;
+        }
+        result[j] = raw[i];
+    }
+
+    return result;
+}
+
 int client_connect(char* serverIP, char* server_port, char* name) {
   printf("%s %s %s", serverIP, server_port, name);
   port = atoi(server_port);

@@ -20,6 +20,8 @@ public:
 
     MainDialogInterface *mainDialog = NULL;
 
+    char* str_handle(char raw[]);
+
 
 private slots:
     void on_EnterBtn_clicked();
