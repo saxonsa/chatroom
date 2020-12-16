@@ -18,8 +18,6 @@ class Reciever : public QThread
 
             msg_len = recv(connect_sock, szBuff, sizeof szBuff, 0);
 
-            qDebug() << "Am i here?" ;
-
             if (msg_len == SOCKET_ERROR) {
               fprintf(stderr, "recv() failed with error %d\n", WSAGetLastError());
               closesocket(connect_sock);
@@ -44,8 +42,8 @@ class Reciever : public QThread
             }
 
             if (strcmp(usr.type, "ENTER") == 0 || strcmp(usr.type, "QUIT") == 0) {
-                strcat(chatMsg, usr.msg);
-                emit enter_success(chatMsg, (nameList*)&groupList);
+            //                strcat(chatMsg, usr.msg);
+                emit enter_success((nameList*)&groupList);
             } else if (strcmp(usr.type, "CHAT") == 0) {                
                 if(usr.room == -1){
                     sprintf(chatMsg,"%s%s: %s",usr.createTime,usr.name,usr.msg);
@@ -73,7 +71,7 @@ class Reciever : public QThread
 signals:
     void recv_success(QString,QString,QString);
     void recv_room_success(QString,QString);
-    void enter_success(QString, nameList*);
+    void enter_success(nameList*);
     void search_success(QString);
     void login_success(char*);
     void login_failed(char*);

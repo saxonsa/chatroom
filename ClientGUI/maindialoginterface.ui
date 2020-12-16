@@ -97,7 +97,17 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
+       <item row="2" column="0">
+        <widget class="QToolButton" name="Invite">
+         <property name="styleSheet">
+          <string notr="true">width:50px;height:50px;</string>
+         </property>
+         <property name="text">
+          <string>Invite</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

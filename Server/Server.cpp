@@ -1,14 +1,12 @@
 #include "stdafx.h"
 #include <winsock2.h>
 #include <stdlib.h>
-//#include <stdio.h>
 #include <string.h>
 #include <process.h>
 #include <signal.h> // for signal() function
 //#include <mysql.h> // for database functions
 #include <iostream>
 #include <time.h>
-//#include "server.h"
 #include "sqlfuc.h"
 
 using namespace std;
