@@ -27,8 +27,8 @@ MainDialogInterface::MainDialogInterface(QWidget *parent) :
     connect(ui->onlineList,SIGNAL(clicked(QModelIndex)),this,SLOT(showClickedPersonName(QModelIndex)));
     connect(this,SIGNAL(sendSignalToChangeName(QString)),this,SLOT(changeChatRoomName(QString)));
     connect(this,SIGNAL(sendSignalToChangeName(QString)),searchHistory,SLOT(change_private_his_name(QString)));
+    connect(ui->groupList, SIGNAL(clicked(QModelIndex)), this, SLOT(showClickedGroupName(QModelIndex)));
 }
-
 
 MainDialogInterface::~MainDialogInterface()
 {
@@ -141,19 +141,19 @@ void MainDialogInterface::displayOnlineList(QString data, nameList *groupList) {
     QStringListModel *model = new QStringListModel(usrOnlineList);
     ui->onlineList->setModel(model);
 
-    QStandardItemModel *treeItemModel = new QStandardItemModel(ui->groupList);
-    treeItemModel->setHorizontalHeaderLabels(QStringList() << QStringLiteral("Group Name"));
-
-
-
-    for (int i = 0; i < MAX_ROOM; i++) {
-        if (groupList[i].uid != -1 && strcmp(groupList[i].name, "") != 0) {
-            QStandardItem *treeItem = new QStandardItem(groupList[i].name);
-            treeItemModel->appendRow(treeItem);
+    if (strcmp(usr.type, "QUIT") != 0) {
+        QStandardItemModel *treeItemModel = new QStandardItemModel(ui->groupList);
+        treeItemModel->setHorizontalHeaderLabels(QStringList() << QStringLiteral("Group Name"));
+        for (int i = 0; i < MAX_ROOM; i++) {
+            if (groupList[i].uid != -1 && strcmp(groupList[i].name, "") != 0) {
+                QStandardItem *treeItem = new QStandardItem(groupList[i].name);
+                treeItemModel->appendRow(treeItem);
+            }
         }
+
+        ui->groupList->setModel(treeItemModel);
     }
 
-    ui->groupList->setModel(treeItemModel);
 }
 
 
@@ -171,7 +171,7 @@ void MainDialogInterface::showClickedPersonName(QModelIndex index){
 
     QString strTemp; // click person in online list
     strTemp = index.data().toString();
-    usr.room = 0;
+    usr.room = -1;
 
     emit sendSignalToChangeName(strTemp);
 
@@ -183,7 +183,7 @@ void MainDialogInterface::showClickedPersonName(QModelIndex index){
     qDebug() << "我被调用了";
 
     memcpy(usr.name, name, sizeof usr.name);
-    memcpy(usr.recv_name, recv_name, sizeof szBuff);
+    memcpy(usr.recv_name, recv_name, sizeof usr.recv_name);
     memcpy(usr.type, "SWITCH_PRIVATE_CHAT", sizeof usr.type);
 
     msg_len = send(connect_sock, (char*)&usr, sizeof szBuff, 0);
@@ -232,4 +232,31 @@ void MainDialogInterface::changeChatRoomName(QString name_select){
     file.close();
 }
 
+void MainDialogInterface::showClickedGroupName(QModelIndex index)
+{
+    QString clickedRoomName;
+    clickedRoomName = index.data().toString();
 
+    char* room_name;
+    QByteArray room_name_byte = clickedRoomName.toLocal8Bit();
+    room_name = room_name_byte.data();
+
+    memcpy(usr.name, name, sizeof usr.name);
+    memset(usr.recv_name, 0, sizeof usr.recv_name);
+    memcpy(usr.room_name, room_name, sizeof usr.room_name);
+    memcpy(usr.type, "SWITCH_GROUP_CHAT", sizeof usr.type);
+
+    msg_len = send(connect_sock, (char*)&usr, sizeof szBuff, 0);
+    if (msg_len == SOCKET_ERROR) {
+      fprintf(stderr, "send() failed with error %d\n", WSAGetLastError());
+      WSACleanup();
+      qDebug() << "SOCKET_ERROR";
+    }
+
+    if (msg_len == 0) {
+      printf("server closed connection\n");
+      closesocket(connect_sock);
+      WSACleanup();
+      qDebug() << "msg_len = 0";
+    }
+}

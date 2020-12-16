@@ -9,7 +9,7 @@
 #include <process.h>
 
 #define DEFAULT_PORT 5019
-#define BufferSize 8952
+#define BufferSize 9052
 
 extern WSADATA wsaData;
 
@@ -54,6 +54,7 @@ typedef struct
   char createTime[100];
   int room;
   char recv_name[100];
+  char room_name[100];
   search searchMsg;
   nameList groupList[MAX_ROOM];
   nameList onlineList[MAX_ALLOWED];

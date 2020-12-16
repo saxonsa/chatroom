@@ -13,11 +13,6 @@ class Reciever : public QThread
 {
     Q_OBJECT
     void run() override{
-//        nameList groupList[MAX_ROOM];
-//        for (int i = 0; i < MAX_ROOM; i++) {
-//            memcpy(groupList[i].name, "", sizeof groupList[i].name);
-//            groupList[i].uid = -1;
-//        }
         while (1) {
             char chatMsg[] = "";
 
@@ -41,7 +36,7 @@ class Reciever : public QThread
             }
 
             memcpy(&usr, szBuff, sizeof szBuff);
-            if (strcmp(usr.name, name) == 0) {
+            if (strcmp(usr.type, "QUIT") != 0 && strcmp(usr.name, name) == 0) {
                 for (int i = 0; i < MAX_ROOM; i++) {
                     memcpy(groupList[i].name, usr.groupList[i].name, sizeof groupList[i].name);
                     groupList[i].uid = usr.groupList[i].uid;
