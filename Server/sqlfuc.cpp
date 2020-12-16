@@ -468,8 +468,6 @@ char* check_login(char user_name[], char pwd[]){
 
 	sprintf_s(loginInfo,"SELECT * FROM users WHERE user_name = '%s';",user_name);
 
-	cout << loginInfo << endl;
-
 	ret = mysql_query(&mysqlConnect, loginInfo); // Pass the query to database
 
 	// If the query failed, close the function
@@ -485,7 +483,7 @@ char* check_login(char user_name[], char pwd[]){
 		//Print the result table
 		if (res->row_count > 0) {
 			nextRow = mysql_fetch_row(res);
-			cout << nextRow[2] << endl;
+
 			// check current user is online
 			if (strcmp(nextRow[2],"1") == 0){
 				// current user is already online
