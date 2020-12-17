@@ -582,10 +582,23 @@ void accept_conn(void *dummy)
 
 				// send back msg to client
 				strcpy_s(usrInfo.type, sizeof usrInfo.type, "ENTER");
+
+				SOCKET invite_sock = INVALID_SOCKET;
+
+				for (int i = 0; i < MAX_ALLOWED; i++) {
+					if (strcmp(clients[i].name, usrInfo.invite_name) == 0) {
+						invite_sock = clients[i].client_socket;
+					}
+				}
+
 				msg_len = send(sub_sock, (char *)&usrInfo, BUFFERSIZE, 0);
 
 				if (msg_len <= 0)
 					break; // jump out big loop
+
+				msg_len = send(invite_sock, (char*)&usrInfo, BUFFERSIZE, 0);
+				if (msg_len <= 0)
+					break;
 			}
 			else
 			{
@@ -595,6 +608,16 @@ void accept_conn(void *dummy)
 					// current user is the admin of the group
 					// add new member to the group
 					add_mem(get_room_id(usrInfo.msg), usrInfo.invite_name);
+					SOCKET invite_sock = INVALID_SOCKET;
+
+					for (int i = 0; i < MAX_ALLOWED; i++) {
+						if (strcmp(clients[i].name, usrInfo.invite_name) == 0) {
+							invite_sock = clients[i].client_socket;
+						}
+					}
+					msg_len = send(invite_sock, (char*)&usrInfo, BUFFERSIZE, 0);
+					if (msg_len <= 0)
+						break;
 				}
 				else
 				{

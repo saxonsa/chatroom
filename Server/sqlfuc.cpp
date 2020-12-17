@@ -410,7 +410,7 @@ void add_room(char admin[], char room_name[]){
 	}
 
 	// Check the res value
-	print_table(mysql_store_result(&mysqlConnect));
+	// print_table(mysql_store_result(&mysqlConnect));
 
 	return;
 }
@@ -429,7 +429,7 @@ void add_mem(int rid, char mem_name[]){
 	}
 
 	// Check the res value
-	print_table(mysql_store_result(&mysqlConnect));
+	// print_table(mysql_store_result(&mysqlConnect));
 
 	return;
 }
