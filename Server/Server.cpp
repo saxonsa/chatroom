@@ -275,12 +275,6 @@ void accept_conn(void *dummy)
 					break;
 				}
 			}
-
-			for (int i = 0; i < MAX_ALLOWED; i++)
-			{
-				printf("onlineList[i]: %s\n", personOnlineList[i].name);
-			}
-
 			// ini client personal info
 			for (int s = 0; s < MAX_ALLOWED; s++)
 			{
@@ -306,11 +300,6 @@ void accept_conn(void *dummy)
 									memcpy(groupList[i].name, group_name[i], sizeof groupList[i].name);
 									groupList[i].uid = i;
 								}
-							}
-
-							for (int i = 0; i < MAX_ROOM; i++)
-							{
-								printf("%d: group member: %s\n", i, groupList[i].name);
 							}
 						}
 						strcat_s(enterMsgSelf, sizeof(clients[s].name), clients[s].name);
@@ -564,6 +553,7 @@ void accept_conn(void *dummy)
 				add_room(usrInfo.name,usrInfo.msg);
 
 				// add the new room to group list
+				
 				for (int i = 0; i < MAX_ROOM; i++)
 				{
 					if (groupList[i].uid == -1)
@@ -572,6 +562,16 @@ void accept_conn(void *dummy)
 						memcpy(groupList[i].name, usrInfo.msg, sizeof groupList[i].name);
                         memcpy(usrInfo.groupList[i].name, groupList[i].name, sizeof usrInfo.groupList[i].name);
 						break;
+					}
+				}
+
+				for (int i = 0; i < MAX_ROOM; i++) {
+					if (groupList[i].uid != -1) {
+						memcpy(usrInfo.groupList[i].name, groupList[i].name, sizeof usrInfo.groupList[i].name);
+						usrInfo.groupList[i].uid = groupList[i].uid;
+					} else {
+						usrInfo.groupList[i].uid = -1;
+						memset(usrInfo.groupList[i].name, 0, sizeof usrInfo.groupList[i].name);
 					}
 				}
 
@@ -586,15 +586,20 @@ void accept_conn(void *dummy)
 				SOCKET invite_sock = INVALID_SOCKET;
 
 				for (int i = 0; i < MAX_ALLOWED; i++) {
+					printf("client.name %d: %s  invite_name %d: %s\n", i, clients[i].name, i, usrInfo.invite_name);
+
 					if (strcmp(clients[i].name, usrInfo.invite_name) == 0) {
 						invite_sock = clients[i].client_socket;
+						break;
 					}
 				}
 
 				msg_len = send(sub_sock, (char *)&usrInfo, BUFFERSIZE, 0);
 
+				/*
 				if (msg_len <= 0)
 					break; // jump out big loop
+					*/
 
 				msg_len = send(invite_sock, (char*)&usrInfo, BUFFERSIZE, 0);
 				if (msg_len <= 0)
