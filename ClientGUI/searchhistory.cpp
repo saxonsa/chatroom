@@ -66,7 +66,11 @@ void SearchHistory::on_Search_clicked()
         return;
     }
 
-    strcpy(usr.type, "SEARCH");
+    if(usr.room != -1)
+        strcpy(usr.type, "SEARCHROOM");
+    else
+        strcpy(usr.type, "SEARCH");
+
     search_name = str_handle(search_name);
     search_content = str_handle(search_content);
 

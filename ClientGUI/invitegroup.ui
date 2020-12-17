@@ -29,7 +29,11 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Add to Group</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/images/images/logo.png</normaloff>:/images/images/logo.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
@@ -175,6 +179,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
