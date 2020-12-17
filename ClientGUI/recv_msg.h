@@ -42,8 +42,9 @@ class Reciever : public QThread
             }
 
             if (strcmp(usr.type, "ENTER") == 0 || strcmp(usr.type, "QUIT") == 0) {
-            //                strcat(chatMsg, usr.msg);
-                emit enter_success((nameList*)&groupList);
+            //                strcat(chatMsg, usr.msg);                
+                emit enter_success((nameList*)&groupList, usr.enter,isFirstTime); //
+                if (isFirstTime == 0) isFirstTime = 1;
             } else if (strcmp(usr.type, "CHAT") == 0) {                
                 if(usr.room == -1){
                     sprintf(chatMsg,"%s\n%s: %s",usr.createTime,usr.name,usr.msg);
@@ -73,10 +74,12 @@ class Reciever : public QThread
 signals:
     void recv_success(QString,QString,QString);
     void recv_room_success(QString,QString);
-    void enter_success(nameList*);
+    void enter_success(nameList*,char*,int);
     void search_success(QString);
     void login_success(char*);
     void login_failed(char*);
+private:
+    int isFirstTime = 0;
 };
 
 #endif // TEST_CONNECTION_H

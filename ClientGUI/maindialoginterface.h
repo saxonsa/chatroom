@@ -36,7 +36,7 @@ private slots:
   void receiveData(QString data,QString sname,QString rname);
   void receiveRoomData(QString data,QString room_name);
   void on_Send_clicked();
-  void displayOnlineList(nameList *groupList);
+  void displayOnlineList(nameList *,char*,int);
   void on_History_clicked();
   void recvSignalToSearch(QString data);
   void showClickedPersonName(QModelIndex index);

@@ -601,7 +601,7 @@ void accept_conn(void *dummy)
 				// send back msg to client
 				strcpy_s(usrInfo.type, sizeof usrInfo.type, "ENTER");
 
-				SOCKET invite_sock = INVALID_SOCKET;
+				SOCKET invite_sock;
 
 				for (int i = 0; i < MAX_ALLOWED; i++) {
 					printf("client.name %d: %s  invite_name %d: %s\n", i, clients[i].name, i, usrInfo.invite_name);
@@ -612,16 +612,17 @@ void accept_conn(void *dummy)
 					}
 				}
 
-				msg_len = send(sub_sock, (char *)&usrInfo, BUFFERSIZE, 0);
+				/*msg_len = */send(sub_sock, (char *)&usrInfo, BUFFERSIZE, 0);
 
 				/*
 				if (msg_len <= 0)
 					break; // jump out big loop
 					*/
-
-				msg_len = send(invite_sock, (char*)&usrInfo, BUFFERSIZE, 0);
-				if (msg_len <= 0)
-					break;
+                strcpy_s(usrInfo.enter, sizeof usrInfo.enter, usrInfo.msg);
+                strcpy_s(usrInfo.type, sizeof usrInfo.type, "ENTER");
+				/*msg_len =*/ send(invite_sock, (char*)&usrInfo, BUFFERSIZE, 0);
+				/*if (msg_len <= 0)
+					break;*/
 			}
 			else
 			{

@@ -192,12 +192,28 @@ void MainDialogInterface::on_Send_clicked()
   ui->textEditor->setFocus();
 }
 
-void MainDialogInterface::displayOnlineList(nameList *groupList)
+void MainDialogInterface::displayOnlineList(nameList *groupListInLocal, char* enter_msg, int isFirstTime)
 {
 
   for (int i = 0; i < MAX_ROOM; i++)
   {
-    qDebug() << groupList[i].name;
+      if(strcmp(groupListInLocal[i].name, "") == 0 && strcmp(groupList[i].name, "") == 0)
+          break;
+      qDebug() << groupListInLocal[i].name << groupList[i].name;
+  }
+
+  qDebug() << enter_msg << isFirstTime;
+
+  if(isFirstTime != 0){
+      for (int i = 0; i < MAX_ROOM; i++) {
+          if (strcmp(groupListInLocal[i].name, "") == 0){
+              memcpy(groupListInLocal[i].name, enter_msg,sizeof groupListInLocal[i].name);
+              strcpy(groupListInLocal[i].name ,enter_msg);
+              groupListInLocal[i].uid = usr.groupList[i].uid;
+              break;
+          }
+//
+      }
   }
 
   QStringList usrOnlineList;
@@ -211,15 +227,17 @@ void MainDialogInterface::displayOnlineList(nameList *groupList)
   QStringListModel *model = new QStringListModel(usrOnlineList);
   ui->onlineList->setModel(model);
 
-  if (strcmp(usr.type, "QUIT") != 0)
-  {
+  qDebug() << "现在在ENTER中" << "-----------------------";
+
+  if (strcmp(usr.type, "QUIT") != 0)  {
     QStandardItemModel *treeItemModel = new QStandardItemModel(ui->groupList);
     treeItemModel->setHorizontalHeaderLabels(QStringList() << QStringLiteral("Group Name"));
+
     for (int i = 0; i < MAX_ROOM; i++)
     {
-      if (groupList[i].uid != -1 && strcmp(groupList[i].name, "") != 0)
+      if (groupListInLocal[i].uid != -1 && strcmp(groupListInLocal[i].name, "") != 0)
       {
-        QStandardItem *treeItem = new QStandardItem(groupList[i].name);
+        QStandardItem *treeItem = new QStandardItem(groupListInLocal[i].name);
         treeItemModel->appendRow(treeItem);
       }
     }
