@@ -570,6 +570,7 @@ void accept_conn(void *dummy)
 					{
 						groupList[i].uid = i;
 						memcpy(groupList[i].name, usrInfo.msg, sizeof groupList[i].name);
+                        memcpy(usrInfo.groupList[i].name, groupList[i].name, sizeof usrInfo.groupList[i].name);
 						break;
 					}
 				}
