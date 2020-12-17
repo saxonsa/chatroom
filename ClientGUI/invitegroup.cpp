@@ -57,3 +57,10 @@ void InviteGroup::on_addButton_clicked()
 
     return;
 }
+
+
+void InviteGroup::show_invite_info(char* info){
+    QString dlgTitle="Information";
+    QString strInfo=info;
+    QMessageBox::information(this, dlgTitle, strInfo);
+}

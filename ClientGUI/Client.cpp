@@ -20,6 +20,7 @@ int msg_len;
 struct hostent* hp;
 
 char name[255] = {0};
+char g_recv_name[100] = {0};
 
 nameList groupList[MAX_ROOM];
 

@@ -26,3 +26,5 @@ char* set_user_status(char user_name[], int status);
 // char** get_room_mem(int rid);
 char** get_room_name(char user_name[]);
 int get_room_id(char room_name[]);
+char* is_room_exist(char room_name[]);
+int is_person_exist(char user_name[]);

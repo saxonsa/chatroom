@@ -73,7 +73,7 @@ typedef struct {
 	int room;
 	char recv_name[100];
 	char room_name[100];
-    char invite_name[100];
+	char invite_name[100]; // invited person name
 	search searchMsg;
 	nameList groupList[MAX_ROOM];
 	nameList onlineList[MAX_ALLOWED];

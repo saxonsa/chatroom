@@ -18,6 +18,8 @@ public:
 private slots:
     void on_addButton_clicked();
 
+    void show_invite_info(char*);
+
 private:
     Ui::InviteGroup *ui;
 };

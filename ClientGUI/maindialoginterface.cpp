@@ -43,6 +43,7 @@ void MainDialogInterface::receiveData(QString data, QString sname, QString rname
   QString name_str(name), fileName;
   QDir dir;
   QString path("./history/" + name_str + "/");
+  qDebug() << "Namestr (name)" << name;
   if (!dir.exists(path))
   {
     dir.mkpath(path);
@@ -53,8 +54,10 @@ void MainDialogInterface::receiveData(QString data, QString sname, QString rname
     {
       fileName = CurrentSelectName;
     }
-    else
-      fileName = sname;
+    else {
+        fileName = sname;
+    }
+
 
 
     QFile file_r(path + fileName + ".txt");
@@ -105,8 +108,6 @@ void MainDialogInterface::receiveRoomData(QString data, QString room_name)
   }
   else
   {
-    if (CurrentSelectName != "")
-    {
       QFile file_r(path + room_name + ".txt");
       bool isOKr = file_r.open(QIODevice::ReadOnly);
       QString previous_content;
@@ -143,7 +144,6 @@ void MainDialogInterface::receiveRoomData(QString data, QString room_name)
         changeChatRoomName(CurrentSelectName);
       }
     }
-  }
 }
 
 void MainDialogInterface::on_Send_clicked()
@@ -163,9 +163,12 @@ void MainDialogInterface::on_Send_clicked()
         QMessageBox::warning(this, dlgTitle, strInfo);
         return;
     }
-
+    memcpy(usr.name, name, sizeof usr.name);
     strcpy(usr.type, "CHAT");
-    strcpy(usr.msg, transfer);
+    memcpy(usr.msg, transfer, sizeof usr.msg);
+    if (usr.room == -1) {
+        memcpy(usr.recv_name, g_recv_name, sizeof usr.recv_name);
+    }
 
   msg_len = send(connect_sock, (char *)&usr, sizeof szBuff, 0);
 
@@ -253,6 +256,7 @@ void MainDialogInterface::showClickedPersonName(QModelIndex index)
   QByteArray recv_name_byte = strTemp.toLocal8Bit();
   recv_name = recv_name_byte.data();
 
+  memcpy(g_recv_name, recv_name, sizeof g_recv_name);
   memcpy(usr.name, name, sizeof usr.name);
   memcpy(usr.recv_name, recv_name, sizeof usr.recv_name);
   memcpy(usr.type, "SWITCH_PRIVATE_CHAT", sizeof usr.type);
