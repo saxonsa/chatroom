@@ -44,8 +44,7 @@ void insert_into_group(char user_name[], char creat_time[], char content[], int 
 
 	printf("%s \n", user_name);
 
-	ret = mysql_query(&mysqlConnect,
-		toInsertHistory);  // Pass the query to database
+	ret = mysql_query(&mysqlConnect, toInsertHistory);  // Pass the query to database
 
 	// If the query failed, close the function
 	if (ret != 0) {
@@ -186,16 +185,14 @@ void search_private_by_content(char* sender, SOCKET socks, usrData usrInfo) {
 	return;
 }
 
-void search_group_by_content(char content[], int rid) {
+void search_group_by_content(char content[], char date[], char room_name[], SOCKET socks, usrData usrInfo) {
 	char toSearchByContent[250];  // vague query
 
-	sprintf_s(
-		toSearchByContent,
-		"SELECT * FROM `group_history` WHERE rid = %d AND content LIKE '%s';",
-		rid, content);
+	int rid = get_room_id(room_name);
 
-	ret = mysql_query(&mysqlConnect,
-		toSearchByContent);  // Pass the query to database
+	sprintf_s( toSearchByContent, "SELECT * FROM `group_history` WHERE rid = %d AND (content LIKE '%s' OR user_name = '%s');", rid, content, content);
+
+	ret = mysql_query(&mysqlConnect, toSearchByContent);  // Pass the query to database
 
 	// If the query failed, close the function
 	if (ret != 0) {
@@ -204,7 +201,52 @@ void search_group_by_content(char content[], int rid) {
 	}
 
 	// Check the res value
-	print_table(mysql_store_result(&mysqlConnect));
+	// print_table(mysql_store_result(&mysqlConnect));
+
+	res = mysql_store_result(&mysqlConnect);  // Check the res value
+
+    if (res) {
+          int fieldCount = mysql_field_count(&mysqlConnect);
+          // Print the result table
+          if (fieldCount > 0) {
+            int column = mysql_num_fields(res);
+            int row = (int)mysql_num_rows(res);
+            // usrData hisRes;
+            for (int i = 0; field = mysql_fetch_field(res); i++) {
+              printf("%25s", field->name);
+              printf(" |");
+            }
+            printf("\n");
+            while (nextRow = mysql_fetch_row(res)) {
+              for (int j = 0; j < column; j++) {
+                printf("%25s", nextRow[j]);
+                printf(" |");
+                switch (j) {
+                  case 1:
+                    memcpy(usrInfo.searchMsg.search_name, nextRow[1],
+                           sizeof usrInfo.searchMsg.search_name);
+                    break;
+                  case 2:
+                    memcpy(usrInfo.searchMsg.search_time, nextRow[2],
+                           sizeof usrInfo.searchMsg.search_time);
+                    break;
+                  case 3:
+                    memcpy(usrInfo.searchMsg.search_content, nextRow[3],
+                           sizeof usrInfo.searchMsg.search_content);
+                    break;
+                }
+              }
+              send(socks, (char *)&usrInfo, sizeof usrInfo, 0);
+              printf("\n");
+            }
+          } 
+		  else {
+			  printf("No resullt. This is the result of a character splitting query... \n");
+          }
+        } 
+	else {
+          printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));
+      }    
 
 	return;
 }
@@ -271,16 +313,17 @@ void search_private_by_date(char* sender, SOCKET socks, usrData usrInfo) {
 
 }
 
-void search_group_by_date(char date[], int rid, SOCKET socks, usrData usrInfo) {
+void search_group_by_date(char date[], char room_name[], SOCKET socks, usrData usrInfo) {
 	char toSearchByDate[250];
 
-	sprintf_s(toSearchByDate,
-		"SELECT * FROM `group_history` WHERE rid = %d AND "
-		"DATE_FORMAT(create_time, '%Y-%m-%d') = '%s';",
-		rid, date);
+	int rid = get_room_id(room_name);
 
-	ret =
-		mysql_query(&mysqlConnect, toSearchByDate);  // Pass the query to database
+	sprintf_s(toSearchByDate,"SELECT * FROM `group_history` WHERE rid = %d AND "
+		"DATE_FORMAT(create_time, '%%Y-%%m-%%d') = '%s';", rid, date);
+	
+	cout << toSearchByDate << endl;
+
+	ret = mysql_query(&mysqlConnect, toSearchByDate);  // Pass the query to database
 
 	// If the query failed, close the function
 	if (ret != 0) {
@@ -289,7 +332,7 @@ void search_group_by_date(char date[], int rid, SOCKET socks, usrData usrInfo) {
 	}
 
 	// Check the res value
-	print_table(mysql_store_result(&mysqlConnect));
+	//print_table(mysql_store_result(&mysqlConnect));
 
 	res = mysql_store_result(&mysqlConnect);  // Check the res value
 
@@ -315,8 +358,7 @@ void search_group_by_date(char date[], int rid, SOCKET socks, usrData usrInfo) {
 							sizeof usrInfo.searchMsg.search_name);
 						break;
 					case 2:
-						memcpy(usrInfo.searchMsg.search_time, nextRow[2],
-							sizeof usrInfo.searchMsg.search_time);
+						memcpy(usrInfo.searchMsg.search_time, nextRow[2],sizeof usrInfo.searchMsg.search_time);
 						break;
 					case 3:
 						memcpy(usrInfo.searchMsg.search_content, nextRow[3],
@@ -324,13 +366,12 @@ void search_group_by_date(char date[], int rid, SOCKET socks, usrData usrInfo) {
 						break;
 					}
 				}
-				// send(socks, (char *)&usrInfo, sizeof usrInfo, 0);
+				send(socks, (char *)&usrInfo, sizeof usrInfo, 0);
 				printf("\n");
 			}
 		} else {
 			printf(
-				"No resullt. This is the result of a character splitting query... "
-				"\n");
+				"No resullt. This is the result of a character splitting query... \n");
 		}
 	} else {
 		printf("mysql_store_result...Error: %s\n", mysql_error(&mysqlConnect));

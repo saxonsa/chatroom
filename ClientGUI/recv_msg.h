@@ -46,16 +46,18 @@ class Reciever : public QThread
                 emit enter_success((nameList*)&groupList);
             } else if (strcmp(usr.type, "CHAT") == 0) {                
                 if(usr.room == -1){
-                    sprintf(chatMsg,"%s%s: %s",usr.createTime,usr.name,usr.msg);
+                    sprintf(chatMsg,"%s\n%s: %s",usr.createTime,usr.name,usr.msg);
                     qDebug() << "private:" << chatMsg;
                     emit recv_success(chatMsg,usr.name,usr.recv_name);
                 }else{
-                    sprintf(chatMsg,"%s%s: %s",usr.createTime,usr.name,usr.msg);
+                    sprintf(chatMsg,"%s\n%s: %s",usr.createTime,usr.name,usr.msg);
                     qDebug() << "room:" << chatMsg << usr.room_name;
                     emit recv_room_success(chatMsg,usr.room_name);
                 }
-            } else if (strcmp(usr.type, "SEARCH") == 0){
-                sprintf(chatMsg,"%s\n%s: %s",usr.searchMsg.search_time,usr.searchMsg.search_name,usr.searchMsg.search_content);
+            } else if (strcmp(usr.type, "SEARCH") == 0 || strcmp(usr.type, "SEARCHROOM") == 0){
+                if (strcmp(usr.type, "SEARCH") == 0)
+                    sprintf(chatMsg,"%s\n%s: %s",usr.searchMsg.search_time,usr.searchMsg.search_name,usr.searchMsg.search_content);
+                else sprintf(chatMsg,"%s%s: %s",usr.searchMsg.search_time,usr.searchMsg.search_name,usr.searchMsg.search_content);
                 qDebug() << chatMsg;
                 emit search_success(chatMsg);
             } else if (strcmp(usr.type, "Login") == 0){

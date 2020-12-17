@@ -122,7 +122,7 @@ void accept_conn(void *dummy)
 		struct tm p;
 		time(&timep);            // get how many seconds pass sence 1900
 		localtime_s(&p, &timep); // use local time to transform from second to stucture tm
-		sprintf_s(usrInfo.createTime, "%d/%d/%d %02d:%02d:%02d\n", 1900 + p.tm_year, 1 + p.tm_mon, p.tm_mday, p.tm_hour, p.tm_min, p.tm_sec);
+		sprintf_s(usrInfo.createTime, "%d/%d/%d %02d:%02d:%02d", 1900 + p.tm_year, 1 + p.tm_mon, p.tm_mday, p.tm_hour, p.tm_min, p.tm_sec);
 
 		// recv fails, destroy the socket
 		if (msg_len == SOCKET_ERROR)
@@ -457,16 +457,34 @@ void accept_conn(void *dummy)
 			if (strcmp(usrInfo.searchMsg.search_content, "") == 0)
 			{
 				// The case that only search by date
-
 				search_private_by_date(current_name, sub_sock, usrInfo);
 			}
 			else
 			{
 				// The case that search both keywords and date
-
 				search_private_by_content(current_name, sub_sock, usrInfo);
 			}
 		}
+
+		if (strcmp(usrInfo.type, "SEARCHROOM") == 0) {
+                  // Because time is always returned from client, there is only
+                  // four cases to judge.
+
+                  printf("Msg from search request --- name: %s\n",
+                         usrInfo.searchMsg.search_name);
+                  printf("Msg from search request --- content: %s\n",
+                         usrInfo.searchMsg.search_content);
+                  printf("Msg from search request --- time: %s\n",
+                         usrInfo.searchMsg.search_time);
+
+                  if (strcmp(usrInfo.searchMsg.search_content, "") == 0) {
+                    // The case that only search by date
+                    search_group_by_date(usrInfo.searchMsg.search_time, usrInfo.searchMsg.search_name, sub_sock, usrInfo);
+                  } else {
+                    // The case that search both keywords and date
+                    search_group_by_content(usrInfo.searchMsg.search_content, usrInfo.searchMsg.search_time, usrInfo.searchMsg.search_name, sub_sock, usrInfo);
+                  }
+                }
 
 		if (strcmp(usrInfo.type, "SWITCH_PRIVATE_CHAT") == 0)
 		{
