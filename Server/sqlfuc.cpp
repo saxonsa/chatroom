@@ -190,7 +190,7 @@ void search_group_by_content(char content[], char date[], char room_name[], SOCK
 
 	int rid = get_room_id(room_name);
 
-	sprintf_s( toSearchByContent, "SELECT * FROM `group_history` WHERE rid = %d AND (content LIKE '%s' OR user_name = '%s');", rid, content, content);
+	sprintf_s( toSearchByContent, "SELECT * FROM `group_history` WHERE rid = %d AND (content LIKE '%%%s%%' OR user_name = '%s');", rid, content, content);
 
 	ret = mysql_query(&mysqlConnect, toSearchByContent);  // Pass the query to database
 

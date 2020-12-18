@@ -58,7 +58,7 @@ class Reciever : public QThread
             } else if (strcmp(usr.type, "SEARCH") == 0 || strcmp(usr.type, "SEARCHROOM") == 0){
                 if (strcmp(usr.type, "SEARCH") == 0)
                     sprintf(chatMsg,"%s\n%s: %s",usr.searchMsg.search_time,usr.searchMsg.search_name,usr.searchMsg.search_content);
-                else sprintf(chatMsg,"%s%s: %s",usr.searchMsg.search_time,usr.searchMsg.search_name,usr.searchMsg.search_content);
+                else sprintf(chatMsg,"%s\n%s: %s",usr.searchMsg.search_time,usr.searchMsg.search_name,usr.searchMsg.search_content);
                 qDebug() << chatMsg;
                 emit search_success(chatMsg);
             } else if (strcmp(usr.type, "Login") == 0){
