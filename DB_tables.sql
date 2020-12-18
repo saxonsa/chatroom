@@ -9,7 +9,6 @@ primary key(user_name, recevie_name, create_time)
 
 drop table if exists group_history;	
 create table group_history(
-`ghid` int primary key not null auto_increment,
 `user_name` varchar(100),
 `create_time` varchar (50),
 `content` text(1200),
@@ -26,7 +25,8 @@ create table users(
 drop table if exists room_mem;	
 create table room_mem(
 `rid` int,
-`user_name` varchar(100)
+`user_name` varchar(100),
+primary key(rid, user_name)
 )default character set utf8 collate utf8_bin;
 
 drop table if exists room_info;	
@@ -60,9 +60,9 @@ insert into private_history values ("Saxon", "2020-12-14 12:00:13", "Hello Micha
 insert into private_history values ("Mano", "2020-12-14 12:13:13", "Hello Saxon", "Saxon");
 insert into private_history values ("Mano", "2020-12-14 12:13:13", "Hello Michael", "Michael");
 
-insert into group_history values (1, "Saxon", "2020-12-14 12:15:00", "Hello Saxon room member", 1);
-insert into group_history values (2, "Michael", "2020-12-14 12:15:00", "Hello Michael room member", 2);
-insert into group_history values (3, "Mano", "2020-12-14 12:15:13", "Hello Mano room member", 3);
-insert into group_history values (4, "Tina", "2020-12-14 12:15:33", "Hello Tina room member", 4);
-insert into group_history values (5, "Saxon", "2020-12-14 12:15:22", "Hello Saxon room member", 5);
-insert into group_history values (6, "Saxon", "2020-12-14 12:15:11", "Hello CAPE Town", 5);
+insert into group_history values ("Saxon", "2020-12-14 12:15:00", "Hello Saxon room member", 1);
+insert into group_history values ("Michael", "2020-12-14 12:15:00", "Hello Michael room member", 2);
+insert into group_history values ("Mano", "2020-12-14 12:15:13", "Hello Mano room member", 3);
+insert into group_history values ("Tina", "2020-12-14 12:15:33", "Hello Tina room member", 4);
+insert into group_history values ("Saxon", "2020-12-14 12:15:22", "Hello Saxon room member", 5);
+insert into group_history values ("Saxon", "2020-12-14 12:15:11", "Hello CAPE Town", 5);
