@@ -222,16 +222,16 @@ void search_group_by_content(char content[], char date[], char room_name[], SOCK
                 printf("%25s", nextRow[j]);
                 printf(" |");
                 switch (j) {
-                  case 1:
-                    memcpy(usrInfo.searchMsg.search_name, nextRow[1],
+                  case 0:
+                    memcpy(usrInfo.searchMsg.search_name, nextRow[0],
                            sizeof usrInfo.searchMsg.search_name);
                     break;
-                  case 2:
-                    memcpy(usrInfo.searchMsg.search_time, nextRow[2],
+                  case 1:
+                    memcpy(usrInfo.searchMsg.search_time, nextRow[1],
                            sizeof usrInfo.searchMsg.search_time);
                     break;
-                  case 3:
-                    memcpy(usrInfo.searchMsg.search_content, nextRow[3],
+                  case 2:
+                    memcpy(usrInfo.searchMsg.search_content, nextRow[2],
                            sizeof usrInfo.searchMsg.search_content);
                     break;
                 }
@@ -353,15 +353,15 @@ void search_group_by_date(char date[], char room_name[], SOCKET socks, usrData u
 					printf("%25s", nextRow[j]);
 					printf(" |");
 					switch (j) {
-					case 1:
-						memcpy(usrInfo.searchMsg.search_name, nextRow[1],
+					case 0:
+						memcpy(usrInfo.searchMsg.search_name, nextRow[0],
 							sizeof usrInfo.searchMsg.search_name);
 						break;
-					case 2:
-						memcpy(usrInfo.searchMsg.search_time, nextRow[2],sizeof usrInfo.searchMsg.search_time);
+					case 1:
+						memcpy(usrInfo.searchMsg.search_time, nextRow[1],sizeof usrInfo.searchMsg.search_time);
 						break;
-					case 3:
-						memcpy(usrInfo.searchMsg.search_content, nextRow[3],
+					case 2:
+						memcpy(usrInfo.searchMsg.search_content, nextRow[2],
 							sizeof usrInfo.searchMsg.search_content);
 						break;
 					}
