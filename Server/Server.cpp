@@ -360,8 +360,31 @@ void accept_conn(void *dummy)
 		if (strcmp(usrInfo.type, "CHAT") == 0)
 		{
 			if (current_room == -1)
-			{ // private CHAT
+			{ 
+				// private CHAT
 				insert_into_private(current_name, usrInfo.createTime, usrInfo.msg, usrInfo.recv_name);
+
+				// after insert message into DB, handle the special character in message
+				char* no_special_char = (char*)malloc(strlen(usrInfo.msg)*sizeof(char));
+				int i = 0, j = 0;
+				for (; usrInfo.msg[i] != '\0'; i++, j++)
+				{
+					if (usrInfo.msg[i] == '\\')
+					{
+						// a sepcial character appears
+						if (usrInfo.msg[i + 1] == '\'' || usrInfo.msg[i + 1] == '\"' || usrInfo.msg[i + 1] == '\\')
+							// we just want the second character
+							no_special_char[j] = usrInfo.msg[++i];
+					}
+					else
+					{
+						// normal case
+						no_special_char[j] = usrInfo.msg[i];
+					}
+				}
+				no_special_char[j] = '\0';
+				strcpy_s(usrInfo.msg,no_special_char);
+
 				// find recv socket
 				SOCKET recv_socket = INVALID_SOCKET;
 				for (int i = 0; i < MAX_ALLOWED; i++)
@@ -397,12 +420,31 @@ void accept_conn(void *dummy)
 				}
 			}
 			else
-			{                                                                                 // group CHAT
+			{
+				// group CHAT
 				insert_into_group(current_name, usrInfo.createTime, usrInfo.msg, current_room); // Insert the history into the database
-				// printf("curr name: %s\n", usrInfo.name);
-				// printf("curr time: %s\n", usrInfo.createTime);
-				// printf("curr msg: %s\n", usrInfo.msg);
-				// search_history();// Search history from database
+
+				// after insert message into DB, handle the special character in message
+				char* no_special_char = (char*)malloc(strlen(usrInfo.msg)*sizeof(char));
+				int i = 0, j = 0;
+				for (; usrInfo.msg[i] != '\0'; i++, j++)
+				{
+					if (usrInfo.msg[i] == '\\')
+					{
+						// a sepcial character appears
+						if (usrInfo.msg[i + 1] == '\'' || usrInfo.msg[i + 1] == '\"' || usrInfo.msg[i + 1] == '\\')
+							// we just want the second character
+							no_special_char[j] = usrInfo.msg[++i];
+					}
+					else
+					{
+						// normal case
+						no_special_char[j] = usrInfo.msg[i];
+					}
+				}
+				no_special_char[j] = '\0';
+				strcpy_s(usrInfo.msg,no_special_char);
+
 				memcpy(usrInfo.name, current_name, sizeof usrInfo.name);
 				memset(usrInfo.recv_name, 0, sizeof usrInfo.recv_name);
 
